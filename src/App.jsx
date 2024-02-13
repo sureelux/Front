@@ -1,20 +1,23 @@
+import userAuth from "./hooks/userAuth";
+import LoginForm from "./layout/LoginForm";
 import RegisterForm from "./layout/RegisterForm";
+import AppRouter from "./routes/AppRouter";
 
 function App() {
+
+  const {loading} = userAuth()
+
+  if(loading) {
+    return (
+      <p className="text-3xl text-primary">กำลังโหลด...</p>
+    )
+  }
   return (
-    <div className="min-h-screen">
-      <h1 className="text-4xl text-pink-50 text-center border bg-fuchsia-400 py-5 m-6 font-bold">
-        Hello world!
-      </h1>
-      <input
-        type="checkbox"
-        value="light"
-        className="toggle theme-controller"
-      ></input>
-      <hr />
-      <RegisterForm />
+    <div data-theme="light" className="min-h-screen">
+      <AppRouter/>
     </div>
   );
+  
 }
 
 export default App;
