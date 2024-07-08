@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/userAuth";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -32,7 +32,7 @@ export default function Header() {
 
   useEffect( () => {
     const typeuser = async () => {
-      let token = localStorage.getItem('token')
+      const token = localStorage.getItem('token')
       const rs = await axios.get("http://localhost:8889/admin/typeuser", {
         headers: {Authorization: `Bearer ${token}`}
       })
@@ -40,7 +40,6 @@ export default function Header() {
     } 
     typeuser()
   }, []) 
-    console.log(typeuser)
 
   const hdlLogout = () => {
     logout();
@@ -63,17 +62,14 @@ export default function Header() {
     navigate("/Profile");
   };
 
-  const hdlTableOrdinary = () => {
-    navigate("/TableOrdinary");
-  };
-
-  const hdlTableVIP = () => {
-    navigate("/TableVIP");
-  };
-
   const hdlDataBookingUser = () => {
     navigate("/DataBookingUser");
   };
+
+  const TypeTableUser = (name) => {
+    navigate(`Tables/${encodeURIComponent(name)}`)
+    // location.reload()
+  }
 
   return (
     <div className="navbar bg-gradient-to-r from-cyan-500 to-blue-500 fixed top-0 w-full z-50">
@@ -117,7 +113,7 @@ export default function Header() {
                     <summary>ประเภท</summary>
                     <ul className="p-2 bg-white rounded-t-none text-black leading-7 w-32">
                     {typeuser.map( (type, index) => (
-                      <li className="">{type.type_name}</li>
+                      <li key={index} onClick={ () => TypeTableUser(type.type_name) }>{type.type_name}</li>
                     ))}
                     </ul>
                   </details>
@@ -144,7 +140,7 @@ export default function Header() {
                   <summary>ประเภท</summary>
                   <ul className="p-2 bg-white rounded-t-none text-black leading-7 w-32 text-center">
                   {typeuser.map( (type, index) => (
-                      <li className="">{type.type_name}</li>
+                      <li key={index} onClick={ () => TypeTableUser(type.type_name) }>{type.type_name}</li>
                     ))}
                     </ul>
                 </details>
@@ -167,7 +163,7 @@ export default function Header() {
               <div className="w-10 rounded-full">
                 <img
                   alt="Tailwind CSS Navbar component"
-                  src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
                 />
               </div>
             </div>
@@ -204,7 +200,7 @@ export default function Header() {
                   >
                     <path d="M16 14V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v15a3 3 0 0 0 3 3h12a1 1 0 0 0 0-2h-1v-2a2 2 0 0 0 2-2ZM4 2h2v12H4V2Zm8 16H3a1 1 0 0 1 0-2h9v2Z" />
                   </svg>
-                  ข้อมูลการจอง
+                  ประวัติการจอง
                 </a>
               </li>
               <li>

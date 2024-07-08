@@ -15,7 +15,7 @@ export default function Data() {
           </label>
 
           <div
-            className="hero min-h-screen"
+            className="hero min-h-screen w-full h-full"
             style={{
               backgroundImage:
                 "url(https://nocnoc.com/blog/wp-content/uploads/2021/03/cover-dining-table-decorate.jpg)",
@@ -30,13 +30,13 @@ export default function Data() {
           </div>
         </div>
 
-        <div className="drawer-side">
+        <div className="drawer-side mt-20 overflow-y-hidden">
           <label
             htmlFor="my-drawer-2"
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <ul className="menu p-4 w-60 min-h-full bg-sky-100 text-base-content">
+          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
             <li>
               <Link to="/DataUser">ข้อมูลผู้ใช้</Link>
             </li>

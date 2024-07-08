@@ -18,10 +18,11 @@ import CreateTable from "../layout/CreateTable";
 import BookingTable from "../layout/BookingTable";
 import UpdateProfile from "../layout/updeteProfile";
 import Profile from "../layout/Profile";
-import TableOrdinary from "../layout/TableOrdinary ";
-import TableVIP from "../layout/TableVIP";
 import Succeed from "../layout/Succeed";
 import DataBookingUser from "../layout/DataBookingUser";
+import Type_table from "../layout/TypeTableUser";
+import TypeTableUser from "../layout/TypeTableUser";
+import ProfileAdmin from "../layout/ProfileAdmin";
 
 const guesRouter = createBrowserRouter([
   {
@@ -40,8 +41,7 @@ const guesRouter = createBrowserRouter([
       { path: "/BookingTable/*", element: <BookingTable /> },
       { path: "/UserHome", element: <UserHome /> },
       { path: "/Contact", element: <Contact /> },
-      { path: "/TableOrdinary", element: <TableOrdinary /> },
-      { path: "/TableVIP", element: <TableVIP /> },
+      { path: "/Tables/*", element: <TypeTableUser /> },
     ],
   },
 ]);
@@ -59,6 +59,7 @@ const userRouter = createBrowserRouter([
       { index: true, element: <UserHome /> },
       { path: "/login", element: <LoginForm /> },
       { path: "/Tables", element: <Tables /> },
+      { path: "/Tables/*", element: <TypeTableUser /> },
       { path: "/UserHome", element: <UserHome /> },
       { path: "/Contact", element: <Contact /> },
       { path: "/Profile", element: <Profile /> },
@@ -67,8 +68,6 @@ const userRouter = createBrowserRouter([
       { path: "/BookingTable/*", element: <BookingTable /> },
       { path: "/Succeed", element: <Succeed /> },
       { path: "/DataBookingUser", element: <DataBookingUser /> },
-      { path: "/TableOrdinary", element: <TableOrdinary /> },
-      { path: "/TableVIP", element: <TableVIP /> },
     ],
   },
 ]);
@@ -94,6 +93,7 @@ const adminRouter = createBrowserRouter([
       { path: "/DataBooking", element: <DataBooking /> },
       { path: "/CreateType", element: <CreateType /> },
       { path: "/CreateTable", element: <CreateTable /> },
+      { path: "/ProfileAdmin", element: <ProfileAdmin /> },
     ],
   },
 ]);

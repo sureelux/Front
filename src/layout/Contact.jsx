@@ -1,134 +1,104 @@
-import { Link } from "react-router-dom";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  FaPhone,
+  FaFacebook,
+  FaEnvelope,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 
-export default function Contact() {
-  const [todos, setTodos] = useState([]);
-  function FormatDate(dateString) {
-    const options = {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("th-TH", options);
-  }
+import { IoLocationSharp } from "react-icons/io5";
+
+const ContactUs = () => {
+  const images = [
+    "https://png.pngtree.com/background/20211215/original/pngtree-gourmet-food-tableware-gray-and-black-creative-banner-picture-image_1495471.jpg",
+  ];
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [animation, setAnimation] = useState("slideIn");
 
   useEffect(() => {
-    const run = async () => {
-      let token = localStorage.getItem("token");
-      const rs = await axios.get("http://localhost:8889/todos", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTodos(rs.data.todos);
-    };
-    run();
-  }, []);
+    const interval = setInterval(() => {
+      setAnimation("slideOut");
+      setTimeout(() => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+        setAnimation("slideIn");
+      }, 9000); // Match the duration of the slideOut animation
+    }, 16000); // Change image every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [images.length]);
 
   return (
-    <div className="">
-      <div className="carousel h-96 mt-20">
-        <div id="slide1" className="carousel-item relative w-full">
+    <div className="bg-pattern min-h-screen flex flex-col items-center py-10 px-1">
+      <div className="overflow-hidden w-full max-w-10xl">
+        <div className="relative overflow-hidden w-full mt-10 h-[400px]">
           <img
-            src="https://i0.wp.com/www.xn--o3cdbr1ab9cle2ccb9c8gta3ivab.com/wp-content/uploads/2020/08/pic01.jpg?ssl=1"
-            className="w-full"
+            src={images[currentImageIndex]}
+            className={`w-full h-[400px] object-cover absolute ${animation}`}
           />
-          <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-            <a href="#slide4" className="btn btn-circle">
-              ❮
-            </a>
-            <a href="#slide2" className="btn btn-circle">
-              ❯
-            </a>
+
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <h1 className="text-white text-7xl font-bold animate-bounce">ติดต่อเรา</h1>
           </div>
         </div>
-        <div id="slide2" className="carousel-item relative w-full">
-          <img
-            src="https://nocnoc.com/blog/wp-content/uploads/2021/03/01-dining-table-decorate.jpg"
-            className="w-full"
-          />
-          <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-            <a href="#slide1" className="btn btn-circle">
-              ❮
-            </a>
-            <a href="#slide3" className="btn btn-circle">
-              ❯
-            </a>
+        <div className="p-6">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold">ชื่อร้านอาหาร</h2>
+            <p className="mt-2 text-gray-600">ร้านอาหารอร่อยที่สุดในเมือง</p>
           </div>
-        </div>
-        <div id="slide3" className="carousel-item relative w-full">
-          <img
-            src="https://nocnoc.com/blog/wp-content/uploads/2021/03/22-dining-table-decorate.jpg"
-            className="w-full"
-          />
-          <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-            <a href="#slide2" className="btn btn-circle">
-              ❮
-            </a>
-            <a href="#slide4" className="btn btn-circle">
-              ❯
-            </a>
-          </div>
-        </div>
-        <div id="slide4" className="carousel-item relative w-full">
-          <img
-            src="https://nocnoc.com/blog/wp-content/uploads/2021/03/12-dining-table-decorate.jpg"
-            className="w-full"
-          />
-          <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-            <a href="#slide3" className="btn btn-circle">
-              ❮
-            </a>
-            <a href="#slide1" className="btn btn-circle">
-              ❯
-            </a>
-          </div>
-        </div>
-      </div>
-      <div className="text-center">
-        <div className="divider divider-info text-4xl mt-10 font-bold">
-          ติดต่อเรา
-        </div>
-        <div className="text-center mt-8">
-          <div className="flex flex-col gap-4 text-xl">
-            <h2>
-              <i className="fas fa-home"></i> <span class="icon-text "></span>{" "}
-              ที่อยู่ :{" "}
-              <a className="text-blue-500">
-                282 หมู่ที่ 6 ตำบลมหาชัย อำเภอปลาปาก จังหวัดนครพนม 48160
-              </a>
-              <div className="flex items-center justify-center">
-        <iframe
-        className="w-96 h-80 rounded-md mt-5"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1905.8930579253683!2d104.08170830458404!3d17.180612454657165!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x313c92b0ac74d757%3A0x90387d77c9a95781!2z4Lir4Lit4Lie4Lix4LiB4Lia4LmJ4Liy4LiZ4Lin4Lij4LiK4Lix4Lii!5e0!3m2!1sth!2sth!4v1710578010646!5m2!1sth!2sth"
-          referrerPolicy="no-referrer-when-downgrade"
-        >
-        </iframe>
-      </div>
-            </h2>
-            <h2>
-              <i className="fas fa-phone"></i> <span class="icon-text"></span>
-              โทรศัพท์ : <a className="text-blue-500">065-5390921</a>
-            </h2>
-            <h2>
-              <i className="fas fa-envelope"></i>{" "}
-              <span class="icon-text"></span>อีเมล :{" "}
-              <a className="text-blue-500">sureelux.pa64@snru.ac.th</a>
-            </h2>
-            <h2>
-              <i className="fab fa-facebook"></i>{" "}
-              <span class="icon-text"></span>Facebook :{" "}
-              <a
-                href="https://www.facebook.com/profile.php?id=100021929414668"
-                className="text-blue-500"
-              >
-                Sureelux Pangkhamhak
-              </a>
-            </h2>
+          <div className="mt-6 space-y-4">
+            <div className="flex items-center text-gray-700">
+              <FaMapMarkerAlt className="text-2xl" />
+              <div className="ml-3">
+                <p className="font-semibold">ที่อยู่:</p>
+                <p>123 ถนนสุขสันต์ ตำบลเมือง อำเภอเมือง จังหวัดกรุงเทพมหานคร</p>
+              </div>
+            </div>
+            <div className="flex items-center text-gray-700">
+              <FaPhone className="text-2xl" />
+              <div className="ml-3">
+                <p className="font-semibold">เบอร์โทรศัพท์:</p>
+                <p>012-345-6789</p>
+              </div>
+            </div>
+            <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-5 ">
+              <div className="flex flex-col items-center p-6 bg-gradient-to-tr from-white to-blue-300 border-2 border-black rounded-xl shadow-xl hover:scale-90 transition duration-150 ease-in-out transform hover:shadow-2xl ">
+                <FaFacebook className="text-4xl text-blue-700 mb-2 drop-shadow-lg" />
+                <h4 className="text-xl font-bold text-gray-800 mb-1">
+                  Facebook
+                </h4>
+                <a
+                  href="https://www.facebook.com/profile.php?id=100021929414668&locale=th_TH"
+                  className="text-blue-600 hover:text-blue-400 "
+                >
+                  Sureelux Pangkhamhak
+                </a>
+              </div>
+
+              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-red-300 border-2 border-black rounded-lg shadow-md hover:scale-90 transition duration-150 ease-in-out">
+                <FaEnvelope className="text-4xl text-red-600 mb-2" />
+                <h4 className="text-xl font-bold">อีเมล</h4>
+                <a href="" className="text-red-600 hover:text-red-400">
+                  sureelux.pa64@snru.ac.th
+                </a>
+              </div>
+              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-green-300 border-2 border-black rounded-lg shadow-md border  hover:scale-90 transition duration-150 ease-in-out">
+                <IoLocationSharp className="text-4xl text-green-500 mb-2" />
+                <h4 className="text-xl font-bold">พิกัด</h4>
+                <a
+                  href="https://www.google.com/maps/place/17%C2%B010'52.2%22N+104%C2%B004'59.9%22E/@17.181159,104.083312,17z/data=!3m1!4b1!4m4!3m3!8m2!3d17.181159!4d104.083312?entry=ttu"
+                  className="text-green-500 hover:text-green-400"
+                >
+                  17.181159, 104.083312
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ContactUs;

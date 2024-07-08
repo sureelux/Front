@@ -60,28 +60,28 @@ export default function LoginForm() {
     >
       <div className="skeleton w-32 h-32"></div>
       <div className=" container mx-auto flex justify-center items-center h-scree">
-        <div className="card shrink-0 w-full max-w-sm shadow-3xl bg-base-100 mt-28">
+        <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100 mt-28">
           <form className="card-body" onSubmit={hdlSubmit}>
             <div className="justify-center">
               <img
-                src="https://pic.onlinewebfonts.com/thumbnails/icons_568656.svg"
+                src="https://icons.veryicon.com/png/o/miscellaneous/free-insurance/login-account.png"
                 className=""
                 style={{ width: "100px", height: "100px" }}
               />
             </div>
-            <h1 className="text-3xl font-bold text-center text-sky-500">
+            <h1 className="text-3xl font-bold text-center text-black">
               เข้าสู่ระบบ
             </h1>
             <label
               for="input-group-1"
-              className="block text-sm font-medium  dark:text-gray-500 mt-4"
+              className="block text-sm font-medium  dark:text-gray-600 mt-4"
             >
               ชื่อผู้ใช้
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                 <svg
-                  class="h-5 w-5 text-gray-500 dark:text-gray-500"
+                  class="h-5 w-5 text-gray-500 dark:text-gray-600"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -96,7 +96,7 @@ export default function LoginForm() {
               </div>
               <input
                 type="text"
-                className="bg-gray-50 border text-sm rounded-xl w-full ps-10 p-3  dark:bg-white dark:border-gray-300 dark:text-gray-600"
+                className="bg-gray-50 border border-gray-300 text-sm rounded-xl w-full ps-10 p-3  dark:bg-white dark:border-gray-300 dark:text-gray-600"
                 name="username"
                 value={input.username}
                 onChange={hdlChange}
@@ -104,7 +104,7 @@ export default function LoginForm() {
             </div>
             <label
               for="input-group-1"
-              className="block text-sm font-medium  dark:text-gray-500 "
+              className="block text-sm font-medium  dark:text-gray-600 "
             >
               รหัสผ่าน
             </label>
@@ -126,7 +126,7 @@ export default function LoginForm() {
               </div>
               <input
                 type="password"
-                className="bg-gray-50 border text-sm rounded-xl w-full ps-10 p-3  dark:bg-white dark:border-gray-300 dark:text-gray-600"
+                className="bg-gray-50 border border-gray-300 text-sm rounded-xl w-full ps-10 p-3  dark:bg-white dark:border-gray-600 dark:text-gray-700"
                 name="password"
                 value={input.password}
                 onChange={hdlChange}
@@ -137,7 +137,7 @@ export default function LoginForm() {
                 เข้าสู่ระบบ
               </button>
 
-              <div className="divider text-xs font-thin text-black ">หรือ</div>
+              <div className="divider divider-stone-500 text-xs font-medium text-black ">หรือ</div>
               <Link
                 to="/register"
                 className="btn btn-neutral-content form-control mt-1 font-medium"

@@ -6,74 +6,120 @@ export default function BookingUser() {
   const { user } = userAuth();
   const [DataBookinguser, setBookingUser] = useState([]);
 
-  function formatDate(dateString) {
-    const options = {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("th-TH", options);
-  }
-
   useEffect(() => {
-    const BookingUsers= async () => {
+    const fetchBookingUsers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:8889/admin/bookingUser", {
-          headers: { Authorization: ` Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://localhost:8889/admin/bookingUser",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setBookingUser(response.data.BookingUser);
         console.log(response.data.BookingUser);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-    BookingUsers();
-  }, [setBookingUser]);
+    fetchBookingUsers();
+  }, []);
 
   return (
-    <div className="overflow-autos w-full h-screen">
-      <div className="mt-24 ml-2 text-3xl font-bold text-center">ข้อมูลการจอง</div>
-      <div className="overflow-x-auto">
-        <table className="table table-zebra mt-4">
-          {/* head */}
-          <thead>
-            <tr className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-900 dark:text-white">
-              <th>วันที่/เวลาจอง</th>
-              <th>ชื่อโต๊ะ</th>
-              <th>ประเภทโต๊ะ</th>
-              <th>ชื่อลูกค้า</th>
-              <th>สถานะ</th>
-            </tr>
-          </thead>
-          <tbody className="font-medium text-black">
-            {DataBookinguser && DataBookinguser.filter(el => el.userId=== user.user_id).map( (el, number ) => (
-              <tr key={number +1}>
-                <td>
-                      {new Date(el.booking_datatime).toLocaleString(
-                        "th-TH"
-                      )}
-                    </td>
-                    <td>{el.table.table_name}</td>
-                    <td>{el.table.type_table.type_name}</td>
-                    <td>{el.user.firstname}</td>
-                    <td className={el.status_booking === 'APPROVE' ? 'text-green-500' : el.status_booking === 'NOT_APPROVED' ? 'text-red-500 font-medium' : el.status_booking === 'WAIT' ? 'text-yellow-400 font-medium' : ''}>
-                      {el.status_booking === "APPROVE"
+    <div className="overflow-auto w-full h-screen p-10 bg-gradient-to-bl from-sky-300 to-white">
+      <div className="mt-20 text-4xl font-bold text-center ">
+        <span className="inline-block rounded-lg px-4 py-2 text-white [text-shadow:2px_1px_5px_var(--tw-shadow-color)] shadow-gray-800">
+          ประวัติการจองโต๊ะ
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-5">
+        {DataBookinguser &&
+          DataBookinguser.filter(
+            (booking) => booking.userId === user.user_id
+          ).map((booking, index) => (
+            <div
+              key={index}
+              className="p-6 border-2 border-gray-500 rounded-lg shadow-xl bg-white mx-2 hover:scale-110 transition duration-300 ease-in-out"
+            >
+              <div className="p-2">
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    รหัสการจอง:
+                  </label>
+                  <input
+                    type="text"
+                    value={booking.booking_id}
+                    readOnly
+                    className="shadow appearance-none border rounded w-full text-sm py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    วันที่/เวลาจอง:
+                  </label>
+                  <input
+                    type="text"
+                    value={new Date(booking.booking_datatime).toLocaleString(
+                      "th-TH"
+                    )}
+                    readOnly
+                    className="shadow appearance-none border rounded w-full text-sm py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    ชื่อโต๊ะ:
+                  </label>
+                  <input
+                    type="text"
+                    value={booking.table.table_name}
+                    readOnly
+                    className="shadow appearance-none border rounded w-full text-sm py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    ประเภทโต๊ะ:
+                  </label>
+                  <input
+                    type="text"
+                    value={booking.table.type_table.type_name}
+                    readOnly
+                    className="shadow appearance-none border rounded w-full text-sm py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    สถานะ:
+                  </label>
+                  <input
+                    type="text"
+                    value={
+                      booking.status_booking === "APPROVE"
                         ? "อนุมัติ"
-                        : el.status_booking === "NOT_APPROVED"
+                        : booking.status_booking === "NOT_APPROVED"
                         ? "ไม่อนุมัติ"
-                        : el.status_booking === "WAIT"
+                        : booking.status_booking === "WAIT"
                         ? "รออนุมัติ"
-                        : ""}
-                    </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                        : ""
+                    }
+                    readOnly
+                    className={`shadow appearance-none border rounded w-full py-2 text-sm px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                      booking.status_booking === "APPROVE"
+                        ? "text-green-500 font-medium text-xs"
+                        : booking.status_booking === "NOT_APPROVED"
+                        ? "text-red-500 font-medium text-xs"
+                        : booking.status_booking === "WAIT"
+                        ? "text-yellow-400 font-medium text-xs"
+                        : ""
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
       </div>
     </div>
-  )
-
+  );
 }

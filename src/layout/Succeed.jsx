@@ -13,12 +13,12 @@ export default function Succeed() {
   return (
     <div className="h-screen">
       <form
-        className="flex flex-col min-w-[600px] border rounded w-5/6 mx-auto p-10 gap-7 mt-28"
+        className="flex flex-col min-w-[600px] border-2 border-gray-300  bg- rounded w-5/6 mx-auto p-10 gap-7 mt-28"
       >
         <div className="hero-content flex-col lg:flex-row">
       <img src="https://cdn.pixabay.com/photo/2017/01/13/01/22/ok-1976099_1280.png" className="max-w-sm rounded-lg w-60 h-60"/>
       </div>
-        <div className="text-center text-4xl mt-5 font-bold">
+        <div className="text-center text-5xl font-bold">
         จองโต๊ะสำเร็จ
         </div>
         <p className="text-center">คุณได้จองโต๊ะอาหารเรียบร้อยแล้ว</p>

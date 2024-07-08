@@ -8,7 +8,7 @@ const userNav = [
   { to: "/", text: "Home" },
 ];
 
-export default function Profile() {
+export default function ProfileAdmin() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -20,7 +20,7 @@ export default function Profile() {
     <div
       className="min-h-screen flex flex-col items-center justify-center p-1 bg-sky-200"
     >
-      <div className="mt-24">
+      <div className="mt-20">
         <p className="text-center text-3xl font-bold">
           บัญชีของ{" "}
           <span className="text-red-600">
@@ -29,7 +29,7 @@ export default function Profile() {
         </p>
       </div>
       {user ? (
-        <div className="max-w-full mx-auto shadow-lg rounded-lg mt-5 border-2 border-black bg-white">
+        <div className="w-3/5 mx-auto shadow-lg rounded-lg mt-5 border-2 border-black bg-white">
           <div className="p-10">
             <div className="text-3xl font-bold mb-4 text-center">
               ข้อมูลส่วนตัว
@@ -70,13 +70,13 @@ export default function Profile() {
               </div>
             </div>
           </div>
-          <div className="p-4 bg-gray-100 border-t border-gray-200 justify-center">
-            <button
+          <div className="p-6 bg-gray-100 border-t border-gray-200 justify-center">
+            {/* <button
               onClick={hdlUpdateProfile}
               className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
             >
               แก้ไขบัญชี
-            </button>
+            </button> */}
           </div>
         </div>
       ) : null}

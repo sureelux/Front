@@ -1,60 +1,71 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTag, faSave } from "@fortawesome/free-solid-svg-icons"; // Import the save icon
 
 export default function CreateType() {
+  const navigate = useNavigate(); 
+
   const [types, setTypes] = useState({
     type: "",
   });
 
   const hdlChange = (e) => {
-    setTypes((prv) => ({ ...prv, [e.target.name]: e.target.value }));
+    setTypes((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const hdlSubmit = async (e) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
-      // setInput(prv => ({...prv, dueDate : new Date(prv.dueDate)}))
-      // const token = localStorage.getItem("token");
       const rs = await axios.post("http://localhost:8889/admin/types", types);
-      alert("เพิ่มข้อมูลเรียบร้อยแล้ว");
+      alert("คุณได้เพิ่มข้อมูลประเภทโต๊ะเรียบร้อยแล้ว"); // Display success message
       console.log(rs);
-      location.reload();
+      navigate("/DataType"); // Redirect to "/DataType"
     } catch (err) {
-      alert(err.message);
+      alert(err.message); // Display error message if request fails
     }
-    // console.log(output)
   };
 
-  return ( 
-    <div className="h-screen text-center mt-10">
-      <p className="font-bold text-4xl">เพิ่มข้อมูลประเภท</p>
-  <div className="hero-content flex-col lg:flex-row mt-10">
-    <img src="https://cx.lnwfile.com/_/cx/_raw/hp/qz/vu.jpg" className="max-w-sm rounded-lg shadow-2xl w-96" />
-    <div>
-    <form
-        className="flex flex-col min-w-[600px] border min-h-64 p-14 gap-6 mt-5 rounded-xl ml-20"
-        onSubmit={hdlSubmit}
+  return (
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-white to-sky-400">
+      <div className="flex absolute top-0 left-0 mt-20">
+        <Link to="/DataType" className="text-black rounded-4xl p-2">
+          <i className="fas fa-arrow-left"></i>
+        </Link>
+      </div>
+      <form
+        className="flex flex-col min-w-[600px] min-h-64 p-14 gap-6 mt-10 rounded-xl shadow-2xl w-10 bg-white border border-gray-500"        onSubmit={hdlSubmit}
       >
-        <label className="form-control w-full ">
-          <div className="label">
-            <span className="label-text font-bold">ชื่อประเภท</span>
+        <div className="text-4xl font-bold [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-500">เพิ่มข้อมูลประเภทโต๊ะ</div>
+        <div className="mt-5">
+          <label className="form-control w-full">
+            <div className="label">
+              <span className="label-text font-bold">
+                <FontAwesomeIcon icon={faTag} className="mr-2" />
+                ชื่อประเภท
+              </span>
+            </div>
+            <div className="relative">
+              <span className="absolute left-3 top-1.5 text-gray-400"></span>
+              <input
+                type="text"
+                className="input input-bordered w-full pl-5"
+                name="type"
+                value={types.type}
+                onChange={hdlChange}
+              />
+            </div>
+          </label>
+          <div className="flex justify-end items-end mt-10">
+            <button className="bg-green-500 text-white w-36 h-12 font-normal rounded-3xl drop-shadow-xl">
+              <FontAwesomeIcon icon={faSave} className="mr-2"/>
+              บันทึก
+            </button>
           </div>
-          <input
-            type="text"
-            className="input input-bordered w-full"
-            name="type"
-            value={types.type}
-            onChange={hdlChange}
-          />
-        </label>
-        <button className="btn btn-secondary mt-5 w-32 h-12 font-normal rounded-2xl shadow-2xl">
-          เพิ่มข้อมูล
-        </button>
+        </div>
       </form>
     </div>
-  </div>
-</div>
-   
   );
 }
-
