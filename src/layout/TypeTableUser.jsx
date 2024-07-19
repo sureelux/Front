@@ -56,7 +56,7 @@ export default function Tables() {
   return (
       <div>
         <div className="text-4xl font-bold shadow-lg bg-gradient-to-l from-green-400 via-violet-400 to-pink-400 text-white p-4 mt-24 text-center">
-            <div  className="[text-shadow:2px_1px_6px_var(--tw-shadow-color)] shadow-gray-800 ">{nameType}</div>
+            <div  className="[text-shadow:2px_1px_6px_var(--tw-shadow-color)] shadow-gray-800 animate-pulse">{nameType}</div>
         </div>
         <hr className="my-4 border-2 border-gray-400 w-[1350px] mt-8 text-center mx-auto rounded-full"/>
         <div className="max-w-[100rem] mx-auto gap-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 justify-items-center">

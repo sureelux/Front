@@ -93,7 +93,7 @@ export default function Tables() {
               gap: "0rem",
               focus: "center",
               type: "loop",
-              pagination: true,
+              pagination: false,
             }}
             aria-label="slide images"
           >
@@ -106,8 +106,8 @@ export default function Tables() {
             ))}
           </Splide>
         </div>
-        <div className="flex items-center justify-center text-4xl font-bold shadow-xl bg-gradient-to-r from-blue-600 via-teal-400 to-green-400 text-white p-8 text-center border border-gray-300 w-full h-[80px]">
-          <div className="animate-pulse [text-shadow:2px_1px_6px_var(--tw-shadow-color)] shadow-gray-700 ">โต๊ะอาหารทั้งหมด</div>
+        <div className="flex items-center justify-center text-4xl font-bold shadow-xl bg-gradient-to-r from-blue-600 via-teal-400 to-green-400 text-white p-8 text-center w-full h-[80px]">
+          <div className="animate-pulse [text-shadow:2px_1px_6px_var(--tw-shadow-color)] shadow-gray-700">โต๊ะอาหารทั้งหมด</div>
         </div>
 
         <div className="relative my-2 w-[1450px] mt-8">

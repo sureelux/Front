@@ -2,13 +2,20 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faTimes,
+  faUser,
+  faTable,
+  faClipboardList,
+  faCalendarCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function DataBooking() {
   const [bookings, setBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(6); // Number of items per page
+  const [perPage] = useState(7); // Number of items per page
 
   useEffect(() => {
     const getBookings = async () => {
@@ -75,12 +82,21 @@ export default function DataBooking() {
   // Pagination logic
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
-  const currentItems = filteredBookings.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const nextPage = () => {
+    if (currentPage < Math.ceil(filteredBookings.length / perPage)) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   return (
     <div className="">
@@ -231,24 +247,51 @@ export default function DataBooking() {
                 </p>
               </div>
             )}
-            {filteredBookings.length > perPage && (
-              <nav className="flex justify-center space-x-2 mt-1">
-                {[...Array(Math.ceil(filteredBookings.length / perPage))].map(
-                  (item, index) => (
-                    <button
-                      key={index}
-                      className={`${
-                        currentPage === index + 1
-                          ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-                      } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-                      onClick={() => paginate(index + 1)}
-                    >
-                      {index + 1}
-                    </button>
-                  )
-                )}
-              </nav>
+             {filteredBookings.length > perPage && (
+          <nav className="flex justify-center space-x-2 mt-1">
+            {/* Previous page button */}
+            <button
+              className={`${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+              onClick={prevPage}
+              disabled={currentPage === 1}
+            >
+              {"<"}
+            </button>
+
+            {/* Numbered pages */}
+            {[...Array(Math.ceil(filteredBookings.length / perPage))].map(
+              (item, index) => (
+                <button
+                  key={index}
+                  className={`${
+                    currentPage === index + 1
+                      ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                  } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              )
+            )}
+
+            {/* Next page button */}
+            <button
+              className={`${
+                currentPage === Math.ceil(filteredBookings.length / perPage)
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+              onClick={nextPage}
+              disabled={currentPage === Math.ceil(filteredBookings.length / perPage)}
+            >
+              {">"}
+            </button>
+          </nav>
             )}
 
             {bookings.map((booking, index) => (
@@ -262,18 +305,29 @@ export default function DataBooking() {
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400 text-black">
+          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
             <li>
-              <Link to="/DataUser">ข้อมูลผู้ใช้</Link>
+              <Link to="/DataUser">
+                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+              </Link>
             </li>
             <li>
-              <Link to="/DataType">ข้อมูลประเภทโต๊ะ</Link>
+              <Link to="/DataType">
+                <FontAwesomeIcon icon={faTable} className="mr-2" />{" "}
+                ข้อมูลประเภทโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataTable">ข้อมูลโต๊ะ</Link>
+              <Link to="/DataTable">
+                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />{" "}
+                ข้อมูลโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataBooking">ข้อมูลการจอง</Link>
+              <Link to="/DataBooking">
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />{" "}
+                ข้อมูลการจอง
+              </Link>
             </li>
           </ul>
         </div>
@@ -289,13 +343,13 @@ const Modal = ({ booking }) => {
   const hdlModalAccept = async (modalId, tableId, bookingId) => {
     try {
       const data = { table_status: "BUSY" };
-      const data2 = { status_booking: "APPROVE" }; 
+      const data2 = { status_booking: "APPROVE" };
       const rs = await axios.patch(
-        `http://localhost:8889/admin/updateStatus/${tableId}`, 
+        `http://localhost:8889/admin/updateStatus/${tableId}`,
         data
       );
       const rs2 = await axios.patch(
-        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`, 
+        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
         data2
       );
       if (rs2.status === 200 && rs.status === 200) {
@@ -307,17 +361,17 @@ const Modal = ({ booking }) => {
       console.error("Error updating booking status:", error);
     }
   };
-  
+
   const hdlModalCancel = async (modalId, tableId, bookingId) => {
     try {
       const data = { table_status: "FREE" };
-      const data2 = { status_booking: "NOT_APPROVE" }; 
+      const data2 = { status_booking: "NOT_APPROVE" };
       const rs = await axios.patch(
-        `http://localhost:8889/admin/updateStatus/${tableId}`, 
+        `http://localhost:8889/admin/updateStatus/${tableId}`,
         data
       );
       const rs2 = await axios.patch(
-        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`, 
+        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`
       );
       if (rs2.status === 200 && rs.status === 200) {
         alert("คุณได้ทำการไม่อนุมัติเรียบร้อยแล้ว");
@@ -328,7 +382,6 @@ const Modal = ({ booking }) => {
       console.error("Error updating booking status:", error);
     }
   };
-  
 
   return (
     <dialog id={modalId} className="modal">

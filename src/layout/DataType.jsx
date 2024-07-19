@@ -1,15 +1,22 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faEdit, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTrash,
+  faEdit,
+  faPlus,
+  faUser,
+  faTable,
+  faClipboardList,
+  faCalendarCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function DataType() {
   const [types, setTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(4); // Number of items per page
-
 
   useEffect(() => {
     const getTypes = async () => {
@@ -35,16 +42,23 @@ export default function DataType() {
       type.type_id.toString().includes(searchTerm.toLowerCase()) ||
       type.type_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const indexOfLastItem = currentPage * perPage;
+  const indexOfFirstItem = indexOfLastItem - perPage;
+  const currentItems = filteredTypes.slice(indexOfFirstItem, indexOfLastItem);
 
-    // Pagination logic
-    const indexOfLastItem = currentPage * perPage;
-    const indexOfFirstItem = indexOfLastItem - perPage;
-    const currentItems = filteredTypes.slice(
-      indexOfFirstItem,
-      indexOfLastItem
-    );
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);  
+  const nextPage = () => {
+    if (currentPage < Math.ceil(filteredTypes.length / perPage)) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   return (
     <div>
@@ -66,11 +80,26 @@ export default function DataType() {
               <form className="w-full">
                 <div className="relative">
                   <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg
+                      className="w-4 h-4 text-gray-400 dark:text-gray-400"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                      />
+                    </svg>
                   </div>
                   <input
                     type="text"
                     id="default-search"
-                    className="block w-96 p-2 ps-10 text-sm border border-gray-300 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block w-96 p-2 ps-10 text-sm border border-gray-400 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="ค้นหา"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -81,7 +110,8 @@ export default function DataType() {
                 <Link
                   className="btn btn-success drawer-button text-white font-normal rounded-xl shadow-xl flex items-center"
                   to="/CreateType"
-                ><FontAwesomeIcon icon={faPlus} className="" />
+                >
+                  <FontAwesomeIcon icon={faPlus} className="" />
                 </Link>
               </div>
             </div>
@@ -96,7 +126,11 @@ export default function DataType() {
                 </thead>
                 <tbody className="font-medium text-black text-center">
                   {currentItems.map((types, index) => (
-                    <tr key={types.type_id} types={types} className="hover:bg-gray-100">
+                    <tr
+                      key={types.type_id}
+                      types={types}
+                      className="hover:bg-gray-100"
+                    >
                       <td>{types.type_id}</td>
                       <td>{types.type_name}</td>
                       <td>
@@ -110,17 +144,19 @@ export default function DataType() {
                                 .showModal()
                             }
                           >
-                            <FontAwesomeIcon icon={faEdit} ></FontAwesomeIcon>
+                            <FontAwesomeIcon icon={faEdit}></FontAwesomeIcon>
                           </button>
                           <button
                             className="btn btn-error text-white text-xs font-normal rounded-xl shadow-xl flex items-center"
                             onClick={() =>
                               document
-                                .getElementById(`my_modaldelete_${types.type_id}`)
+                                .getElementById(
+                                  `my_modaldelete_${types.type_id}`
+                                )
                                 .showModal()
                             }
                           >
-                            <FontAwesomeIcon icon={faTrash}/>
+                            <FontAwesomeIcon icon={faTrash} />
                           </button>
                         </div>
                       </td>
@@ -144,24 +180,51 @@ export default function DataType() {
                 </p>
               </div>
             )}
-            {filteredTypes.length > perPage && (
-              <nav className="flex justify-center space-x-2 mt-1">
-                {[...Array(Math.ceil(filteredTypes.length / perPage))].map(
-                  (item, index) => (
-                    <button
-                      key={index}
-                      className={`${
-                        currentPage === index + 1
-                          ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-                      } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-                      onClick={() => paginate(index + 1)}
-                    >
-                      {index + 1}
-                    </button>
-                  )
-                )}
-              </nav>
+           {filteredTypes.length > perPage && (
+          <nav className="flex justify-center space-x-2 mt-1">
+            {/* Previous page button */}
+            <button
+              className={`${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+              onClick={prevPage}
+              disabled={currentPage === 1}
+            >
+              {"<"}
+            </button>
+
+            {/* Numbered pages */}
+            {[...Array(Math.ceil(filteredTypes.length / perPage))].map(
+              (item, index) => (
+                <button
+                  key={index}
+                  className={`${
+                    currentPage === index + 1
+                      ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                  } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              )
+            )}
+
+            {/* Next page button */}
+            <button
+              className={`${
+                currentPage === Math.ceil(filteredTypes.length / perPage)
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+              onClick={nextPage}
+              disabled={currentPage === Math.ceil(filteredTypes.length / perPage)}
+            >
+              {">"}
+            </button>
+          </nav>
             )}
           </div>
         </div>
@@ -172,18 +235,29 @@ export default function DataType() {
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400 text-black">
+          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
             <li>
-              <Link to="/DataUser">ข้อมูลผู้ใช้</Link>
+              <Link to="/DataUser">
+                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+              </Link>
             </li>
             <li>
-              <Link to="/DataType">ข้อมูลประเภทโต๊ะ</Link>
+              <Link to="/DataType">
+                <FontAwesomeIcon icon={faTable} className="mr-2" />{" "}
+                ข้อมูลประเภทโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataTable">ข้อมูลโต๊ะ</Link>
+              <Link to="/DataTable">
+                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />{" "}
+                ข้อมูลโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataBooking">ข้อมูลการจอง</Link>
+              <Link to="/DataBooking">
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />{" "}
+                ข้อมูลการจอง
+              </Link>
             </li>
           </ul>
         </div>
@@ -304,12 +378,9 @@ const ModalDelete = ({ type, setTrigger }) => {
     try {
       e.stopPropagation();
       const token = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:8889/admin/deleteType/${type_id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await axios.delete(`http://localhost:8889/admin/deleteType/${type_id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       // Show alert after successful deletion
       alert("คุณได้ลบข้อมูลประเภทโต๊ะเรียบร้อยแล้ว");
       // Optionally reload the page or update state to reflect the deletion

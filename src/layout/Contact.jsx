@@ -39,7 +39,7 @@ const ContactUs = () => {
 
           <div className="absolute inset-0 bg-black opacity-50"></div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="text-white text-7xl font-bold animate-bounce">ติดต่อเรา</h1>
+            <h1 className="text-white text-7xl font-bold animate-bounce [text-shadow:2px_2px_4px_var(--tw-shadow-color)] shadow-gray-400">ติดต่อเรา</h1>
           </div>
         </div>
         <div className="p-6">
@@ -63,7 +63,7 @@ const ContactUs = () => {
               </div>
             </div>
             <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-5 ">
-              <div className="flex flex-col items-center p-6 bg-gradient-to-tr from-white to-blue-300 border-2 border-black rounded-xl shadow-xl hover:scale-90 transition duration-150 ease-in-out transform hover:shadow-2xl ">
+              <div className="flex flex-col items-center p-6 bg-gradient-to-tr from-white to-blue-300 border border-gray-300 rounded-xl shadow-xl hover:scale-90 transition duration-150 ease-in-out transform hover:shadow-2xl ">
                 <FaFacebook className="text-4xl text-blue-700 mb-2 drop-shadow-lg" />
                 <h4 className="text-xl font-bold text-gray-800 mb-1">
                   Facebook
@@ -76,14 +76,14 @@ const ContactUs = () => {
                 </a>
               </div>
 
-              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-red-300 border-2 border-black rounded-lg shadow-md hover:scale-90 transition duration-150 ease-in-out">
+              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-red-300 border border-gray-300 rounded-lg shadow-md hover:scale-90 transition duration-150 ease-in-out">
                 <FaEnvelope className="text-4xl text-red-600 mb-2" />
                 <h4 className="text-xl font-bold">อีเมล</h4>
                 <a href="" className="text-red-600 hover:text-red-400">
                   sureelux.pa64@snru.ac.th
                 </a>
               </div>
-              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-green-300 border-2 border-black rounded-lg shadow-md border  hover:scale-90 transition duration-150 ease-in-out">
+              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-green-300  border border-gray-300 rounded-lg shadow-md hover:scale-90 transition duration-150 ease-in-out">
                 <IoLocationSharp className="text-4xl text-green-500 mb-2" />
                 <h4 className="text-xl font-bold">พิกัด</h4>
                 <a

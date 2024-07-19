@@ -1,7 +1,13 @@
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUser,
+  faTable,
+  faClipboardList,
+  faCalendarCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function Data() {
-
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -23,9 +29,7 @@ export default function Data() {
           >
             <div className="hero-overlay bg-opacity-60"></div>
             <div className="hero-content text-center text-neutral-content">
-              <div className="max-w-md">
-
-              </div>
+              <div className="max-w-md"></div>
             </div>
           </div>
         </div>
@@ -38,16 +42,27 @@ export default function Data() {
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
             <li>
-              <Link to="/DataUser">ข้อมูลผู้ใช้</Link>
+              <Link to="/DataUser">
+                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+              </Link>
             </li>
             <li>
-              <Link to="/DataType">ข้อมูลประเภทโต๊ะ</Link>
+              <Link to="/DataType">
+                <FontAwesomeIcon icon={faTable} className="mr-2" />{" "}
+                ข้อมูลประเภทโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataTable">ข้อมูลโต๊ะ</Link>
+              <Link to="/DataTable">
+                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />{" "}
+                ข้อมูลโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataBooking">ข้อมูลการจอง</Link>
+              <Link to="/DataBooking">
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />{" "}
+                ข้อมูลการจอง
+              </Link>
             </li>
           </ul>
         </div>

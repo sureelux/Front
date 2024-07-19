@@ -2,7 +2,15 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faEdit, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faEdit,
+  faPlus,
+  faUser,
+  faTable,
+  faClipboardList,
+  faCalendarCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function DataTable() {
   const [tables, setTables] = useState([]);
@@ -63,15 +71,23 @@ export default function DataTable() {
     );
   });
 
-    // Pagination logic
-    const indexOfLastItem = currentPage * perPage;
-    const indexOfFirstItem = indexOfLastItem - perPage;
-    const currentItems = filteredTables.slice(
-      indexOfFirstItem,
-      indexOfLastItem
-    );
+  const indexOfLastItem = currentPage * perPage;
+  const indexOfFirstItem = indexOfLastItem - perPage;
+  const currentItems = filteredTables.slice(indexOfFirstItem, indexOfLastItem);
 
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const nextPage = () => {
+    if (currentPage < Math.ceil(filteredTables.length / perPage)) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   return (
     <div>
@@ -144,7 +160,11 @@ export default function DataTable() {
                 </thead>
                 <tbody className="font-medium text-black text-center">
                   {currentItems.map((tables, index) => (
-                    <tr key={tables.table_id} tables={tables} className="hover:bg-gray-100">
+                    <tr
+                      key={tables.table_id}
+                      tables={tables}
+                      className="hover:bg-gray-100"
+                    >
                       <td>{tables.table_id}</td>
                       <td>
                         <figure className="hover:scale-110 transition duration-300 ease-in-out">
@@ -247,23 +267,47 @@ export default function DataTable() {
               </div>
             )}
             {filteredTables.length > perPage && (
-              <nav className="flex justify-center space-x-2 mt-1">
-                {[...Array(Math.ceil(filteredTables.length / perPage))].map(
-                  (item, index) => (
-                    <button
-                      key={index}
-                      className={`${
-                        currentPage === index + 1
-                          ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-                      } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-                      onClick={() => paginate(index + 1)}
-                    >
-                      {index + 1}
-                    </button>
-                  )
-                )}
-              </nav>
+          <nav className="flex justify-center space-x-2 mt-1">
+            <button
+              className={`${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+              onClick={prevPage}
+              disabled={currentPage === 1}
+            >
+              {"<"}
+            </button>
+            {[...Array(Math.ceil(filteredTables.length / perPage))].map(
+              (item, index) => (
+                <button
+                  key={index}
+                  className={`${
+                    currentPage === index + 1
+                      ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                  } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              )
+            )}
+
+            {/* Next page button */}
+            <button
+              className={`${
+                currentPage === Math.ceil(filteredTables.length / perPage)
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+              onClick={nextPage}
+              disabled={currentPage === Math.ceil(filteredTables.length / perPage)}
+            >
+              {">"}
+            </button>
+          </nav>
             )}
           </div>
         </div>
@@ -274,18 +318,29 @@ export default function DataTable() {
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400 text-black">
+          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
             <li>
-              <Link to="/DataUser">ข้อมูลผู้ใช้</Link>
+              <Link to="/DataUser">
+                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+              </Link>
             </li>
             <li>
-              <Link to="/DataType">ข้อมูลประเภทโต๊ะ</Link>
+              <Link to="/DataType">
+                <FontAwesomeIcon icon={faTable} className="mr-2" />
+                ข้อมูลประเภทโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataTable">ข้อมูลโต๊ะ</Link>
+              <Link to="/DataTable">
+                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+                ข้อมูลโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataBooking">ข้อมูลการจอง</Link>
+              <Link to="/DataBooking">
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+                ข้อมูลการจอง
+              </Link>
             </li>
           </ul>
         </div>

@@ -59,9 +59,16 @@ export default function RegisterForm() {
           "url(https://nocnoc.com/blog/wp-content/uploads/2021/03/22-dining-table-decorate.jpg)",
       }}
     >
-      <div className="flex justify-center items-center p-14 border w-11/12 min-w-[500px] mx-auto bg-white rounded-lg mt-24
+      <div className="flex absolute top-0 left-0 mt-20">
+        <Link to="/login" className=" text-black rounded-4xl p-2">
+          <i className="fas fa-arrow-left"></i>
+        </Link>
+      </div>
+      <div
+        className="flex justify-center items-center p-14 border w-11/12 min-w-[500px] mx-auto bg-white rounded-lg mt-24
       
-      mb-16">
+      mb-16"
+      >
         <form className="text-3xl mb-2 w-full" onSubmit={hdlSubmit}>
           <div className="flex flex-col ">
             <img
@@ -171,7 +178,7 @@ export default function RegisterForm() {
             </label>
           </div>
           <div className="flex gap-5 justify-end items-end mt-3">
-          <button type="submit" className="btn btn-outline btn-info">
+            <button type="submit" className="btn btn-outline btn-info">
               สมัครสมาชิก
             </button>
             <button

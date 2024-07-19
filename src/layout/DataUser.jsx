@@ -1,9 +1,14 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTrash,
+  faUser,
+  faTable,
+  faClipboardList,
+  faCalendarCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function DataUser() {
   const [users, setUsers] = useState([]);
@@ -31,7 +36,7 @@ export default function DataUser() {
       await axios.delete(`http://localhost:8889/admin/deleteUser/${user_id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(users.filter(user => user.user_id !== user_id));
+      setUsers(users.filter((user) => user.user_id !== user_id));
       alert("คุณได้ลบข้อมูลผู้ใช้เรียบร้อยแล้ว");
     } catch (err) {
       console.error(err);
@@ -49,26 +54,36 @@ export default function DataUser() {
     return date.toLocaleDateString("th-TH", options);
   }
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.user_id.toString().includes(searchTerm.toLowerCase()) ||
-      user.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.role === "USER" && "ผู้ใช้งาน".includes(searchTerm.toLowerCase()))
-  ).filter((user) => user.role !== "ADMIN");
-
-  // Pagination logic
+  const filteredUsers = users
+    .filter(
+      (user) =>
+        user.user_id.toString().includes(searchTerm.toLowerCase()) ||
+        user.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.role === "USER" && "ผู้ใช้งาน".includes(searchTerm.toLowerCase()))
+    )
+    .filter((user) => user.role !== "ADMIN");
+    
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
-  const currentItems = filteredUsers.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const nextPage = () => {
+    if (currentPage < Math.ceil(filteredUsers.length / perPage)) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   return (
     <div>
@@ -82,7 +97,9 @@ export default function DataUser() {
             ดูข้อมูล
           </label>
           <div className="overflow-autos w-full h-screen mt-15">
-            <p className="mt-3 ml-2 text-3xl font-bold drop-shadow-[2px_2px_var(--tw-shadow-color)] shadow-gray-300">รายละเอียดข้อมูลผู้ใช้</p>
+            <p className="mt-3 ml-2 text-3xl font-bold drop-shadow-[2px_2px_var(--tw-shadow-color)] shadow-gray-300">
+              รายละเอียดข้อมูลผู้ใช้
+            </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
             <form className="max-w-md mx-auto mr-28">
               <div className="relative">
@@ -113,7 +130,9 @@ export default function DataUser() {
                 />
               </div>
             </form>
-            {notification && <p className="text-center text-green-500 mt-4">{notification}</p>}
+            {notification && (
+              <p className="text-center text-green-500 mt-4">{notification}</p>
+            )}
             {filteredUsers.length > 0 ? (
               <table className="table mt-4">
                 <thead>
@@ -146,9 +165,9 @@ export default function DataUser() {
                               document
                                 .getElementById(`my_modal_${user.user_id}`)
                                 .showModal()
-                            }>
+                            }
+                          >
                             <FontAwesomeIcon icon={faTrash} />
-                           
                           </button>
                         </div>
                       </td>
@@ -172,27 +191,51 @@ export default function DataUser() {
                     </tr>
                   </thead>
                 </table>
-                <p className="text-center text-xl font-bold text-gray-500 mt-10">ไม่พบข้อมูล</p>
+                <p className="text-center text-xl font-bold text-gray-500 mt-10">
+                  ไม่พบข้อมูล
+                </p>
               </div>
             )}
-            {filteredUsers.length > perPage && (
-              <nav className="flex justify-center space-x-2 mt-1">
-                {[...Array(Math.ceil(filteredUsers.length / perPage))].map(
-                  (item, index) => (
-                    <button
-                      key={index}
-                      className={`${
-                        currentPage === index + 1
-                          ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-                      } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-                      onClick={() => paginate(index + 1)}
-                    >
-                      {index + 1}
-                    </button>
-                  )
-                )}
-              </nav>
+              {filteredUsers.length > perPage && (
+          <nav className="flex justify-center space-x-2 mt-1">
+            <button
+              className={`${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+              onClick={prevPage}
+              disabled={currentPage === 1}
+            >
+              {"<"}
+            </button>
+            {[...Array(Math.ceil(filteredUsers.length / perPage))].map(
+              (item, index) => (
+                <button
+                  key={index}
+                  className={`${
+                    currentPage === index + 1
+                      ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                  } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              )
+            )}
+            <button
+              className={`${
+                currentPage === Math.ceil(filteredUsers.length / perPage)
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+              onClick={nextPage}
+              disabled={currentPage === Math.ceil(filteredUsers.length / perPage)}
+            >
+              {">"}
+            </button>
+          </nav>
             )}
           </div>
         </div>
@@ -203,18 +246,29 @@ export default function DataUser() {
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400 text-black">
+          <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
             <li>
-              <Link to="/DataUser">ข้อมูลผู้ใช้</Link>
+              <Link to="/DataUser">
+                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+              </Link>
             </li>
             <li>
-              <Link to="/DataType">ข้อมูลประเภทโต๊ะ</Link>
+              <Link to="/DataType">
+                <FontAwesomeIcon icon={faTable} className="mr-2" />{" "}
+                ข้อมูลประเภทโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataTable">ข้อมูลโต๊ะ</Link>
+              <Link to="/DataTable">
+                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />{" "}
+                ข้อมูลโต๊ะ
+              </Link>
             </li>
             <li>
-              <Link to="/DataBooking">ข้อมูลการจอง</Link>
+              <Link to="/DataBooking">
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />{" "}
+                ข้อมูลการจอง
+              </Link>
             </li>
           </ul>
         </div>
