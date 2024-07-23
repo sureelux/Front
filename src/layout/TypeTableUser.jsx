@@ -15,7 +15,12 @@ export default function Tables() {
 
   const getTables = async () => {
     try {
-      const response = await axios.get("http://localhost:8889/admin/tables");
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`http://localhost:8889/admin/tables`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        } 
+      );
       setTables(response.data.tables);
       // console.log(tables)
     } catch (error) {
@@ -25,7 +30,12 @@ export default function Tables() {
 
   const getTypes = async () => {
     try {
-      const response = await axios.get("http://localhost:8889/admin/types");
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`http://localhost:8889/admin/types`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }   
+      );
       setTypes(response.data.types);
       // console.log(types)
     } catch (error) {
@@ -35,10 +45,14 @@ export default function Tables() {
 
   const getTypeTable = async (type) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:8889/admin/TypeTableUser?type=${TypeTable}`
+        `http://localhost:8889/user/TypeTableUser?type=${TypeTable}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }   
       );
-      setTypeTable(response.data.dTpye); // Make sure to use the correct response structure
+      setTypeTable(response.data.dTpye); 
       setNameType(response.data.type);
     } catch (error) {
       console.error("Error fetching types:", error);

@@ -26,9 +26,11 @@ export default function Header() {
   useEffect(() => {
     const typeuser = async () => {
       const token = localStorage.getItem('token');
-      const rs = await axios.get("http://localhost:8889/admin/typeuser", {
+      const rs = await axios.get(`http://localhost:8889/user/typeuser`, 
+        {
         headers: { Authorization: `Bearer ${token}` }
-      });
+      }
+    );
       setTypeUser(rs.data.types);
     };
     typeuser();

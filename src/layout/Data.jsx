@@ -1,3 +1,5 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -6,8 +8,14 @@ import {
   faClipboardList,
   faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
+import { Line } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export default function Data() {
+ 
+
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -19,19 +27,7 @@ export default function Data() {
           >
             ดูข้อมูล
           </label>
-
-          <div
-            className="hero min-h-screen w-full h-full"
-            style={{
-              backgroundImage:
-                "url(https://nocnoc.com/blog/wp-content/uploads/2021/03/cover-dining-table-decorate.jpg)",
-            }}
-          >
-            <div className="hero-overlay bg-opacity-60"></div>
-            <div className="hero-content text-center text-neutral-content">
-              <div className="max-w-md"></div>
-            </div>
-          </div>
+          
         </div>
 
         <div className="drawer-side mt-20 overflow-y-hidden">

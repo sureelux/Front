@@ -9,6 +9,7 @@ import {
   faClipboardList,
   faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 export default function DataUser() {
   const [users, setUsers] = useState([]);
@@ -20,7 +21,10 @@ export default function DataUser() {
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const rs = await axios.get("http://localhost:8889/admin/users");
+        const token = localStorage.getItem("token");
+        const rs = await axios.get(`http://localhost:8889/admin/users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setUsers(rs.data.users);
       } catch (err) {
         console.error(err);
@@ -30,16 +34,40 @@ export default function DataUser() {
   }, []);
 
   const hdlDelete = async (e, user_id) => {
-    try {
-      e.preventDefault();
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8889/admin/deleteUser/${user_id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(users.filter((user) => user.user_id !== user_id));
-      alert("คุณได้ลบข้อมูลผู้ใช้เรียบร้อยแล้ว");
-    } catch (err) {
-      console.error(err);
+    e.preventDefault();
+
+    // Show SweetAlert2 confirmation dialog
+    const result = await Swal.fire({
+      title: 'คุณต้องการลบข้อมูลหรือไม่?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d', 
+      confirmButtonText: 'ลบ',
+      cancelButtonText: 'ยกเลิก'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(`http://localhost:8889/admin/deleteUser/${user_id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUsers(users.filter((user) => user.user_id !== user_id));
+        Swal.fire({
+          icon: 'success',
+          title: 'ลบข้อมูลเรียบร้อย',
+          confirmButtonColor: '#3996fa',
+        });
+      } catch (err) {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาดในการลบข้อมูล',
+          text: err.message,
+          confirmButtonColor: '#3996fa',
+        });
+      }
     }
   };
 
@@ -66,7 +94,7 @@ export default function DataUser() {
         (user.role === "USER" && "ผู้ใช้งาน".includes(searchTerm.toLowerCase()))
     )
     .filter((user) => user.role !== "ADMIN");
-    
+
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
   const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
@@ -123,7 +151,7 @@ export default function DataUser() {
                 <input
                   type="text"
                   id="default-search"
-                  className="block w-96 p-2 ps-10 text-sm border border-gray-400 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block w-96 p-2 ps-10 text-sm border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="ค้นหา"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -161,11 +189,7 @@ export default function DataUser() {
                         <div className="justify-center items-center">
                           <button
                             className="btn btn-error font-normal text-white text-xs shadow-xl rounded-xl"
-                            onClick={() =>
-                              document
-                                .getElementById(`my_modal_${user.user_id}`)
-                                .showModal()
-                            }
+                            onClick={(e) => hdlDelete(e, user.user_id)} // Call delete handler
                           >
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
@@ -196,46 +220,46 @@ export default function DataUser() {
                 </p>
               </div>
             )}
-              {filteredUsers.length > perPage && (
-          <nav className="flex justify-center space-x-2 mt-1">
-            <button
-              className={`${
-                currentPage === 1
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-              onClick={prevPage}
-              disabled={currentPage === 1}
-            >
-              {"<"}
-            </button>
-            {[...Array(Math.ceil(filteredUsers.length / perPage))].map(
-              (item, index) => (
+            {filteredUsers.length > perPage && (
+              <nav className="flex justify-center space-x-2 mt-1">
                 <button
-                  key={index}
                   className={`${
-                    currentPage === index + 1
-                      ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                    currentPage === 1
+                      ? "opacity-50 cursor-not-allowed"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
                   } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-                  onClick={() => paginate(index + 1)}
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
                 >
-                  {index + 1}
+                  {"<"}
                 </button>
-              )
-            )}
-            <button
-              className={`${
-                currentPage === Math.ceil(filteredUsers.length / perPage)
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-              onClick={nextPage}
-              disabled={currentPage === Math.ceil(filteredUsers.length / perPage)}
-            >
-              {">"}
-            </button>
-          </nav>
+                {[...Array(Math.ceil(filteredUsers.length / perPage))].map(
+                  (item, index) => (
+                    <button
+                      key={index}
+                      className={`${
+                        currentPage === index + 1
+                          ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                      } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                      onClick={() => paginate(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  )
+                )}
+                <button
+                  className={`${
+                    currentPage === Math.ceil(filteredUsers.length / perPage)
+                      ? "opacity-50 cursor-not-allowed"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                  } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                  onClick={nextPage}
+                  disabled={currentPage === Math.ceil(filteredUsers.length / perPage)}
+                >
+                  {">"}
+                </button>
+              </nav>
             )}
           </div>
         </div>
@@ -254,55 +278,22 @@ export default function DataUser() {
             </li>
             <li>
               <Link to="/DataType">
-                <FontAwesomeIcon icon={faTable} className="mr-2" />{" "}
-                ข้อมูลประเภทโต๊ะ
+                <FontAwesomeIcon icon={faTable} className="mr-2" /> ข้อมูลประเภทโต๊ะ
               </Link>
             </li>
             <li>
               <Link to="/DataTable">
-                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />{" "}
-                ข้อมูลโต๊ะ
+                <FontAwesomeIcon icon={faClipboardList} className="mr-2" /> ข้อมูลโต๊ะ
               </Link>
             </li>
             <li>
               <Link to="/DataBooking">
-                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />{" "}
-                ข้อมูลการจอง
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" /> ข้อมูลการจอง
               </Link>
             </li>
           </ul>
         </div>
       </div>
-
-      {users.map((user) => (
-        <Modal key={user.user_id} user={user} onDelete={hdlDelete} />
-      ))}
     </div>
   );
 }
-
-const Modal = ({ user, onDelete }) => {
-  const modalId = `my_modal_${user.user_id}`;
-
-  return (
-    <dialog id={modalId} className="modal">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">คุณต้องการลบข้อมูลหรือไม่?</h3>
-        <div className="modal-action">
-          <button
-            className="btn"
-            onClick={() => document.getElementById(modalId).close()}
-          >
-            ยกเลิก
-          </button>
-          <button
-            className="btn btn-error text-white font-normal"
-            onClick={(e) => onDelete(e, user.user_id)}
-          >
-            ลบ
-          </button>
-        </div>
-      </div>
-    </dialog>
-  );
-};

@@ -78,7 +78,7 @@ export default function HeaderAdmin() {
                   <a onClick={hdlAdminHome}>หน้าหลัก</a>
                 </li>
                 <li>
-                  <a onClick={hdlData}>ข้อมูล</a>
+                  <a onClick={hdlData}>แดชบอร์ด</a>
                 </li>
               </ul>
             </div>
@@ -95,7 +95,7 @@ export default function HeaderAdmin() {
                 <a onClick={hdlAdminHome}>หน้าหลัก</a>
               </li>
               <li>
-                <a onClick={hdlData}>ดูข้อมูล</a>
+                <a onClick={hdlData}>แดชบอร์ด</a>
               </li>
             </ul>
           </div>

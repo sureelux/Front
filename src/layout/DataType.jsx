@@ -16,11 +16,18 @@ export default function DataType() {
   const [types, setTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(4); // Number of items per page
+  const [perPage] = useState(4); 
 
+  
+  
   useEffect(() => {
+    const token = localStorage.getItem("token");
     const getTypes = async () => {
-      const rs = await axios.get("http://localhost:8889/admin/types");
+      const rs = await axios.get(`http://localhost:8889/admin/types`,      
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      } 
+    );
       setTypes(rs.data.types);
     };
     getTypes();
@@ -99,7 +106,7 @@ export default function DataType() {
                   <input
                     type="text"
                     id="default-search"
-                    className="block w-96 p-2 ps-10 text-sm border border-gray-400 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block w-96 p-2 ps-10 text-sm border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="ค้นหา"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -182,7 +189,6 @@ export default function DataType() {
             )}
            {filteredTypes.length > perPage && (
           <nav className="flex justify-center space-x-2 mt-1">
-            {/* Previous page button */}
             <button
               className={`${
                 currentPage === 1
@@ -195,7 +201,6 @@ export default function DataType() {
               {"<"}
             </button>
 
-            {/* Numbered pages */}
             {[...Array(Math.ceil(filteredTypes.length / perPage))].map(
               (item, index) => (
                 <button
@@ -212,7 +217,6 @@ export default function DataType() {
               )
             )}
 
-            {/* Next page button */}
             <button
               className={`${
                 currentPage === Math.ceil(filteredTypes.length / perPage)
@@ -292,7 +296,12 @@ const Modal = ({ type }) => {
 
       const apiUrl = `http://localhost:8889/admin/updateType/${type_id}`;
 
-      await axios.patch(apiUrl, editData);
+      const token = localStorage.getItem("token");
+      await axios.patch(apiUrl, editData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       alert("คุณทำการแก้ไขข้อมูลเรียบร้อย");
       location.reload();
       setEditing(false);
@@ -378,7 +387,8 @@ const ModalDelete = ({ type, setTrigger }) => {
     try {
       e.stopPropagation();
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8889/admin/deleteType/${type_id}`, {
+      await axios.delete(`http://localhost:8889/admin/deleteType/${type_id}`, 
+        {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Show alert after successful deletion

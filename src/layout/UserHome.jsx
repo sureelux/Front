@@ -20,31 +20,24 @@ const UserHome = () => {
   const imageArr = [
     {
       src: "https://sabuyjaishop.com/shop/wallbkk/images/zvvkhk20wyxtple30kjx1782021223017902.jpg",
-      alt: "image-01",
     },
     {
       src: "https://www.bloggang.com/data/t/tathaitravel/picture/1659527277.jpg",
-      alt: "image-02",
     },
     {
       src: "https://www.bloggang.com/data/t/tathaitravel/picture/1659527299.jpg",
-      alt: "image-03",
     },
     {
       src: "https://www.bloggang.com/data/t/tathaitravel/picture/1659527244.jpg",
-      alt: "image-04",
     },
     {
       src: "https://www.ryoiireview.com/upload/article/201912/1575460965_f7e90e57514ef13099ad72d91271cfc5.jpg",
-      alt: "image-05",
     },
     {
       src: "https://nocnoc.com/blog/wp-content/uploads/2020/12/shape-table.jpg",
-      alt: "image-06",
     },
     {
       src: "https://nocnoc.com/blog/wp-content/uploads/2023/01/10_how-to-start-a-restaurant-business.jpg",
-      alt: "image-07",
     },
   ];
 
@@ -54,8 +47,8 @@ const UserHome = () => {
       setTimeout(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
         setAnimation("slideIn");
-      }, 9000); // Match the duration of the slideOut animation
-    }, 16000); // Change image every 3 seconds
+      }, 9000); 
+    }, 16000);
 
     return () => clearInterval(interval);
   }, [images.length]);
@@ -69,7 +62,7 @@ const UserHome = () => {
 
     return () => clearInterval(interval);
   }, []);
-
+  
   return (
     <div className="bg-white min-h-screen flex flex-col items-center py-10 px-1">
       <div className="overflow-hidden w-full max-w-10xl">

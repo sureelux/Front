@@ -9,13 +9,13 @@ import "@splidejs/react-splide/css/core";
 export default function Tables() {
   const [tables, setTables] = useState(null);
   const [types, setTypes] = useState(null);
-  const { user } = userAuth();
+  const { user } = userAuth(); 
   const navigate = useNavigate();
 
   const imageArr = [
     {
       src: "https://sabuyjaishop.com/shop/wallbkk/images/zvvkhk20wyxtple30kjx1782021223017902.jpg",
-      alt: "image-01",
+
     },
     {
       src: "https://www.bloggang.com/data/t/tathaitravel/picture/1659527277.jpg",
@@ -47,13 +47,14 @@ export default function Tables() {
     },
   ];
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [animation, setAnimation] = useState("slideIn");
-
+  
   useEffect(() => {
     const getTables = async () => {
       try {
-        const response = await axios.get("http://localhost:8889/admin/tables");
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:8889/user/tables", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         setTables(response.data.tables);
       } catch (error) {
         console.error("Error fetching tables:", error);
@@ -62,7 +63,10 @@ export default function Tables() {
 
     const getTypes = async () => {
       try {
-        const response = await axios.get("http://localhost:8889/admin/types");
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:8889/admin/types", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         setTypes(response.data.types);
       } catch (error) {
         console.error("Error fetching types:", error);

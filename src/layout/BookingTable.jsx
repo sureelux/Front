@@ -5,6 +5,7 @@ import userAuth from "../hooks/userAuth";
 import Tables from "./Tables";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook } from "@fortawesome/free-solid-svg-icons";
+import moment from 'moment-timezone';
 
 export default function BookingTable() {
   const navigate = useNavigate();
@@ -23,8 +24,12 @@ export default function BookingTable() {
     const getBookingTable = async () => {
       try {
         const id = tableId;
+        const token = localStorage.getItem("token");
         const response = await axios.get(
-          `http://localhost:8889/admin/tables/${id}`
+          `http://localhost:8889/user/tables/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         setBookingTable(response.data.tables);
         // console.log(response.data)
@@ -46,9 +51,13 @@ export default function BookingTable() {
     }
 
     try {
+      const token = localStorage.getItem("token");
       const rs = await axios.post(
-        "http://localhost:8889/admin/bookings",
-        input
+        "http://localhost:8889/user/bookings",
+        input, 
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        } 
       );
       if (rs.status === 200) {
         const id = rs.data.booking.booking_id;

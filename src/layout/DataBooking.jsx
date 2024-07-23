@@ -9,18 +9,30 @@ import {
   faTable,
   faClipboardList,
   faCalendarCheck,
+  faCheckCircle,
+  faHourglassHalf,
+  faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function DataBooking() {
   const [bookings, setBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(7); // Number of items per page
+  const [perPage] = useState(6);
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [rejectedCount, setRejectedCount] = useState(0);
+
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const getBookings = async () => {
       try {
-        const rs = await axios.get("http://localhost:8889/admin/bookings");
+        const rs = await axios.get(`http://localhost:8889/admin/bookings`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }  
+        );
         setBookings(rs.data.bookings);
       } catch (error) {
         console.error("Error fetching bookings:", error);
@@ -82,7 +94,10 @@ export default function DataBooking() {
   // Pagination logic
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
-  const currentItems = filteredBookings.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredBookings.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -96,6 +111,13 @@ export default function DataBooking() {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
+  };
+
+  const counts = {
+    approved: bookings.filter((b) => b.status_booking === "APPROVE").length,
+    pending: bookings.filter((b) => b.status_booking === "WAIT").length,
+    canceled: bookings.filter((b) => b.status_booking === "NOT_APPROVED")
+      .length,
   };
 
   return (
@@ -114,6 +136,43 @@ export default function DataBooking() {
               รายละเอียดข้อมูลการจอง
             </p>
             <hr className="border my-3 ml-10 border-sky-400 dark:border-sky-300" />
+            <div className="flex space-x-4 mb-10 mt-5 w-full px-4">
+              <div className="p-4 bg-green-200 rounded-lg shadow-md flex-1">
+                <div className="flex items-center">
+                  <FontAwesomeIcon
+                    icon={faCheckCircle}
+                    className="text-green-600 mr-2"
+                  />
+                  <h2 className="text-xl font-semibold text-green-600">
+                    อนุมัติ
+                  </h2>
+                </div>
+                <p className="text-3xl font-bold">{counts.approved}</p>
+              </div>
+              <div className="p-4 bg-yellow-200 rounded-lg shadow-md flex-1">
+                <div className="flex items-center">
+                  <FontAwesomeIcon
+                    icon={faHourglassHalf}
+                    className="text-yellow-600 mr-2"
+                  />
+                  <h2 className="text-xl font-semibold text-yellow-600">
+                    รออนุมัติ
+                  </h2>
+                </div>
+                <p className="text-3xl font-bold">{counts.pending}</p>
+              </div>
+              <div className="p-4 bg-red-200 rounded-lg shadow-md flex-1">
+                <div className="flex items-center">
+                  <FontAwesomeIcon
+                    icon={faTimesCircle}
+                    className="text-red-600 mr-2"
+                  />
+                  <h2 className="text-xl font-semibold text-red-600">ยกเลิก</h2>
+                </div>
+                <p className="text-3xl font-bold">{counts.canceled}</p>
+              </div>
+            </div>
+
             <form className="max-w-md mx-auto mr-28">
               <div className="relative">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none space-x-2">
@@ -136,7 +195,7 @@ export default function DataBooking() {
                 <input
                   type="text"
                   id="default-search"
-                  className="block w-96 p-2 ps-10 text-sm text- border border-gray-300 rounded-lg bg-gray-50  dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block w-96 p-2 ps-10 text-sm text- border border-gray-500 rounded-lg bg-gray-50  dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="ค้นหา"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -151,6 +210,7 @@ export default function DataBooking() {
                     <th>วันที่/เวลา</th>
                     <th>ชื่อโต๊ะ</th>
                     <th>ประเภทโต๊ะ</th>
+                    <th>ราคาโต๊ะ</th>
                     <th>ชื่อลูกค้า</th>
                     <th>สถานะ</th>
                     <th>จัดการ</th>
@@ -171,6 +231,7 @@ export default function DataBooking() {
                       </td>
                       <td>{bookings.table.table_name}</td>
                       <td>{bookings.table.type_table.type_name}</td>
+                      <td>{bookings.table.table_price}</td>
                       <td>{bookings.user.firstname}</td>
                       <td
                         className={
@@ -207,7 +268,7 @@ export default function DataBooking() {
                           }
                         >
                           <svg
-                            className="w-5 h-5 text-gray-800 dark:text-white "
+                            className="w-4 h-4 text-white"
                             aria-hidden="true"
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -238,7 +299,7 @@ export default function DataBooking() {
                       <th>ประเภทโต๊ะ</th>
                       <th>ชื่อลูกค้า</th>
                       <th>สถานะ</th>
-                      <th>การดำเนิน</th>
+                      <th>จัดการ</th>
                     </tr>
                   </thead>
                 </table>
@@ -247,51 +308,53 @@ export default function DataBooking() {
                 </p>
               </div>
             )}
-             {filteredBookings.length > perPage && (
-          <nav className="flex justify-center space-x-2 mt-1">
-            {/* Previous page button */}
-            <button
-              className={`${
-                currentPage === 1
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-              onClick={prevPage}
-              disabled={currentPage === 1}
-            >
-              {"<"}
-            </button>
-
-            {/* Numbered pages */}
-            {[...Array(Math.ceil(filteredBookings.length / perPage))].map(
-              (item, index) => (
+            {filteredBookings.length > perPage && (
+              <nav className="flex justify-center space-x-2 mt-1">
+                {/* Previous page button */}
                 <button
-                  key={index}
                   className={`${
-                    currentPage === index + 1
-                      ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                    currentPage === 1
+                      ? "opacity-50 cursor-not-allowed"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
                   } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-                  onClick={() => paginate(index + 1)}
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
                 >
-                  {index + 1}
+                  {"<"}
                 </button>
-              )
-            )}
 
-            {/* Next page button */}
-            <button
-              className={`${
-                currentPage === Math.ceil(filteredBookings.length / perPage)
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-              onClick={nextPage}
-              disabled={currentPage === Math.ceil(filteredBookings.length / perPage)}
-            >
-              {">"}
-            </button>
-          </nav>
+                {/* Numbered pages */}
+                {[...Array(Math.ceil(filteredBookings.length / perPage))].map(
+                  (item, index) => (
+                    <button
+                      key={index}
+                      className={`${
+                        currentPage === index + 1
+                          ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                      } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                      onClick={() => paginate(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  )
+                )}
+
+                {/* Next page button */}
+                <button
+                  className={`${
+                    currentPage === Math.ceil(filteredBookings.length / perPage)
+                      ? "opacity-50 cursor-not-allowed"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                  } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                  onClick={nextPage}
+                  disabled={
+                    currentPage === Math.ceil(filteredBookings.length / perPage)
+                  }
+                >
+                  {">"}
+                </button>
+              </nav>
             )}
 
             {bookings.map((booking, index) => (

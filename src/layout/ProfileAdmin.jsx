@@ -71,12 +71,6 @@ export default function ProfileAdmin() {
             </div>
           </div>
           <div className="p-6 bg-gray-100 border-t border-gray-200 justify-center">
-            {/* <button
-              onClick={hdlUpdateProfile}
-              className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-full focus:outline-none focus:shadow-outline"
-            >
-              แก้ไขบัญชี
-            </button> */}
           </div>
         </div>
       ) : null}

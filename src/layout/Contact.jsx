@@ -22,8 +22,8 @@ const ContactUs = () => {
       setTimeout(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
         setAnimation("slideIn");
-      }, 9000); // Match the duration of the slideOut animation
-    }, 16000); // Change image every 3 seconds
+      }, 9000); 
+    }, 16000); 
 
     return () => clearInterval(interval);
   }, [images.length]);
@@ -44,26 +44,26 @@ const ContactUs = () => {
         </div>
         <div className="p-6">
           <div className="text-center">
-            <h2 className="text-4xl font-bold">ชื่อร้านอาหาร</h2>
-            <p className="mt-2 text-gray-600">ร้านอาหารอร่อยที่สุดในเมือง</p>
+            <h2 className="text-4xl font-bold">ร้านอาหารเขตจังหวัดนครพนม</h2>
+            <p className="mt-2 text-gray-600">ร้านอาหารอร่อยที่สุดในเมืองนครพนม</p>
           </div>
           <div className="mt-6 space-y-4">
             <div className="flex items-center text-gray-700">
               <FaMapMarkerAlt className="text-2xl" />
               <div className="ml-3">
                 <p className="font-semibold">ที่อยู่:</p>
-                <p>123 ถนนสุขสันต์ ตำบลเมือง อำเภอเมือง จังหวัดกรุงเทพมหานคร</p>
+                <p>282 ตำบลมหาชัย อำเภอปลาปาก จังหวัดนครพนม</p>
               </div>
             </div>
             <div className="flex items-center text-gray-700">
               <FaPhone className="text-2xl" />
               <div className="ml-3">
                 <p className="font-semibold">เบอร์โทรศัพท์:</p>
-                <p>012-345-6789</p>
+                <p>065-539-0921</p>
               </div>
             </div>
             <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-5 ">
-              <div className="flex flex-col items-center p-6 bg-gradient-to-tr from-white to-blue-300 border border-gray-300 rounded-xl shadow-xl hover:scale-90 transition duration-150 ease-in-out transform hover:shadow-2xl ">
+              <div className="flex flex-col items-center p-6 bg-gradient-to-tr from-white to-blue-300 border-2 border-gray-300 rounded-xl shadow-xl hover:scale-90 transition duration-150 ease-in-out transform hover:shadow-2xl ">
                 <FaFacebook className="text-4xl text-blue-700 mb-2 drop-shadow-lg" />
                 <h4 className="text-xl font-bold text-gray-800 mb-1">
                   Facebook
@@ -76,14 +76,14 @@ const ContactUs = () => {
                 </a>
               </div>
 
-              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-red-300 border border-gray-300 rounded-lg shadow-md hover:scale-90 transition duration-150 ease-in-out">
+              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-red-300 border-2 border-gray-300 rounded-lg shadow-md hover:scale-90 transition duration-150 ease-in-out">
                 <FaEnvelope className="text-4xl text-red-600 mb-2" />
                 <h4 className="text-xl font-bold">อีเมล</h4>
                 <a href="" className="text-red-600 hover:text-red-400">
                   sureelux.pa64@snru.ac.th
                 </a>
               </div>
-              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-green-300  border border-gray-300 rounded-lg shadow-md hover:scale-90 transition duration-150 ease-in-out">
+              <div class="flex flex-col items-center p-4 bg-gradient-to-tr from-white to-green-300  border-2 border-gray-300 rounded-lg shadow-md hover:scale-90 transition duration-150 ease-in-out">
                 <IoLocationSharp className="text-4xl text-green-500 mb-2" />
                 <h4 className="text-xl font-bold">พิกัด</h4>
                 <a

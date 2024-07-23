@@ -50,6 +50,7 @@ export default function updateProfile() {
       );
       alert("คุณได้แก้ไขข้อมูลบัญชีเรียบร้อยแล้ว");
       navigate("/Profile")
+      location.reload();
     } catch (err) {
       alert(err.message);
     }

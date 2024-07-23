@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faImage,
@@ -9,9 +9,10 @@ import {
   faTag,
   faSave
 } from "@fortawesome/free-solid-svg-icons";
+import Swal from 'sweetalert2';
 
 export default function CreateTable() {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [typeTable, setTypeTable] = useState([]);
   const [tables, setTables] = useState({
     table_img: "",
@@ -20,11 +21,19 @@ export default function CreateTable() {
     table_price: "",
     type_name: "1",
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchTypes = async () => {
-      const rs = await axios.get("http://localhost:8889/admin/types");
-      setTypeTable(rs.data.types);
+      const token = localStorage.getItem("token");
+      try {
+        const rs = await axios.get(`http://localhost:8889/admin/types`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTypeTable(rs.data.types);
+      } catch (error) {
+        console.error("Error fetching table types:", error);
+      }
     };
     fetchTypes();
   }, []);
@@ -33,15 +42,61 @@ export default function CreateTable() {
     setTables((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const checkTableNameUnique = async (name) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(`http://localhost:8889/admin/tables/check?name=${name}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data.isUnique;
+    } catch (err) {
+      console.error("Error checking table name uniqueness:", err);
+      return false;
+    }
+  };
+
   const hdlSubmit = async (e) => {
     e.preventDefault();
+
+    if (!tables.table_img || !tables.table_name || !tables.table_price) {
+      Swal.fire({
+        icon: 'error',
+        title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+        confirmButtonColor: '#3996fa',
+      });
+      return;
+    }
+
+    const isUnique = await checkTableNameUnique(tables.table_name);
+    if (!isUnique) {
+      Swal.fire({
+        icon: 'error',
+        title: 'ชื่อโต๊ะนี้มีอยู่แล้ว กรุณาเลือกชื่ออื่น',
+        confirmButtonColor: '#3996fa',
+      });
+      return;
+    }
+
     try {
-      const rs = await axios.post("http://localhost:8889/admin/tables", tables);
-      alert("คุณได้เพิ่มข้อมูลโต๊ะเรียบร้อยแล้ว");
-      console.log(rs);
-      navigate("/DataTable"); // Redirect to /DataTable
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      await axios.post("http://localhost:8889/admin/tables", tables, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      Swal.fire({
+        icon: 'success',
+        title: 'คุณได้เพิ่มข้อมูลโต๊ะเรียบร้อยแล้ว',
+        confirmButtonColor: '#3996fa',
+      });
+      navigate("/DataTable");
     } catch (err) {
-      alert(err.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด: ' + err.message,
+        confirmButtonColor: '#3996fa',
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,7 +108,7 @@ export default function CreateTable() {
         </Link>
       </div>
       <form
-        className="flex flex-col min-w-[550px] border border-gray-500 w-1/2  mx-auto p-12 gap-4 mt-16 rounded-xl shadow-2xl bg-white"
+        className="flex flex-col min-w-[550px] border border-gray-500 w-1/2 mx-auto p-12 gap-4 mt-16 rounded-xl shadow-2xl bg-white"
         onSubmit={hdlSubmit}
       >
         <div className="text-4xl font-bold [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-500">
@@ -75,7 +130,7 @@ export default function CreateTable() {
               onChange={hdlChange}
             />
           </label>
-          <label className="form-control w-full ">
+          <label className="form-control w-full">
             <div className="label">
               <span className="label-text font-bold">
                 <FontAwesomeIcon icon={faChair} className="mr-2" />
@@ -90,7 +145,7 @@ export default function CreateTable() {
               onChange={hdlChange}
             />
           </label>
-          <label className="form-control w-full ">
+          <label className="form-control w-full">
             <div className="label">
               <span className="label-text font-bold">
                 <FontAwesomeIcon icon={faDollarSign} className="mr-2" />
@@ -130,7 +185,7 @@ export default function CreateTable() {
 
           <div className="justify-center mt-10">
             <button className="bg-green-500 text-white w-36 h-12 font-normal rounded-3xl drop-shadow-xl">
-            <FontAwesomeIcon icon={faSave} className="mr-2"/>บันทึก
+              <FontAwesomeIcon icon={faSave} className="mr-2"/> {loading ? 'บันทึก...' : 'บันทึก'}
             </button>
           </div>
         </div>

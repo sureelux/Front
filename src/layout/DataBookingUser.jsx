@@ -11,7 +11,7 @@ export default function BookingUser() {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:8889/admin/bookingUser",
+          `http://localhost:8889/user/bookingUser`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
