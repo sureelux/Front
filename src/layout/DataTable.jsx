@@ -12,23 +12,21 @@ import {
   faClipboardList,
   faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import Swal from 'sweetalert2'; 
+import Swal from "sweetalert2";
 
 export default function DataTable() {
   const [tables, setTables] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(4); // Number of items per page
+  const [perPage] = useState(4); 
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     const getTables = async (req, res, next) => {
-      const rs = await axios.get(`http://localhost:8889/user/tables`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        } 
-      );
+      const rs = await axios.get(`http://localhost:8889/user/tables`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setTables(rs.data.tables);
     };
     getTables();
@@ -38,37 +36,39 @@ export default function DataTable() {
     e.preventDefault();
 
     const result = await Swal.fire({
-      title: 'คุณต้องการลบข้อมูลหรือไม่?',
-      icon: 'warning',
+      title: "คุณต้องการลบข้อมูลหรือไม่?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#6c757d', 
-      confirmButtonText: 'ลบ',
-      cancelButtonText: 'ยกเลิก'
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
     });
 
     if (result.isConfirmed) {
-    try {
-      const token = localStorage.getItem("token");
-     await axios.delete(
-        `http://localhost:8889/admin/deleteTable/${table_id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(
+          `http://localhost:8889/admin/deleteTable/${table_id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      setTables(tables.filter((table) => table.table_id !== table_id));
+        setTables(tables.filter((table) => table.table_id !== table_id));
 
         Swal.fire({
-          icon: 'success',
-          title: 'ลบข้อมูลเรียบร้อย',
-          confirmButtonColor: '#3996fa',
+          icon: "success",
+          title: "ลบข้อมูลเรียบร้อย",
+          confirmButtonColor: "#3996fa",
         });
       } catch (err) {
         console.error(err);
         Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาดในการลบข้อมูล',
+          icon: "error",
+          title: "เกิดข้อผิดพลาดในการลบข้อมูล",
           text: err.message,
-          confirmButtonColor: '#3996fa',
+          confirmButtonColor: "#3996fa",
         });
       }
     }
@@ -241,7 +241,7 @@ export default function DataTable() {
 
                           <button
                             className="btn btn-error text-white text-xs font-normal rounded-xl shadow-xl"
-                            onClick={(e) => hdlDelete(e, tables.table_id)} 
+                            onClick={(e) => hdlDelete(e, tables.table_id)}
                           >
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
@@ -267,50 +267,33 @@ export default function DataTable() {
                   </thead>
                 </table>
                 <p className="text-center text-xl font-bold text-gray-500 mt-10">
-                  ไม่พบข้อมูล
+                  ไม่พบข้อมูลโต๊ะ
                 </p>
               </div>
             )}
             {filteredTables.length > perPage && (
-          <nav className="flex justify-center space-x-2 mt-1">
-            <button
-              className={`${
-                currentPage === 1
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-              onClick={prevPage}
-              disabled={currentPage === 1}
-            >
-              {"<"}
-            </button>
-            {[...Array(Math.ceil(filteredTables.length / perPage))].map(
-              (item, index) => (
+              <div className="mt-2 flex items-center justify-center space-x-4">
                 <button
-                  key={index}
-                  className={`${
-                    currentPage === index + 1
-                      ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-                  } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-                  onClick={() => paginate(index + 1)}
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300"
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
                 >
-                  {index + 1}
+                  ก่อนหน้า
                 </button>
-              )
-            )}
-            <button
-              className={`${
-                currentPage === Math.ceil(filteredTables.length / perPage)
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-              onClick={nextPage}
-              disabled={currentPage === Math.ceil(filteredTables.length / perPage)}
-            >
-              {">"}
-            </button>
-          </nav>
+                <span className="text-sm text-gray-900">
+                  หน้า {currentPage} จาก {" "}
+                  {Math.ceil(filteredTables.length / perPage)}
+                </span>
+                <button
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300"
+                  onClick={nextPage}
+                  disabled={
+                    currentPage === Math.ceil(filteredTables.length / perPage)
+                  }
+                >
+                  ถัดไป
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -322,41 +305,70 @@ export default function DataTable() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-          <li>
-            <Link to="/Dashboard"
-             className={`flex items-center p-2 rounded-lg ${isActive("/Dashboard") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}
-            >
-              <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
-              แดชบอร์ด
-            </Link>
-          </li>
-          <li>
-            <Link to="/DataUser"
-            className={`flex items-center p-2 rounded-lg ${isActive("/DataUser") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
-              <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
-            </Link>
-          </li>
-          <li>
-            <Link to="/DataType"
-            className={`flex items-center p-2 rounded-lg ${isActive("/DataType") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
-              <FontAwesomeIcon icon={faTable} className="mr-2" />
-              ข้อมูลประเภทโต๊ะ
-            </Link>
-          </li>
-          <li>
-            <Link to="/DataTable"
-            className={`flex items-center p-2 rounded-lg ${isActive("/DataTable") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
-              <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
-              ข้อมูลโต๊ะ
-            </Link>
-          </li>
-          <li>
-            <Link to="/DataBooking"
-            className={`flex items-center p-2 rounded-lg ${isActive("/DataBooking") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
-              <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
-              ข้อมูลการจอง
-            </Link>
-          </li>
+            <li>
+              <Link
+                to="/Dashboard"
+                className={`flex items-center p-2 rounded-lg ${
+                  isActive("/Dashboard")
+                    ? "bg-black text-white font-bold"
+                    : "bg-opacity-55 text-black"
+                }`}
+              >
+                <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
+                แดชบอร์ด
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/DataUser"
+                className={`flex items-center p-2 rounded-lg ${
+                  isActive("/DataUser")
+                    ? "bg-black text-white font-bold"
+                    : "bg-opacity-55 text-black"
+                }`}
+              >
+                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/DataType"
+                className={`flex items-center p-2 rounded-lg ${
+                  isActive("/DataType")
+                    ? "bg-black text-white font-bold"
+                    : "bg-opacity-55 text-black"
+                }`}
+              >
+                <FontAwesomeIcon icon={faTable} className="mr-2" />
+                ข้อมูลประเภทโต๊ะ
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/DataTable"
+                className={`flex items-center p-2 rounded-lg ${
+                  isActive("/DataTable")
+                    ? "bg-black text-white font-bold"
+                    : "bg-opacity-55 text-black"
+                }`}
+              >
+                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+                ข้อมูลโต๊ะ
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/DataBooking"
+                className={`flex items-center p-2 rounded-lg ${
+                  isActive("/DataBooking")
+                    ? "bg-black text-white font-bold"
+                    : "bg-opacity-55 text-black"
+                }`}
+              >
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+                ข้อมูลการจอง
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
@@ -368,37 +380,71 @@ export default function DataTable() {
 }
 const Modal = ({ table }) => {
   const modalId = `my_modal_${table.table_id}`;
-  console.log(modalId);
   const [editData, setEditData] = useState({
     table_img: "",
     table_name: "",
     table_status: "",
     table_price: "",
+    type_id: "", // เปลี่ยนเป็น type_id แทน type_name
   });
   const [isEditing, setEditing] = useState(false);
+  const [tableTypes, setTableTypes] = useState([]); // เก็บประเภทโต๊ะ
 
-  const handleEditCilck = () => {
-    setEditData({ ...table });
+  useEffect(() => {
+    // ดึงข้อมูลประเภทโต๊ะ
+    const fetchTableTypes = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8889/admin/types`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setTableTypes(response.data.types || []); 
+      } catch (error) {
+        console.error("Error fetching table types", error);
+      }
+    };
+
+    fetchTableTypes();
+  }, []);
+
+  useEffect(() => {
+    // ตั้งค่าข้อมูลแก้ไข
+    setEditData({
+      table_img: table.table_img,
+      table_name: table.table_name,
+      table_status: table.table_status,
+      table_price: table.table_price,
+      type_id: table.type_table?.type_id || "", // ใช้ type_id แทน type_name
+    });
+  }, [table]);
+
+  const handleEditClick = () => {
+    setEditData({
+      table_img: table.table_img,
+      table_name: table.table_name,
+      table_status: table.table_status,
+      table_price: table.table_price,
+      type_id: table.type_table?.type_id || "", // ใช้ type_id แทน type_name
+    });
     setEditing(true);
   };
 
   const handleSaveClick = async (e) => {
-    setEditing(false);
+    e.stopPropagation();
     try {
-      e.stopPropagation();
       const table_id = table.table_id;
 
       const apiUrl = `http://localhost:8889/admin/updateTable/${table_id}`;
+      const token = localStorage.getItem("token");
 
-      const token = localStorage.getItem("token"); 
-      await axios.patch(apiUrl, editData, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      await axios.patch(apiUrl, {
+        ...editData,
+        type_id: editData.type_id, // ส่ง type_id ไปที่เซิร์ฟเวอร์
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       alert("คุณทำการแก้ไขข้อมูลเรียบร้อย");
       location.reload();
-      setEditing(false);
       document.getElementById(modalId).close();
     } catch (error) {
       console.error("เกิดข้อผิดพลาดในการแก้ไขข้อมูล", error);
@@ -411,21 +457,21 @@ const Modal = ({ table }) => {
       [e.target.name]: e.target.value,
     }));
   };
+
   return (
     <dialog id={modalId} className="modal">
-      {console.log(modalId)}
       <div className="modal-box p-10">
         <h3 className="font-bold text-2xl mb-5">แก้ไขข้อมูลโต๊ะ</h3>
         <h3 className="text-lg mb-5 font-bold">
           ภาพ :{" "}
           {isEditing ? (
             <input
-              className="border border-gray-400  pl-3 pr-3 py-1 rounded-lg font-normal shadow-sm w-80 ml-7"
+              className="border border-gray-400 pl-3 pr-3 py-1 rounded-lg font-normal shadow-sm w-80 ml-7"
               type="text"
               name="table_img"
               value={editData.table_img}
               onChange={handleChange}
-            ></input>
+            />
           ) : (
             table.table_img
           )}
@@ -439,7 +485,7 @@ const Modal = ({ table }) => {
               name="table_name"
               value={editData.table_name}
               onChange={handleChange}
-            ></input>
+            />
           ) : (
             table.table_name
           )}
@@ -453,7 +499,7 @@ const Modal = ({ table }) => {
               name="table_status"
               value={editData.table_status}
               onChange={handleChange}
-            ></input>
+            />
           ) : (
             table.table_status
           )}
@@ -467,9 +513,28 @@ const Modal = ({ table }) => {
               name="table_price"
               value={editData.table_price}
               onChange={handleChange}
-            ></input>
+            />
           ) : (
             table.table_price
+          )}
+        </h3>
+        <h3 className="text-lg mb-5 font-bold">
+          ประเภทโต๊ะ :{" "}
+          {isEditing ? (
+            <select
+              className="border border-gray-400 pl-3 pr-3 py-1 rounded-lg font-normal shadow-sm w-80 ml-1"
+              name="type_id"
+              value={editData.type_id}
+              onChange={handleChange}
+            >
+              {tableTypes.map((type) => (
+                <option key={type.type_id} value={type.type_id}>
+                  {type.type_name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            table.type_table?.type_name || ""
           )}
         </h3>
 
@@ -477,13 +542,13 @@ const Modal = ({ table }) => {
           {isEditing ? (
             <div className="space-x-4">
               <button
-                className=" btn btn-accent text-white font-normal rounded-3xl"
+                className="btn btn-accent text-white font-normal rounded-3xl"
                 onClick={handleSaveClick}
               >
                 บันทึก
               </button>
               <button
-                className=" btn btn-error rounded-3xl text-white font-normal"
+                className="btn btn-error rounded-3xl text-white font-normal"
                 onClick={() => document.getElementById(modalId).close()}
               >
                 ยกเลิก
@@ -492,13 +557,13 @@ const Modal = ({ table }) => {
           ) : (
             <div className="space-x-4">
               <button
-                className=" btn btn-warning rounded-3xl text-white font-normal"
-                onClick={handleEditCilck}
+                className="btn btn-warning rounded-3xl text-white font-normal"
+                onClick={handleEditClick}
               >
                 แก้ไข
               </button>
               <button
-                className=" btn btn-error rounded-3xl text-white font-normal"
+                className="btn btn-error rounded-3xl text-white font-normal"
                 onClick={() => document.getElementById(modalId).close()}
               >
                 ยกเลิก
@@ -515,3 +580,4 @@ const Modal = ({ table }) => {
     </dialog>
   );
 };
+

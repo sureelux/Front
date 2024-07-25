@@ -2,13 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faImage,
-  faChair,
-  faDollarSign,
-  faTag,
-  faSave
-} from "@fortawesome/free-solid-svg-icons";
+import { faImage, faChair, faDollarSign, faTag, faSave } from "@fortawesome/free-solid-svg-icons";
 import Swal from 'sweetalert2';
 
 export default function CreateTable() {
@@ -23,41 +17,61 @@ export default function CreateTable() {
   });
   const [loading, setLoading] = useState(false);
 
+  // Fetch table types from the server
   useEffect(() => {
     const fetchTypes = async () => {
       const token = localStorage.getItem("token");
       try {
-        const rs = await axios.get(`http://localhost:8889/admin/types`, {
+        const response = await axios.get(`http://localhost:8889/admin/types`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setTypeTable(rs.data.types);
+        setTypeTable(response.data.types);
       } catch (error) {
         console.error("Error fetching table types:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'ไม่สามารถดึงข้อมูลประเภทโต๊ะได้',
+          confirmButtonColor: '#3996fa',
+        });
       }
     };
     fetchTypes();
   }, []);
 
-  const hdlChange = (e) => {
+  // Handle input field changes
+  const handleChange = (e) => {
     setTables((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const checkTableNameUnique = async (name) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.get(`http://localhost:8889/admin/tables/check?name=${name}`, {
+      console.log("Checking table name uniqueness for:", name); // Log table name being checked
+  
+      const response = await axios.get(`http://localhost:8889/admin/tables/check`, {
         headers: { Authorization: `Bearer ${token}` },
+        params: { name }
       });
+  
+      console.log("API response:", response.data); // Log API response
+  
       return response.data.isUnique;
     } catch (err) {
       console.error("Error checking table name uniqueness:", err);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาดในการตรวจสอบชื่อโต๊ะ',
+        confirmButtonColor: '#3996fa',
+      });
       return false;
     }
   };
 
-  const hdlSubmit = async (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Validate form fields
     if (!tables.table_img || !tables.table_name || !tables.table_price) {
       Swal.fire({
         icon: 'error',
@@ -66,7 +80,8 @@ export default function CreateTable() {
       });
       return;
     }
-
+  
+    // Check if the table name is unique
     const isUnique = await checkTableNameUnique(tables.table_name);
     if (!isUnique) {
       Swal.fire({
@@ -76,7 +91,7 @@ export default function CreateTable() {
       });
       return;
     }
-
+  
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
@@ -90,6 +105,7 @@ export default function CreateTable() {
       });
       navigate("/DataTable");
     } catch (err) {
+      console.error("Error submitting table:", err);
       Swal.fire({
         icon: 'error',
         title: 'เกิดข้อผิดพลาด: ' + err.message,
@@ -103,13 +119,13 @@ export default function CreateTable() {
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-bl from-sky-400 to-white">
       <div className="flex absolute top-0 left-0 mt-20">
-        <Link to="/DataTable" className=" text-black rounded-4xl p-2">
+        <Link to="/DataTable" className="text-black rounded-4xl p-2">
           <i className="fas fa-arrow-left"></i>
         </Link>
       </div>
       <form
         className="flex flex-col min-w-[550px] border border-gray-500 w-1/2 mx-auto p-12 gap-4 mt-16 rounded-xl shadow-2xl bg-white"
-        onSubmit={hdlSubmit}
+        onSubmit={handleSubmit}
       >
         <div className="text-4xl font-bold [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-500">
           เพิ่มข้อมูลโต๊ะ
@@ -127,7 +143,7 @@ export default function CreateTable() {
               className="input input-bordered w-full pl-5"
               name="table_img"
               value={tables.table_img}
-              onChange={hdlChange}
+              onChange={handleChange}
             />
           </label>
           <label className="form-control w-full">
@@ -142,7 +158,7 @@ export default function CreateTable() {
               className="input input-bordered w-full pl-5"
               name="table_name"
               value={tables.table_name}
-              onChange={hdlChange}
+              onChange={handleChange}
             />
           </label>
           <label className="form-control w-full">
@@ -157,7 +173,7 @@ export default function CreateTable() {
               className="input input-bordered w-full pl-5"
               name="table_price"
               value={tables.table_price}
-              onChange={hdlChange}
+              onChange={handleChange}
               pattern="\d*"
               title="กรุณาใส่ตัวเลขเท่านั้น"
             />
@@ -171,7 +187,7 @@ export default function CreateTable() {
             </div>
             <select
               className="select select-bordered"
-              onChange={hdlChange}
+              onChange={handleChange}
               name="type_name"
               value={tables.type_name}
             >
@@ -184,8 +200,12 @@ export default function CreateTable() {
           </label>
 
           <div className="justify-center mt-10">
-            <button className="bg-green-500 text-white w-36 h-12 font-normal rounded-3xl drop-shadow-xl">
-              <FontAwesomeIcon icon={faSave} className="mr-2"/> {loading ? 'บันทึก...' : 'บันทึก'}
+            <button
+              type="submit"
+              className="bg-green-500 text-white w-36 h-12 font-normal rounded-3xl drop-shadow-xl"
+              disabled={loading}
+            >
+              <FontAwesomeIcon icon={faSave} className="mr-2" /> {loading ? 'บันทึก...' : 'บันทึก'}
             </button>
           </div>
         </div>

@@ -8,48 +8,101 @@ import Swal from "sweetalert2";
 
 export default function CreateType() {
   const navigate = useNavigate();
-  const [types, setTypes] = useState({ type: "" });
+  const [type, setType] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setTypes((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setType(e.target.value);
+  };
+
+  const checkDuplicateType = async (typeName) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return false;
+      }
+      const response = await axios.get(
+        `http://localhost:8889/admin/types/check/${typeName}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data.exists;
+    } catch (err) {
+      console.error("Error checking for duplicate type:", err);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถตรวจสอบความซ้ำซ้อนได้",
+      });
+      return false;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!types.type) {
+    if (!type.trim()) {
       Swal.fire({
-        icon: 'warning',
-        title: 'กรุณากรอกชื่อประเภท',
-        text: 'ชื่อประเภทไม่สามารถเป็นค่าว่างได้',
+        icon: "warning",
+        title: "กรุณากรอกชื่อประเภท",
+        text: "ชื่อประเภทไม่สามารถเป็นค่าว่างได้",
       });
       return;
     }
 
+    setLoading(true);
+
     try {
-      setLoading(true);
+
+      const isDuplicate = await checkDuplicateType(type);
+      if (isDuplicate) {
+        Swal.fire({
+          icon: "warning",
+          title: "ข้อมูลซ้ำ",
+          text: "ชื่อประเภทนี้มีอยู่แล้ว",
+          showCancelButton: false, 
+          confirmButtonText: "ปิด", 
+          confirmButtonColor: "#dc3545",
+        });
+        return;
+      }
+
       const token = localStorage.getItem("token");
 
-      await axios.post("http://localhost:8889/admin/types", types, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      await axios.post(
+        "http://localhost:8889/admin/types",
+        { type_name: type },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       Swal.fire({
-        icon: 'success',
-        title: 'สำเร็จ',
-        text: 'คุณได้เพิ่มข้อมูลประเภทโต๊ะเรียบร้อยแล้ว',
+        icon: "success",
+        title: "สำเร็จ",
+        text: "คุณได้เพิ่มข้อมูลประเภทโต๊ะเรียบร้อยแล้ว",
       });
       navigate("/DataType");
     } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'เกิดข้อผิดพลาด',
-        text: err.response?.data?.message || err.message,
-      });
+      handleError(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleError = (error) => {
+    Swal.fire({
+      icon: "error",
+      title: "เกิดข้อผิดพลาด",
+      text: error.response?.data?.msg || "ไม่สามารถบันทึกข้อมูลได้",
+    });
   };
 
   return (
@@ -60,7 +113,7 @@ export default function CreateType() {
         </Link>
       </div>
       <form
-        className="flex flex-col min-w-[600px] min-h-64 p-14 gap-6 mt-10 rounded-xl shadow-2xl w-10 bg-white border border-gray-500"
+        className="flex flex-col min-w-[600px] min-h-64 p-14 gap-6 mt-10 rounded-xl shadow-2xl bg-white border border-gray-500"
         onSubmit={handleSubmit}
       >
         <div className="text-4xl font-bold [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-500">
@@ -78,8 +131,7 @@ export default function CreateType() {
               <input
                 type="text"
                 className="input input-bordered w-full pl-5"
-                name="type"
-                value={types.type}
+                value={type}
                 onChange={handleChange}
                 aria-label="Type name"
               />
@@ -88,11 +140,13 @@ export default function CreateType() {
           <div className="flex justify-end items-end mt-10">
             <button
               type="submit"
-              className={`bg-green-500 text-white w-36 h-12 font-normal rounded-3xl drop-shadow-xl ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`bg-green-500 text-white w-36 h-12 font-normal rounded-3xl drop-shadow-xl ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               disabled={loading}
             >
               <FontAwesomeIcon icon={faSave} className="mr-2" />
-              {loading ? 'บันทึก...' : 'บันทึก'}
+              {loading ? "บันทึก..." : "บันทึก"}
             </button>
           </div>
         </div>
