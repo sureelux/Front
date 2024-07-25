@@ -1,8 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faTachometerAlt,
   faTrash,
   faEdit,
   faPlus,
@@ -11,23 +12,20 @@ import {
   faClipboardList,
   faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
 
 export default function DataType() {
   const [types, setTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(4); 
+  const [perPage] = useState(4);
 
-  
-  
   useEffect(() => {
     const token = localStorage.getItem("token");
     const getTypes = async () => {
-      const rs = await axios.get(`http://localhost:8889/admin/types`,      
-      {
+      const rs = await axios.get(`http://localhost:8889/admin/types`, {
         headers: { Authorization: `Bearer ${token}` },
-      } 
-    );
+      });
       setTypes(rs.data.types);
     };
     getTypes();
@@ -67,6 +65,47 @@ export default function DataType() {
     }
   };
 
+  const hdlDelete = async (e, type_id) => {
+    e.preventDefault();  
+
+        const result = await Swal.fire({
+        title: 'คุณต้องการลบข้อมูลหรือไม่?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก'
+      });
+  
+      if (result.isConfirmed) {
+        try {
+        const token = localStorage.getItem("token");
+        await axios.delete(`http://localhost:8889/admin/deleteType/${type_id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        setTypes(types.filter((type) => type.type_id !== type_id));
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'ลบข้อมูลเรียบร้อย',
+          confirmButtonColor: '#3996fa',
+        });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาดในการลบข้อมูล',
+        text: err.message,
+        confirmButtonColor: '#3996fa',
+      });
+    }
+  }
+  };
+  
+  const isActive = (path) => location.pathname === path;
+
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -78,8 +117,8 @@ export default function DataType() {
           >
             ดูข้อมูล
           </label>
-          <div className="overflow-autos w-full h-screen mt-15">
-            <p className="mt-3 ml-2 text-3xl font-bold drop-shadow-[2px_2px_var(--tw-shadow-color)] shadow-gray-300">
+          <div className="overflow-auto w-full h-screen mt-15">
+            <p className="mt-3 ml-2 text-3xl font-bold drop-shadow-md shadow-gray-300">
               รายละเอียดข้อมูลประเภทโต๊ะ
             </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
@@ -96,9 +135,9 @@ export default function DataType() {
                     >
                       <path
                         stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
                         d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
                       />
                     </svg>
@@ -115,10 +154,10 @@ export default function DataType() {
               </form>
               <div className="mt-2 ml-96">
                 <Link
-                  className="btn btn-success drawer-button text-white font-normal rounded-xl shadow-xl flex items-center"
+                  className="btn btn-success text-white font-normal rounded-xl shadow-xl flex items-center"
                   to="/CreateType"
                 >
-                  <FontAwesomeIcon icon={faPlus} className="" />
+                  <FontAwesomeIcon icon={faPlus} className="mr-2" />
                 </Link>
               </div>
             </div>
@@ -132,38 +171,30 @@ export default function DataType() {
                   </tr>
                 </thead>
                 <tbody className="font-medium text-black text-center">
-                  {currentItems.map((types, index) => (
+                  {currentItems.map((type, index) => (
                     <tr
-                      key={types.type_id}
-                      types={types}
+                      key={type.type_id}
                       className="hover:bg-gray-100"
                     >
-                      <td>{types.type_id}</td>
-                      <td>{types.type_name}</td>
+                      <td>{type.type_id}</td>
+                      <td>{type.type_name}</td>
                       <td>
                         <div className="flex justify-center items-center">
                           <button
-                            className="btn btn-warning text-black text-xs font-normal rounded-xl shadow-xl flex items-center"
-                            style={{ marginRight: "20px" }}
+                            className="btn btn-warning text-black text-xs font-normal rounded-xl shadow-xl flex items-center mr-2"
                             onClick={() =>
                               document
-                                .getElementById(`my_modal_${types.type_id}`)
+                                .getElementById(`my_modal_${type.type_id}`)
                                 .showModal()
                             }
                           >
-                            <FontAwesomeIcon icon={faEdit}></FontAwesomeIcon>
+                            <FontAwesomeIcon icon={faEdit} className="mr-1" />
                           </button>
                           <button
                             className="btn btn-error text-white text-xs font-normal rounded-xl shadow-xl flex items-center"
-                            onClick={() =>
-                              document
-                                .getElementById(
-                                  `my_modaldelete_${types.type_id}`
-                                )
-                                .showModal()
-                            }
+                            onClick={(e) => hdlDelete(e, type.type_id)}
                           >
-                            <FontAwesomeIcon icon={faTrash} />
+                            <FontAwesomeIcon icon={faTrash} className="mr-1" />
                           </button>
                         </div>
                       </td>
@@ -187,48 +218,48 @@ export default function DataType() {
                 </p>
               </div>
             )}
-           {filteredTypes.length > perPage && (
-          <nav className="flex justify-center space-x-2 mt-1">
-            <button
-              className={`${
-                currentPage === 1
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-              onClick={prevPage}
-              disabled={currentPage === 1}
-            >
-              {"<"}
-            </button>
-
-            {[...Array(Math.ceil(filteredTypes.length / perPage))].map(
-              (item, index) => (
+            {filteredTypes.length > perPage && (
+              <nav className="flex justify-center space-x-2 mt-1">
                 <button
-                  key={index}
                   className={`${
-                    currentPage === index + 1
-                      ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                    currentPage === 1
+                      ? "opacity-50 cursor-not-allowed"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
                   } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-                  onClick={() => paginate(index + 1)}
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
                 >
-                  {index + 1}
+                  {"<"}
                 </button>
-              )
-            )}
 
-            <button
-              className={`${
-                currentPage === Math.ceil(filteredTypes.length / perPage)
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
-              } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
-              onClick={nextPage}
-              disabled={currentPage === Math.ceil(filteredTypes.length / perPage)}
-            >
-              {">"}
-            </button>
-          </nav>
+                {[...Array(Math.ceil(filteredTypes.length / perPage))].map(
+                  (item, index) => (
+                    <button
+                      key={index}
+                      className={`${
+                        currentPage === index + 1
+                          ? "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                      } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                      onClick={() => paginate(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  )
+                )}
+
+                <button
+                  className={`${
+                    currentPage === Math.ceil(filteredTypes.length / perPage)
+                      ? "opacity-50 cursor-not-allowed"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-200"
+                  } btn btn-sm rounded-full px-3 py-1 shadow-sm`}
+                  onClick={nextPage}
+                  disabled={currentPage === Math.ceil(filteredTypes.length / perPage)}
+                >
+                  {">"}
+                </button>
+              </nav>
             )}
           </div>
         </div>
@@ -240,37 +271,46 @@ export default function DataType() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-            <li>
-              <Link to="/DataUser">
-                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataType">
-                <FontAwesomeIcon icon={faTable} className="mr-2" />{" "}
-                ข้อมูลประเภทโต๊ะ
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataTable">
-                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />{" "}
-                ข้อมูลโต๊ะ
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataBooking">
-                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />{" "}
-                ข้อมูลการจอง
-              </Link>
-            </li>
+          <li>
+            <Link to="/Dashboard"
+             className={`flex items-center p-2 rounded-lg ${isActive("/Dashboard") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}
+            >
+              <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
+              แดชบอร์ด
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataUser"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataUser") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataType"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataType") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faTable} className="mr-2" />
+              ข้อมูลประเภทโต๊ะ
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataTable"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataTable") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+              ข้อมูลโต๊ะ
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataBooking"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataBooking") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+              ข้อมูลการจอง
+            </Link>
+          </li>
           </ul>
         </div>
       </div>
       {types.map((type, index) => (
         <Modal key={index} type={type} />
-      ))}
-      {types.map((type, index) => (
-        <ModalDelete key={index} type={type} />
       ))}
     </div>
   );
@@ -283,31 +323,28 @@ const Modal = ({ type }) => {
   });
   const [isEditing, setEditing] = useState(false);
 
-  const handleEditClick = () => {
+  useEffect(() => {
     setEditData({ ...type });
+  }, [type]);
+
+  const handleEditClick = () => {
     setEditing(true);
   };
 
   const handleSaveClick = async (e) => {
-    setEditing(false);
+    e.stopPropagation();
     try {
-      e.stopPropagation();
-      const type_id = type.type_id;
-
-      const apiUrl = `http://localhost:8889/admin/updateType/${type_id}`;
-
+      const apiUrl = `http://localhost:8889/admin/updateType/${type.type_id}`;
       const token = localStorage.getItem("token");
-      await axios.patch(apiUrl, editData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await axios.patch(apiUrl, editData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       alert("คุณทำการแก้ไขข้อมูลเรียบร้อย");
-      location.reload();
-      setEditing(false);
       document.getElementById(modalId).close();
     } catch (error) {
       console.error("เกิดข้อผิดพลาดในการแก้ไขข้อมูล", error);
+    } finally {
+      setEditing(false);
     }
   };
 
@@ -358,7 +395,7 @@ const Modal = ({ type }) => {
                 className=" btn btn-warning rounded-3xl text-white font-normal flex items-center"
                 onClick={handleEditClick}
               >
-                <FontAwesomeIcon icon={faEdit} />
+                <FontAwesomeIcon icon={faEdit} className="mr-1" />
                 แก้ไข
               </button>
               <button
@@ -376,51 +413,6 @@ const Modal = ({ type }) => {
           Close
         </button>
       </form>
-    </dialog>
-  );
-};
-
-const ModalDelete = ({ type, setTrigger }) => {
-  const modeldeleteId = `my_modaldelete_${type.type_id}`;
-
-  const hdlDelete = async (e, type_id) => {
-    try {
-      e.stopPropagation();
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8889/admin/deleteType/${type_id}`, 
-        {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      // Show alert after successful deletion
-      alert("คุณได้ลบข้อมูลประเภทโต๊ะเรียบร้อยแล้ว");
-      // Optionally reload the page or update state to reflect the deletion
-      location.reload();
-      setTrigger((prev) => !prev);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  return (
-    <dialog id={modeldeleteId} className="modal">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">คุณต้องการลบข้อมูลหรือไม่</h3>
-        <div className="modal-action">
-          <button
-            className="btn"
-            onClick={() => document.getElementById(modeldeleteId).close()}
-          >
-            ยกเลิก
-          </button>
-          <button
-            className="btn btn-error text-white font-medium flex items-center"
-            onClick={(e) => hdlDelete(e, type.type_id)}
-          >
-            <FontAwesomeIcon icon={faTrash} className="mr-2" />
-            ลบ
-          </button>
-        </div>
-      </div>
     </dialog>
   );
 };

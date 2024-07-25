@@ -20,7 +20,7 @@ export default function AdminHome() {
           <p className="mb-5">ผู้ดูแลระบบสามารถจัดการข้อมูลได้
           </p>
           <Link
-            to="/Data"
+            to="/Dashboard"
             className="btn btn-neutral-content form-control mt-0 font-medium shadow-xl"
           >
             ดูข้อมูล

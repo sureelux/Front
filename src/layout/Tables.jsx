@@ -9,6 +9,7 @@ import "@splidejs/react-splide/css/core";
 export default function Tables() {
   const [tables, setTables] = useState(null);
   const [types, setTypes] = useState(null);
+  const [tablesUser, setTablesUser] = useState(null);
   const { user } = userAuth(); 
   const navigate = useNavigate();
 
@@ -46,36 +47,55 @@ export default function Tables() {
       alt: "image-08",
     },
   ];
-
+const token = localStorage.getItem("token")
+console.log(token)
+ 
+    useEffect(() => {
+      const getTables = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.get("http://localhost:8889/user/tables", {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          setTables(response.data.tables);
+        } catch (error) {
+          console.error("Error fetching tables:", error);
+        }
+      };
   
-  useEffect(() => {
-    const getTables = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:8889/user/tables", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        setTables(response.data.tables);
-      } catch (error) {
-        console.error("Error fetching tables:", error);
-      }
-    };
+      const getTypes = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.get("http://localhost:8889/admin/types", {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          setTypes(response.data.types);
+        } catch (error) {
+          console.error("Error fetching types:", error);
+        }
+      };
+  
+      const getTypesUser = async () => {
+        try {
+          const response = await axios.get("http://localhost:8889/get");
+          setTables(response.data.tables);
+        } catch (error) {
+          console.error("Error fetching types:", error);
+        }
+      };
+      if(token !== null)
+        {
+      getTables();
+      getTypes();
+        }
+        else{
+          getTypesUser();
 
-    const getTypes = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:8889/admin/types", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        setTypes(response.data.types);
-      } catch (error) {
-        console.error("Error fetching types:", error);
-      }
-    };
-
-    getTables();
-    getTypes();
-  }, []);
+        }
+    }, []);
+  
+ 
+  
 
   const hdlBooking = (id) => {
     user?.user_id ? navigate(`/BookingTable/${id}`) : navigate("/login");

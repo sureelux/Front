@@ -3,20 +3,22 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faTrash,
+  faTachometerAlt,
   faUser,
   faTable,
   faClipboardList,
   faCalendarCheck,
+  faTrash
 } from "@fortawesome/free-solid-svg-icons";
-import Swal from 'sweetalert2'; // Import SweetAlert2
+
+import Swal from 'sweetalert2'; 
 
 export default function DataUser() {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [notification, setNotification] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(7); // Number of items per page
+  const [perPage] = useState(7);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -36,7 +38,6 @@ export default function DataUser() {
   const hdlDelete = async (e, user_id) => {
     e.preventDefault();
 
-    // Show SweetAlert2 confirmation dialog
     const result = await Swal.fire({
       title: 'คุณต้องการลบข้อมูลหรือไม่?',
       icon: 'warning',
@@ -53,7 +54,9 @@ export default function DataUser() {
         await axios.delete(`http://localhost:8889/admin/deleteUser/${user_id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setUsers(users.filter((user) => user.user_id !== user_id));
+
         Swal.fire({
           icon: 'success',
           title: 'ลบข้อมูลเรียบร้อย',
@@ -113,6 +116,9 @@ export default function DataUser() {
     }
   };
 
+  const isActive = (path) => location.pathname === path;
+
+
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -124,6 +130,7 @@ export default function DataUser() {
           >
             ดูข้อมูล
           </label>
+
           <div className="overflow-autos w-full h-screen mt-15">
             <p className="mt-3 ml-2 text-3xl font-bold drop-shadow-[2px_2px_var(--tw-shadow-color)] shadow-gray-300">
               รายละเอียดข้อมูลผู้ใช้
@@ -189,7 +196,7 @@ export default function DataUser() {
                         <div className="justify-center items-center">
                           <button
                             className="btn btn-error font-normal text-white text-xs shadow-xl rounded-xl"
-                            onClick={(e) => hdlDelete(e, user.user_id)} // Call delete handler
+                            onClick={(e) => hdlDelete(e, user.user_id)} 
                           >
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
@@ -271,26 +278,41 @@ export default function DataUser() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-            <li>
-              <Link to="/DataUser">
-                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataType">
-                <FontAwesomeIcon icon={faTable} className="mr-2" /> ข้อมูลประเภทโต๊ะ
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataTable">
-                <FontAwesomeIcon icon={faClipboardList} className="mr-2" /> ข้อมูลโต๊ะ
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataBooking">
-                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" /> ข้อมูลการจอง
-              </Link>
-            </li>
+          <li>
+            <Link to="/Dashboard"
+             className={`flex items-center p-2 rounded-lg ${isActive("/Dashboard") ? "bg-black text-white font-bold" : "bg-opacity-55 text-white"}`}
+            >
+              <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
+              แดชบอร์ด
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataUser"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataUser") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataType"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataType") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faTable} className="mr-2" />
+              ข้อมูลประเภทโต๊ะ
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataTable"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataTable") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+              ข้อมูลโต๊ะ
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataBooking"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataBooking") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+              ข้อมูลการจอง
+            </Link>
+          </li>
           </ul>
         </div>
       </div>

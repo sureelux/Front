@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faTachometerAlt,
   faCheck,
   faTimes,
   faUser,
@@ -13,6 +14,7 @@ import {
   faHourglassHalf,
   faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import Swal from 'sweetalert2'; 
 
 export default function DataBooking() {
   const [bookings, setBookings] = useState([]);
@@ -120,6 +122,8 @@ export default function DataBooking() {
       .length,
   };
 
+  const isActive = (path) => location.pathname === path;
+
   return (
     <div className="">
       <div className="drawer lg:drawer-open">
@@ -207,7 +211,7 @@ export default function DataBooking() {
                 <thead>
                   <tr className="text-sm text-black uppercase bg-gradient-to-r from-sky-400 to-cyan-300 text-center">
                     <th>ลำดับ</th>
-                    <th>วันที่/เวลา</th>
+                    <th>วันที่/เวลาจอง</th>
                     <th>ชื่อโต๊ะ</th>
                     <th>ประเภทโต๊ะ</th>
                     <th>ราคาโต๊ะ</th>
@@ -362,6 +366,7 @@ export default function DataBooking() {
             ))}
           </div>
         </div>
+        
         <div className="drawer-side mt-20 overflow-y-hidden">
           <label
             htmlFor="my-drawer-2"
@@ -369,29 +374,41 @@ export default function DataBooking() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-            <li>
-              <Link to="/DataUser">
-                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataType">
-                <FontAwesomeIcon icon={faTable} className="mr-2" />{" "}
-                ข้อมูลประเภทโต๊ะ
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataTable">
-                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />{" "}
-                ข้อมูลโต๊ะ
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataBooking">
-                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />{" "}
-                ข้อมูลการจอง
-              </Link>
-            </li>
+          <li>
+            <Link to="/Dashboard"
+             className={`flex items-center p-2 rounded-lg ${isActive("/Dashboard") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}
+            >
+              <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
+              แดชบอร์ด
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataUser"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataUser") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataType"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataType") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faTable} className="mr-2" />
+              ข้อมูลประเภทโต๊ะ
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataTable"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataTable") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+              ข้อมูลโต๊ะ
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataBooking"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataBooking") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+              ข้อมูลการจอง
+            </Link>
+          </li>
           </ul>
         </div>
       </div>
@@ -409,11 +426,17 @@ const Modal = ({ booking }) => {
       const data2 = { status_booking: "APPROVE" };
       const rs = await axios.patch(
         `http://localhost:8889/admin/updateStatus/${tableId}`,
-        data
+        data,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        } 
       );
       const rs2 = await axios.patch(
         `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
-        data2
+        data2,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        } 
       );
       if (rs2.status === 200 && rs.status === 200) {
         alert("คุณได้ทำการอนุมัติเรียบร้อยแล้ว");
@@ -427,16 +450,24 @@ const Modal = ({ booking }) => {
 
   const hdlModalCancel = async (modalId, tableId, bookingId) => {
     try {
+      const token = localStorage.getItem("token");
       const data = { table_status: "FREE" };
-      const data2 = { status_booking: "NOT_APPROVE" };
+      const data2 = { status_booking: "NOT_APPROVED" };
       const rs = await axios.patch(
         `http://localhost:8889/admin/updateStatus/${tableId}`,
-        data
+        data,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }  
       );
       const rs2 = await axios.patch(
-        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`
+        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
+        data2,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-      if (rs2.status === 200 && rs.status === 200) {
+      if (rs2.status === 200) {
         alert("คุณได้ทำการไม่อนุมัติเรียบร้อยแล้ว");
         document.getElementById(modalId).close();
         location.reload();

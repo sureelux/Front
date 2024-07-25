@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faTachometerAlt,
   faTrash,
   faEdit,
   faPlus,
@@ -11,6 +12,7 @@ import {
   faClipboardList,
   faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
+import Swal from 'sweetalert2'; 
 
 export default function DataTable() {
   const [tables, setTables] = useState([]);
@@ -33,20 +35,42 @@ export default function DataTable() {
   }, []);
 
   const hdlDelete = async (e, table_id) => {
+    e.preventDefault();
+
+    const result = await Swal.fire({
+      title: 'คุณต้องการลบข้อมูลหรือไม่?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d', 
+      confirmButtonText: 'ลบ',
+      cancelButtonText: 'ยกเลิก'
+    });
+
+    if (result.isConfirmed) {
     try {
-      e.stopPropagation();
       const token = localStorage.getItem("token");
-      const rs = await axios.delete(
-        `http://localhost:8889/admin/deleteTable/${table_id}`,
-        {
+     await axios.delete(
+        `http://localhost:8889/admin/deleteTable/${table_id}`, {
           headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      alert("คุณได้ลบข้อมูลโต๊ะเรียบร้อยแล้ว"); // Show alert after successful deletion
-      location.reload();
-      setTrigger((prv) => !prv);
-    } catch (err) {
-      console.log(err);
+        });
+
+      setTables(tables.filter((table) => table.table_id !== table_id));
+
+        Swal.fire({
+          icon: 'success',
+          title: 'ลบข้อมูลเรียบร้อย',
+          confirmButtonColor: '#3996fa',
+        });
+      } catch (err) {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาดในการลบข้อมูล',
+          text: err.message,
+          confirmButtonColor: '#3996fa',
+        });
+      }
     }
   };
 
@@ -94,6 +118,8 @@ export default function DataTable() {
       setCurrentPage(currentPage - 1);
     }
   };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <div>
@@ -150,7 +176,7 @@ export default function DataTable() {
                 </Link>
               </div>
             </div>
-            {/* {JSON.stringify(tables)} */}
+
             {filteredTables.length > 0 ? (
               <table className="table mt-2">
                 <thead>
@@ -215,37 +241,10 @@ export default function DataTable() {
 
                           <button
                             className="btn btn-error text-white text-xs font-normal rounded-xl shadow-xl"
-                            onClick={() =>
-                              document.getElementById("my_modal_1").showModal()
-                            }
+                            onClick={(e) => hdlDelete(e, tables.table_id)} 
                           >
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
-                          <dialog id="my_modal_1" className="modal">
-                            <div className="modal-box">
-                              <h3 className="font-bold text-lg">
-                                คุณต้องการลบข้อมูลหรือไม่?
-                              </h3>
-                              <div className="modal-action">
-                                <button
-                                  className="btn"
-                                  onClick={() =>
-                                    document
-                                      .getElementById("my_modal_1")
-                                      .close()
-                                  }
-                                >
-                                  ยกเลิก
-                                </button>
-                                <button
-                                  className="btn btn-error text-white"
-                                  onClick={(e) => hdlDelete(e, tables.table_id)}
-                                >
-                                  ลบ
-                                </button>
-                              </div>
-                            </div>
-                          </dialog>
                         </div>
                       </td>
                     </tr>
@@ -300,8 +299,6 @@ export default function DataTable() {
                 </button>
               )
             )}
-
-            {/* Next page button */}
             <button
               className={`${
                 currentPage === Math.ceil(filteredTables.length / perPage)
@@ -325,29 +322,41 @@ export default function DataTable() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-            <li>
-              <Link to="/DataUser">
-                <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataType">
-                <FontAwesomeIcon icon={faTable} className="mr-2" />
-                ข้อมูลประเภทโต๊ะ
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataTable">
-                <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
-                ข้อมูลโต๊ะ
-              </Link>
-            </li>
-            <li>
-              <Link to="/DataBooking">
-                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
-                ข้อมูลการจอง
-              </Link>
-            </li>
+          <li>
+            <Link to="/Dashboard"
+             className={`flex items-center p-2 rounded-lg ${isActive("/Dashboard") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}
+            >
+              <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
+              แดชบอร์ด
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataUser"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataUser") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataType"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataType") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faTable} className="mr-2" />
+              ข้อมูลประเภทโต๊ะ
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataTable"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataTable") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
+              ข้อมูลโต๊ะ
+            </Link>
+          </li>
+          <li>
+            <Link to="/DataBooking"
+            className={`flex items-center p-2 rounded-lg ${isActive("/DataBooking") ? "bg-black text-white font-bold" : "bg-opacity-55 text-black"}`}>
+              <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+              ข้อมูลการจอง
+            </Link>
+          </li>
           </ul>
         </div>
       </div>

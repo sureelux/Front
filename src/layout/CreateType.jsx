@@ -31,20 +31,6 @@ export default function CreateType() {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const checkRes = await axios.get(`http://localhost:8889/admin/types/check?type=${types.type}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (checkRes.data.exists) {
-        Swal.fire({
-          icon: 'error',
-          title: 'ชื่อประเภทมีอยู่แล้ว',
-          text: 'กรุณาเลือกชื่อประเภทอื่น',
-        });
-        setLoading(false);
-        return;
-      }
-
       await axios.post("http://localhost:8889/admin/types", types, {
         headers: { Authorization: `Bearer ${token}` },
       });

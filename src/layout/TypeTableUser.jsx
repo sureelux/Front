@@ -13,9 +13,9 @@ export default function Tables() {
   const TypeTable = decodeURIComponent(location.pathname.split("/")[2]);
   // console.log(TypeTable)
 
+  const token = localStorage.getItem("token");
   const getTables = async () => {
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(`http://localhost:8889/admin/tables`,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -30,7 +30,6 @@ export default function Tables() {
 
   const getTypes = async () => {
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(`http://localhost:8889/admin/types`,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -45,7 +44,6 @@ export default function Tables() {
 
   const getTypeTable = async (type) => {
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.get(
         `http://localhost:8889/user/TypeTableUser?type=${TypeTable}`,
         {
@@ -58,10 +56,30 @@ export default function Tables() {
       console.error("Error fetching types:", error);
     }
   };
+
+  const getTypeHome = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8889/getType?type=${TypeTable}`);
+      setTypeTable(response.data.dTpye);
+      setNameType(response.data.type);
+    } catch (error) {
+      console.error("Error fetching types:", error);
+    }
+  };
+
   useEffect(() => {
+    if(token !== null)
+      {
+    getTables();
+    getTypes();
     getTypeTable();
-    console.log(typetable);
+      }
+      else{
+        getTypeHome();
+
+      }
   }, [TypeTable]);
+
 
   const hdlBooking = (id) => {
     user?.user_id ? navigate(`/BookingTable/${id}`) : navigate("/login");

@@ -31,8 +31,8 @@ export default function HeaderAdmin() {
     navigate("/");
   };
 
-  const hdlData = () => {
-    navigate("/Data");
+  const hdlDashboard = () => {
+    navigate("/Dashboard");
   };
 
   const hdlAdminHome = () => {
@@ -78,7 +78,7 @@ export default function HeaderAdmin() {
                   <a onClick={hdlAdminHome}>หน้าหลัก</a>
                 </li>
                 <li>
-                  <a onClick={hdlData}>แดชบอร์ด</a>
+                  <a onClick={hdlDashboard}>แดชบอร์ด</a>
                 </li>
               </ul>
             </div>
@@ -95,7 +95,7 @@ export default function HeaderAdmin() {
                 <a onClick={hdlAdminHome}>หน้าหลัก</a>
               </li>
               <li>
-                <a onClick={hdlData}>แดชบอร์ด</a>
+                <a onClick={hdlDashboard}>ข้อมูล</a>
               </li>
             </ul>
           </div>
@@ -111,7 +111,7 @@ export default function HeaderAdmin() {
             <div className="w-10 rounded-full">
               <img
                 alt="Tailwind CSS Navbar component"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
               />
             </div>
           </div>

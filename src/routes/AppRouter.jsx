@@ -5,7 +5,7 @@ import RegisterForm from "../layout/RegisterForm";
 import Header from "../layout/Header";
 import UserHome from "../layout/UserHome";
 import HeaderAdmin from "../layout/HeaderAdmin";
-import Data from "../layout/Data";
+import Dashboard from "../layout/Dashboard";
 import Tables from "../layout/Tables";
 import AdminHome from "../layout/AdminHome";
 import DataUser from "../layout/DataUser";
@@ -85,7 +85,7 @@ const adminRouter = createBrowserRouter([
 
     children: [
       { index: true, element: <AdminHome /> },
-      { path: "/Data", element: <Data /> },
+      { path: "/Dashboard", element: <Dashboard /> },
       { path: "/AdminHome", element: <AdminHome /> },
       { path: "/DataUser", element: <DataUser /> },
       { path: "/DataType", element: <DataType /> },
