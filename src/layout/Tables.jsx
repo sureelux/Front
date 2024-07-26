@@ -150,8 +150,8 @@ console.log(token)
                   <figure className="px-10 pt-10 hover:scale-110 transition duration-300 ease-in-out">
                     <img src={item.table_img} alt="" />
                   </figure>
-                  <div className="flex flex-col gap-4 mt-3">
-                    <h3 className="text-xl font-bold">{item.table_name}</h3>
+                  <div className="flex flex-col gap-4 mt-2">
+                    <h3 className="text-3xl font-bold">{item.table_name}</h3>
                     <p className="product-price font-bold text-2xl">
                       ราคา :{" "}
                       <label className="text-red-600 text-xl font-bold ">

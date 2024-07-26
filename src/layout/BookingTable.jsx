@@ -82,9 +82,9 @@ export default function BookingTable() {
           {bookingtable && (
             <div
               key={bookingtable.table_id}
-              className="card-body text-center grid grid-cols-2 gap-4 items-start"
+              className="card-body text-center grid grid-cols-2 gap-14 gap-y-14 items-start"
             >
-              <div className="w-full flex justify-center">
+              <div className="w-full flex justify-center shadow-xl">
                 <figure className="w-full">
                   <img
                     src={bookingtable.table_img}
@@ -95,7 +95,7 @@ export default function BookingTable() {
 
               <div className="w-full pl-10">
                 <div className="mb-4 text-left">
-                  <label className="text-3xl font-bold">
+                  <label className="text-4xl font-bold">
                     ชื่อโต๊ะ : <a className="font-normal">{bookingtable.table_name}</a>
                   </label>
                 </div>

@@ -135,9 +135,14 @@ export default function Dashboard() {
       return acc;
     }, {});
 
+    // Calculate average bookings per day
+    const totalDays = Object.keys(counts).length;
+    const totalBookingsCount = Object.values(counts).reduce((sum, count) => sum + count, 0);
+    const averageBookingsPerDay = totalDays > 0 ? totalBookingsCount / totalDays : 0;
+
     return {
       labels: Object.keys(counts),
-      data: Object.values(counts),
+      data: Object.keys(counts).map(date => averageBookingsPerDay),
     };
   };
 
@@ -147,7 +152,7 @@ export default function Dashboard() {
     labels: labels,
     datasets: [
       {
-        label: "จำนวนการจองที่ได้รับการอนุมัติต่อวัน",
+        label: "ค่าเฉลี่ยการจองต่อวัน",
         data: data,
         fill: false,
         backgroundColor: "rgba(75, 192, 192, 0.2)",
@@ -173,7 +178,7 @@ export default function Dashboard() {
       y: {
         title: {
           display: true,
-          text: "จำนวนการจอง",
+          text: "ค่าเฉลี่ยการจอง",
         },
       },
     },
@@ -281,7 +286,7 @@ export default function Dashboard() {
 
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-              กราฟวันที่มีการจองโต๊ะมากที่สุด
+              กราฟค่าเฉลี่ยการจองต่อวัน
             </h2>
             <Line data={chartData} options={chartOptions} />
           </div>

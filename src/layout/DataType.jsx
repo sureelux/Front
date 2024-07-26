@@ -99,6 +99,7 @@ export default function DataType() {
         Swal.fire({
           icon: "success",
           title: "ลบข้อมูลเรียบร้อย",
+          confirmButtonText: "ตกลง",
           confirmButtonColor: "#3996fa",
         });
       } catch (err) {
@@ -159,7 +160,8 @@ export default function DataType() {
             icon: "success",
             title: "สำเร็จ!",
             text: "คุณทำการแก้ไขข้อมูลเรียบร้อย",
-            confirmButtonColor: "#3996fa",
+            showConfirmButton: false,
+            timer: 1500,
           });
         } else {
           throw new Error("ไม่สามารถอัปเดตข้อมูลได้");
@@ -194,12 +196,18 @@ export default function DataType() {
               รายละเอียดข้อมูลประเภทโต๊ะ
             </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
-            <div className="flex flex-col items-center max-w-md mx-auto mr-28">
-              <form className="w-full">
+            <div className="flex justify-end items-end mb-2">
+              <div className="flex items-center mr-5">
+                <label
+                  htmlFor="default-search"
+                  className="text-sm font-bold text-gray-700 dark:text-gray-300 mr-2"
+                >
+                  ค้นหา
+                </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                     <svg
-                      className="w-4 h-4 text-gray-400"
+                      className="w-4 h-4 text-gray-400 dark:text-gray-400"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -217,14 +225,16 @@ export default function DataType() {
                   <input
                     type="text"
                     id="default-search"
-                    className="block w-96 p-2 pl-10 text-sm border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block p-2 pl-10 text-sm w-80 border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="ค้นหา"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-              </form>
-              <div className="mt-2 ml-96">
+              </div>
+            </div>
+            <div className="flex justify-end mr-8">
+              <div className="mt-1">
                 <Link
                   className="btn btn-success text-white font-normal rounded-xl shadow-xl flex items-center"
                   to="/CreateType"
@@ -288,7 +298,7 @@ export default function DataType() {
             {filteredTypes.length > perPage && (
               <div className="mt-2 flex items-center justify-center space-x-4">
                 <button
-                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300"
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
                   onClick={prevPage}
                   disabled={currentPage === 1}
                 >
@@ -299,7 +309,7 @@ export default function DataType() {
                   {Math.ceil(filteredTypes.length / perPage)}
                 </span>
                 <button
-                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300"
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
                   onClick={nextPage}
                   disabled={
                     currentPage === Math.ceil(filteredTypes.length / perPage)

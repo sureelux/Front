@@ -18,7 +18,7 @@ export default function DataTable() {
   const [tables, setTables] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(4); 
+  const [perPage] = useState(4);
 
   const token = localStorage.getItem("token");
 
@@ -60,6 +60,7 @@ export default function DataTable() {
         Swal.fire({
           icon: "success",
           title: "ลบข้อมูลเรียบร้อย",
+          confirmButtonText: "ตกลง",
           confirmButtonColor: "#3996fa",
         });
       } catch (err) {
@@ -73,6 +74,149 @@ export default function DataTable() {
       }
     }
   };
+
+  const handleEditClick = async (table) => {
+    try {
+      const tableTypesResponse = await axios.get(
+        "http://localhost:8889/admin/types",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const tableTypes = Array.isArray(tableTypesResponse.data.types)
+        ? tableTypesResponse.data.types
+        : [];
+      console.log("tableTypes:", tableTypes);
+
+      const { value: formValues } = await Swal.fire({
+        title: "แก้ไขข้อมูลโต๊ะ",
+        html: `
+        <div class="space-y-4 mb-4">
+            <div class="flex items-center space-x-4">
+                <label for="table_img" class="flex-shrink-0 w-20 text-gray-700 font-medium">ภาพ</label>
+                <input id="table_img" class="swal2-input border border-gray-300 rounded-md p-2 flex-grow text-lg" type="text" value="${
+                  table.table_img
+                }" />
+            </div>
+            <div class="flex items-center space-x-4">
+                <label for="table_name" class="flex-shrink-0 w-20 text-gray-700 font-medium">ชื่อโต๊ะ</label>
+                <input id="table_name" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="text" value="${
+                  table.table_name
+                }" />
+            </div>
+            <div class="flex items-center space-x-4">
+                <label for="table_status" class="flex-shrink-0 w-20 text-gray-700 font-medium">สถานะ</label>
+                <input id="table_status" 
+                       class="border border-gray-300 rounded-md p-2 flex-grow text-lg cursor-not-allowed" 
+                       type="text" 
+                       value="${
+                         table.table_status === "FREE" ? "ว่าง" : "ไม่ว่าง"
+                       }" 
+                       readonly 
+                       style="color: ${
+                         table.table_status === "FREE" ? "green" : "red"
+                       };"
+                       />
+            </div>
+            <div class="flex items-center space-x-4">
+                <label for="table_price" class="flex-shrink-0 w-20 text-gray-700 font-medium">ราคา</label>
+                <input id="table_price" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="number" value="${
+                  table.table_price
+                }" />
+            </div>
+            <div class="flex items-center space-x-4">
+                <label for="type_id" class="flex-shrink-0 w-32 text-gray-700 font-medium">ประเภทโต๊ะ</label>
+                <select id="type_id" class="border border-gray-300 rounded-md p-2 flex-grow text-lg">
+                    ${tableTypes
+                      .map(
+                        (type) => `
+                        <option value="${type.type_id}" ${
+                          type.type_id == table.type_table?.type_id
+                            ? "selected"
+                            : ""
+                        }>
+                            ${type.type_name}
+                        </option>`
+                      )
+                      .join("")}
+                </select>
+            </div>
+        </div>
+        `,
+        focusConfirm: false,
+        didOpen: () => {
+          const tableStatusInput =
+            Swal.getPopup().querySelector("#table_status");
+          tableStatusInput.addEventListener("click", showStatusAlert);
+        },
+        preConfirm: () => {
+          return {
+            table_img: document.getElementById("table_img").value,
+            table_name: document.getElementById("table_name").value,
+            table_status: table.table_status,
+            table_price: document.getElementById("table_price").value,
+            type_id: document.getElementById("type_id").value,
+          };
+        },
+        confirmButtonText: "บันทึก",
+        cancelButtonText: "ยกเลิก",
+        showCancelButton: true,
+        cancelButtonColor: "#eb3b4c",
+        confirmButtonColor: "#27ba48",
+        customClass: {
+          confirmButton: "rounded-xl shadow-2xl",
+          cancelButton: "rounded-xl shadow-2xl",
+        },
+      });
+
+      if (formValues) {
+        await axios.patch(
+          `http://localhost:8889/admin/updateTable/${table.table_id}`,
+          {
+            table_img: formValues.table_img,
+            table_name: formValues.table_name,
+            table_status: table.table_status,
+            table_price: parseInt(formValues.table_price, 10),
+            type_id: formValues.type_id,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: "ข้อมูลถูกแก้ไขเรียบร้อย",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+
+        const rs = await axios.get(`http://localhost:8889/user/tables`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTables(rs.data.tables);
+      }
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการแก้ไขข้อมูล", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถแก้ไขข้อมูลได้",
+      });
+    }
+  };
+
+  function showStatusAlert() {
+    Swal.fire({
+      icon: "info",
+      title: "สถานะ",
+      text: "ไม่สามารถแก้ไขสถานะได้",
+      confirmButtonText: "ตกลง",
+      confirmButtonColor: "#3996fa",
+    });
+  }
 
   function FormatDate(dateString) {
     const options = {
@@ -137,8 +281,14 @@ export default function DataTable() {
               รายละเอียดข้อมูลโต๊ะ
             </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
-            <div className="flex flex-col items-center max-w-md mx-auto mr-28">
-              <form className="w-full">
+            <div className="flex justify-end items-end mb-2">
+              <div className="flex items-center mr-5">
+                <label
+                  htmlFor="default-search"
+                  className="text-sm font-bold text-gray-700 dark:text-gray-300 mr-2"
+                >
+                  ค้นหา
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                     <svg
@@ -150,9 +300,9 @@ export default function DataTable() {
                     >
                       <path
                         stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
                         d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
                       />
                     </svg>
@@ -160,19 +310,21 @@ export default function DataTable() {
                   <input
                     type="text"
                     id="default-search"
-                    className="block w-96 p-2 ps-10 text-sm text- border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block p-2 pl-10 text-sm w-80 border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="ค้นหา"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-              </form>
-              <div className="mt-1 ml-96">
+              </div>
+            </div>
+            <div className="flex justify-end mr-8">
+              <div className="mt-1">
                 <Link
                   className="btn btn-success drawer-button text-white font-normal rounded-xl shadow-xl"
                   to="/CreateTable"
                 >
-                  <FontAwesomeIcon icon={faPlus} className="" />
+                  <FontAwesomeIcon icon={faPlus} />
                 </Link>
               </div>
             </div>
@@ -230,11 +382,7 @@ export default function DataTable() {
                           <button
                             className="btn btn-warning text-black text-xs font-normal rounded-xl shadow-xl"
                             style={{ marginRight: "20px" }}
-                            onClick={() =>
-                              document
-                                .getElementById(`my_modal_${tables.table_id}`)
-                                .showModal()
-                            }
+                            onClick={() => handleEditClick(tables)}
                           >
                             <FontAwesomeIcon icon={faEdit}></FontAwesomeIcon>
                           </button>
@@ -274,18 +422,18 @@ export default function DataTable() {
             {filteredTables.length > perPage && (
               <div className="mt-2 flex items-center justify-center space-x-4">
                 <button
-                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300"
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
                   onClick={prevPage}
                   disabled={currentPage === 1}
                 >
                   ก่อนหน้า
                 </button>
                 <span className="text-sm text-gray-900">
-                  หน้า {currentPage} จาก {" "}
+                  หน้า {currentPage} จาก{" "}
                   {Math.ceil(filteredTables.length / perPage)}
                 </span>
                 <button
-                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300"
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
                   onClick={nextPage}
                   disabled={
                     currentPage === Math.ceil(filteredTables.length / perPage)
@@ -372,212 +520,6 @@ export default function DataTable() {
           </ul>
         </div>
       </div>
-      {tables.map((table, index) => (
-        <Modal key={index} table={table} />
-      ))}
     </div>
   );
 }
-const Modal = ({ table }) => {
-  const modalId = `my_modal_${table.table_id}`;
-  const [editData, setEditData] = useState({
-    table_img: "",
-    table_name: "",
-    table_status: "",
-    table_price: "",
-    type_id: "", // เปลี่ยนเป็น type_id แทน type_name
-  });
-  const [isEditing, setEditing] = useState(false);
-  const [tableTypes, setTableTypes] = useState([]); // เก็บประเภทโต๊ะ
-
-  useEffect(() => {
-    // ดึงข้อมูลประเภทโต๊ะ
-    const fetchTableTypes = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8889/admin/types`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setTableTypes(response.data.types || []); 
-      } catch (error) {
-        console.error("Error fetching table types", error);
-      }
-    };
-
-    fetchTableTypes();
-  }, []);
-
-  useEffect(() => {
-    // ตั้งค่าข้อมูลแก้ไข
-    setEditData({
-      table_img: table.table_img,
-      table_name: table.table_name,
-      table_status: table.table_status,
-      table_price: table.table_price,
-      type_id: table.type_table?.type_id || "", // ใช้ type_id แทน type_name
-    });
-  }, [table]);
-
-  const handleEditClick = () => {
-    setEditData({
-      table_img: table.table_img,
-      table_name: table.table_name,
-      table_status: table.table_status,
-      table_price: table.table_price,
-      type_id: table.type_table?.type_id || "", // ใช้ type_id แทน type_name
-    });
-    setEditing(true);
-  };
-
-  const handleSaveClick = async (e) => {
-    e.stopPropagation();
-    try {
-      const table_id = table.table_id;
-
-      const apiUrl = `http://localhost:8889/admin/updateTable/${table_id}`;
-      const token = localStorage.getItem("token");
-
-      await axios.patch(apiUrl, {
-        ...editData,
-        type_id: editData.type_id, // ส่ง type_id ไปที่เซิร์ฟเวอร์
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      alert("คุณทำการแก้ไขข้อมูลเรียบร้อย");
-      location.reload();
-      document.getElementById(modalId).close();
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการแก้ไขข้อมูล", error);
-    }
-  };
-
-  const handleChange = (e) => {
-    setEditData((prevData) => ({
-      ...prevData,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  return (
-    <dialog id={modalId} className="modal">
-      <div className="modal-box p-10">
-        <h3 className="font-bold text-2xl mb-5">แก้ไขข้อมูลโต๊ะ</h3>
-        <h3 className="text-lg mb-5 font-bold">
-          ภาพ :{" "}
-          {isEditing ? (
-            <input
-              className="border border-gray-400 pl-3 pr-3 py-1 rounded-lg font-normal shadow-sm w-80 ml-7"
-              type="text"
-              name="table_img"
-              value={editData.table_img}
-              onChange={handleChange}
-            />
-          ) : (
-            table.table_img
-          )}
-        </h3>
-        <h3 className="text-lg mb-5 font-bold">
-          ชื่อโต๊ะ :{" "}
-          {isEditing ? (
-            <input
-              className="border border-gray-400 pl-3 pr-3 py-1 rounded-lg font-normal shadow-sm w-80 ml-2"
-              type="text"
-              name="table_name"
-              value={editData.table_name}
-              onChange={handleChange}
-            />
-          ) : (
-            table.table_name
-          )}
-        </h3>
-        <h3 className="text-lg mb-5 font-bold">
-          สถานะ :{" "}
-          {isEditing ? (
-            <input
-              className="border border-gray-400 pl-3 pr-3 py-1 rounded-lg font-normal shadow-sm w-80 ml-1"
-              type="text"
-              name="table_status"
-              value={editData.table_status}
-              onChange={handleChange}
-            />
-          ) : (
-            table.table_status
-          )}
-        </h3>
-        <h3 className="text-lg mb-5 font-bold">
-          ราคา :{" "}
-          {isEditing ? (
-            <input
-              className="border border-gray-400 pl-3 pr-3 py-1 rounded-lg font-normal shadow-sm w-80 ml-5"
-              type="text"
-              name="table_price"
-              value={editData.table_price}
-              onChange={handleChange}
-            />
-          ) : (
-            table.table_price
-          )}
-        </h3>
-        <h3 className="text-lg mb-5 font-bold">
-          ประเภทโต๊ะ :{" "}
-          {isEditing ? (
-            <select
-              className="border border-gray-400 pl-3 pr-3 py-1 rounded-lg font-normal shadow-sm w-80 ml-1"
-              name="type_id"
-              value={editData.type_id}
-              onChange={handleChange}
-            >
-              {tableTypes.map((type) => (
-                <option key={type.type_id} value={type.type_id}>
-                  {type.type_name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            table.type_table?.type_name || ""
-          )}
-        </h3>
-
-        <div className="flex justify-end mt-5">
-          {isEditing ? (
-            <div className="space-x-4">
-              <button
-                className="btn btn-accent text-white font-normal rounded-3xl"
-                onClick={handleSaveClick}
-              >
-                บันทึก
-              </button>
-              <button
-                className="btn btn-error rounded-3xl text-white font-normal"
-                onClick={() => document.getElementById(modalId).close()}
-              >
-                ยกเลิก
-              </button>
-            </div>
-          ) : (
-            <div className="space-x-4">
-              <button
-                className="btn btn-warning rounded-3xl text-white font-normal"
-                onClick={handleEditClick}
-              >
-                แก้ไข
-              </button>
-              <button
-                className="btn btn-error rounded-3xl text-white font-normal"
-                onClick={() => document.getElementById(modalId).close()}
-              >
-                ยกเลิก
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-      <form method="dialog" className="modal-backdrop">
-        <button onClick={() => document.getElementById(modalId).close()}>
-          Close
-        </button>
-      </form>
-    </dialog>
-  );
-};
-
