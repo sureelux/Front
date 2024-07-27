@@ -75,10 +75,10 @@ export default function BookingTable() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-1 bg-sky-200">
       <form className="flex flex-col border-2 border-black rounded w-4/6 mx-auto p-10 gap-7 mt-20 shadow-2xl bg-white">
-        <div className="divider divider-info text-3xl mt-5 font-bold">
+        <div className="divider divider-info text-4xl mt-5 font-bold">
           เลือกเวลาจองโต๊ะ
         </div>
-        <div className="gap-3">
+        <div className="gap-8">
           {bookingtable && (
             <div
               key={bookingtable.table_id}
@@ -93,19 +93,19 @@ export default function BookingTable() {
                 </figure>
               </div>
 
-              <div className="w-full pl-10">
+              <div className="w-full pl-5 space-y-9">
                 <div className="mb-4 text-left">
-                  <label className="text-4xl font-bold">
+                  <label className="text-5xl font-bold">
                     ชื่อโต๊ะ : <a className="font-normal">{bookingtable.table_name}</a>
                   </label>
                 </div>
                 <div className="mb-4 text-left">
-                  <label className="text-xl font-bold">
+                  <label className="text-2xl font-bold">
                     ประเภท : <a className="font-normal">{bookingtable.type_table?.type_name}</a>
                   </label>
                 </div>
                 <div className="mb-4 text-left">
-                  <label className="product-price font-bold text-xl">
+                  <label className="product-price font-bold text-2xl">
                     ราคา{" "}
                     <a className="text-red-600 text-2xl font-normal">
                       {bookingtable.table_price}
@@ -116,12 +116,12 @@ export default function BookingTable() {
                 <div className="mt-5">
                   <label className="form-control w-full max-w-[300px]">
                     <div className="label">
-                      <span className="label-text-alt text-base font-bold">
+                      <span className="label-text-alt font-bold text-xl">
                         เลือกวันที่/เวลาการจอง
                       </span>
                     </div>
                     <input
-                      className="text-white bg-gray-400 hover:bg-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
+                      className="text-black hover:text-white bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
                       type="datetime-local"
                       name="booking_datatime"
                       value={input.booking_datatime}
@@ -136,7 +136,7 @@ export default function BookingTable() {
 
         <div className="flex justify-end ">
           <p
-            className="text-white bg-gradient-to-l bg-green-500 from-green-300 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-3xl text-sm px-20 py-4 text-center me-2 mb-1"
+            className="text-white bg-gradient-to-l bg-green-500 from-green-00 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-3xl text-sm px-20 py-4 text-center me-2 mb-1"
             onClick={hdlSubmit}
           >
             <FontAwesomeIcon icon={faBook} className="mr-2" />
