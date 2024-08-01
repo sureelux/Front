@@ -42,7 +42,7 @@ export default function updateProfile() {
       const output = { ...input };
       const token = localStorage.getItem("token");
       const rs = await axios.put(
-        `http://localhost:8889/auth/${user.user_id}`,
+        `http://localhost:8889/user/${user.user_id}`,
         output,
         {
           headers: { Authorization: `Bearer ${token}` },

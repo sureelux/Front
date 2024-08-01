@@ -1,9 +1,11 @@
+import React from "react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import userAuth from "../hooks/userAuth";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import moment from "moment";
 
 export default function BookingUser() {
   const { user } = userAuth();
@@ -31,39 +33,47 @@ export default function BookingUser() {
 
   const showBookingDetails = (booking) => {
     MySwal.fire({
-      title: "รายละเอียดการจอง",
+      title: "รายละเอียดประวัติการจอง",
       html: (
-        <div className="bg-white p-6 rounded-lg shadow-lg text-left space-y-4 border border-gray-200">
-          <p className="text-lg font-semibold text-gray-800">
-            <span className="font-bold">รหัสการจอง : </span>{" "}
-            <span className="font-normal">{booking.booking_id}</span>
+        <div className="bg-white p-6 rounded-lg shadow-lg text-left space-y-7 border border-gray-300">
+          <p className="text-lg font-medium text-gray-800">
+            <span className="font-bold text-gray-700">รหัสการจอง:</span>{" "}
+            <span className="font-normal text-3xl">{booking.booking_id}</span>
           </p>
+          <figure className="text-lg text-gray-800 justify-center items-center ">
+            <span className="font-bold text-gray-700"></span>{" "}
+            <img
+              src={booking.table.table_img}
+              alt={`ภาพของโต๊ะ ${booking.table.table_name}`}
+              className="w-72 h-full object-cover mt-2 rounded-md border border-gray-300 shadow-xl"
+            />
+          </figure>
           <p className="text-lg text-gray-800">
-            <span className="font-bold">วันที่/เวลาจอง : </span>{" "}
+            <span className="font-bold text-gray-700">วันที่/เวลาจอง :</span>{" "}
             <span className="font-normal">
-              {new Date(booking.booking_datatime).toLocaleString("th-TH")}
+              {moment(booking.booking_datatime).format("DD/MM/YYYY HH:mm")}
             </span>
           </p>
           <p className="text-lg text-gray-800">
-            <span className="font-bold">ชื่อโต๊ะ : </span>{" "}
+            <span className="font-bold text-gray-700">ชื่อโต๊ะ :</span>{" "}
             <span className="font-normal">{booking.table.table_name}</span>
           </p>
-          <p className="text-lg font-semibold text-gray-800">
-            <span className="font-bold text-gray-800">ประเภทโต๊ะ : </span>{" "}
+          <p className="text-lg font-medium text-gray-800">
+            <span className="font-bold text-gray-700">ประเภทโต๊ะ:</span>{" "}
             <span className="font-normal">
               {booking.table.type_table.type_name}
             </span>
           </p>
           <p className="text-lg">
-            <span className="font-bold text-gray-800">สถานะ : </span>{" "}
+            <span className="font-bold text-gray-700">สถานะ:</span>{" "}
             <span
               className={`${
                 booking.status_booking === "APPROVE"
-                  ? "text-green-600"
+                  ? "text-green-700"
                   : booking.status_booking === "NOT_APPROVED"
-                  ? "text-red-600"
+                  ? "text-red-700"
                   : booking.status_booking === "WAIT"
-                  ? "text-yellow-600"
+                  ? "text-yellow-700"
                   : "text-gray-600"
               } font-medium`}
             >
@@ -79,10 +89,23 @@ export default function BookingUser() {
         </div>
       ),
       showCloseButton: true,
-      focusConfirm: false,
-      confirmButtonText: "ปิด",
     });
   };
+
+  const groupByDate = (bookings) => {
+    return bookings.reduce((acc, booking) => {
+      const date = moment(booking.booking_datatime).format("DD/MM/YYYY");
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(booking);
+      return acc;
+    }, {});
+  };
+
+  const groupedBookings = groupByDate(
+    DataBookinguser.filter((booking) => booking.userId === user.user_id)
+  );
 
   return (
     <div className="overflow-auto w-full h-screen p-10 bg-gradient-to-bl from-sky-300 to-white">
@@ -93,7 +116,7 @@ export default function BookingUser() {
       </div>
       <div className="container mx-auto py-5">
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200">
+          <table className="min-w-full bg-white border border-gray-200 ">
             <thead>
               <tr>
                 <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center">
@@ -114,55 +137,64 @@ export default function BookingUser() {
               </tr>
             </thead>
             <tbody>
-              {DataBookinguser &&
-                DataBookinguser.filter(
-                  (booking) => booking.userId === user.user_id
-                ).map((booking, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-gray-50 transition duration-300 ease-in-out"
-                  >
-                    <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
-                      {new Date(booking.booking_datatime).toLocaleString(
-                        "th-TH"
-                      )}
-                    </td>
-                    <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
-                      {booking.table.table_name}
-                    </td>
-                    <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
-                      {booking.table.type_table.type_name}
-                    </td>
+              {Object.keys(groupedBookings).map((date, idx) => (
+                <React.Fragment key={idx}>
+                  <tr>
                     <td
-                      className={`px-6 py-4 border-b border-gray-200 text-sm font-medium text-center ${
-                        booking.status_booking === "APPROVE"
-                          ? "text-green-500"
-                          : booking.status_booking === "NOT_APPROVED"
-                          ? "text-red-500"
-                          : booking.status_booking === "WAIT"
-                          ? "text-yellow-400"
-                          : ""
-                      }`}
+                      colSpan="5"
+                      className="px-5 py-1 border border-gray-200 text-lg font-bold  bg-gray-100"
                     >
-                      {booking.status_booking === "APPROVE"
-                        ? "อนุมัติ"
-                        : booking.status_booking === "NOT_APPROVED"
-                        ? "ไม่อนุมัติ"
-                        : booking.status_booking === "WAIT"
-                        ? "รออนุมัติ"
-                        : ""}
-                    </td>
-                    <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
-                      <button
-                        onClick={() => showBookingDetails(booking)}
-                        className="flex justify-center items-center bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 mx-auto"
-                      >
-                        <i className="fas fa-info-circle mr-2"></i>
-                        ดูรายละเอียด
-                      </button>
+                      {date}
                     </td>
                   </tr>
-                ))}
+                  {groupedBookings[date].map((booking, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 transition duration-300 ease-in-out"
+                    >
+                      <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
+                        {moment(booking.booking_datatime).format(
+                          "DD/MM/YYYY HH:mm"
+                        )}
+                      </td>
+                      <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
+                        {booking.table.table_name}
+                      </td>
+                      <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
+                        {booking.table.type_table.type_name}
+                      </td>
+                      <td
+                        className={`px-6 py-4 border-b border-gray-200 text-sm font-medium text-center ${
+                          booking.status_booking === "APPROVE"
+                            ? "text-green-500"
+                            : booking.status_booking === "NOT_APPROVED"
+                            ? "text-red-500"
+                            : booking.status_booking === "WAIT"
+                            ? "text-yellow-400"
+                            : ""
+                        }`}
+                      >
+                        {booking.status_booking === "APPROVE"
+                          ? "อนุมัติ"
+                          : booking.status_booking === "NOT_APPROVED"
+                          ? "ไม่อนุมัติ"
+                          : booking.status_booking === "WAIT"
+                          ? "รออนุมัติ"
+                          : ""}
+                      </td>
+                      <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
+                        <button
+                          onClick={() => showBookingDetails(booking)}
+                          className="flex justify-center items-center bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 mx-auto"
+                        >
+                          <i className="fas fa-info-circle mr-2"></i>
+                          ดูรายละเอียด
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
             </tbody>
           </table>
         </div>

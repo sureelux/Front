@@ -1,11 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import userAuth from "../hooks/userAuth";
-import Tables from "./Tables";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook } from "@fortawesome/free-solid-svg-icons";
-import moment from 'moment-timezone';
+import moment from 'moment';
 
 export default function BookingTable() {
   const navigate = useNavigate();
@@ -32,13 +31,12 @@ export default function BookingTable() {
           }
         );
         setBookingTable(response.data.tables);
-        // console.log(response.data)
       } catch (error) {
         console.error("Error fetching tables:", error);
       }
     };
     getBookingTable();
-  }, []);
+  }, [tableId]);
 
   const hdlChange = (e) => {
     setInput((prv) => ({ ...prv, [e.target.name]: e.target.value }));
@@ -60,7 +58,6 @@ export default function BookingTable() {
         } 
       );
       if (rs.status === 200) {
-        const id = rs.data.booking.booking_id;
         navigate("/Succeed");
       } else {
         alert("ไม่สามารถจองได้ ... ");
@@ -70,7 +67,11 @@ export default function BookingTable() {
       alert("เกิดข้อผิดพลาดในการจอง");
     }
   };
-  console.log(bookingtable)
+
+  // Convert datetime to dd/MM/yyyy format
+  const formatDate = (dateString) => {
+    return moment(dateString).format('DD/MM/YYYY HH:mm');
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-1 bg-sky-200">
