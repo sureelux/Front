@@ -120,9 +120,9 @@ export default function HeaderAdmin() {
             className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-40"
           >
             <li>
-              <a onClick={hdlProfileAdmin} >
+              <a onClick={hdlProfileAdmin}>
                 <svg
-                  class="w-3 h-3 text-gray-800 dark:text-black"
+                  className="w-3 h-3 text-gray-800 dark:text-black"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -136,7 +136,7 @@ export default function HeaderAdmin() {
             <li>
               <a onClick={hdlLogout}>
                 <svg
-                  class="w-3 h-3"
+                  className="w-3 h-3"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -144,9 +144,9 @@ export default function HeaderAdmin() {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M4 8h11m0 0-4-4m4 4-4 4m-5 3H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h3"
                   />
                 </svg>

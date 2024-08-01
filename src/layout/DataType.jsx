@@ -255,7 +255,7 @@ export default function DataType() {
                 <tbody className="font-medium text-black text-center">
                   {currentItems.map((type, index) => (
                     <tr key={type.type_id} className="hover:bg-gray-100">
-                      <td>{type.type_id}</td>
+                      <td>{index + 1}</td>{" "}
                       <td>{type.type_name}</td>
                       <td>
                         <div className="flex justify-center items-center">
@@ -378,6 +378,19 @@ export default function DataType() {
               >
                 <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
                 ข้อมูลโต๊ะ
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/DataBooing_Approval"
+                className={`flex items-center p-2 rounded-lg ${
+                  isActive("/DataBooking")
+                    ? "bg-black text-white font-bold"
+                    : "bg-opacity-55 text-black"
+                }`}
+              >
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+                ข้อมูลการจอง (รออนุมัติ)
               </Link>
             </li>
             <li>

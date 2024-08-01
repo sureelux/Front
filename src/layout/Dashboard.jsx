@@ -117,13 +117,12 @@ export default function Dashboard() {
 
   const isActive = (path) => location.pathname === path;
 
-  // Prepare data for the chart
   const processBookingData = () => {
     if (!Array.isArray(bookingData)) return { labels: [], data: [] };
 
     const approvedBookings = bookingData.filter(
       (booking) => booking.status === "approved"
-    ); // Filter for approved bookings
+    ); 
 
     const counts = approvedBookings.reduce((acc, booking) => {
       const date = booking.date;
@@ -135,7 +134,7 @@ export default function Dashboard() {
       return acc;
     }, {});
 
-    // Calculate average bookings per day
+  
     const totalDays = Object.keys(counts).length;
     const totalBookingsCount = Object.values(counts).reduce((sum, count) => sum + count, 0);
     const averageBookingsPerDay = totalDays > 0 ? totalBookingsCount / totalDays : 0;
@@ -351,6 +350,19 @@ export default function Dashboard() {
               ข้อมูลโต๊ะ
             </Link>
           </li>
+          <li>
+              <Link
+                to="/DataBooing_Approval"
+                className={`flex items-center p-2 rounded-lg ${
+                  isActive("/DataBooking")
+                    ? "bg-black text-white font-bold"
+                    : "bg-opacity-55 text-black"
+                }`}
+              >
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+                ข้อมูลการจอง (รออนุมัติ)
+              </Link>
+            </li>
           <li>
             <Link
               to="/DataBooking"

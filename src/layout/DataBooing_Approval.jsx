@@ -15,7 +15,7 @@ import Swal from "sweetalert2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-export default function DataBooking() {
+export default function DataBooing_Approval() {
   const [bookings, setBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,7 +83,7 @@ export default function DataBooking() {
     const searchTermLower = searchTerm.trim().toLowerCase();
     const thaiStatusMapping = {
       APPROVE: "อนุมัติ",
-      NOT_APPROVED: "ไม่อนุมัติ",
+      NOT_APPROVED: "ยกเลิก",
       WAIT: "รออนุมัติ",
     };
 
@@ -157,7 +157,7 @@ export default function DataBooking() {
           </label>
           <div className="overflow-auto w-full h-screen mt-15">
             <p className="mt-3 ml-2 text-3xl font-bold drop-shadow-[2px_2px_var(--tw-shadow-color)] shadow-gray-300">
-              รายละเอียดข้อมูลการจอง
+              รายละเอียดข้อมูลการจอง (รออนุมัติ)
             </p>
             <hr className="border my-3 ml-10 border-sky-400 dark:border-sky-300" />
 

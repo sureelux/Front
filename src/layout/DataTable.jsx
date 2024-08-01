@@ -349,7 +349,7 @@ export default function DataTable() {
                       tables={tables}
                       className="hover:bg-gray-100"
                     >
-                      <td>{tables.table_id}</td>
+                      <td>{index + 1}</td>{" "}
                       <td>
                         <figure className="hover:scale-110 transition duration-300 ease-in-out">
                           <img
@@ -502,6 +502,19 @@ export default function DataTable() {
               >
                 <FontAwesomeIcon icon={faClipboardList} className="mr-2" />
                 ข้อมูลโต๊ะ
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/DataBooing_Approval"
+                className={`flex items-center p-2 rounded-lg ${
+                  isActive("/DataBooking")
+                    ? "bg-black text-white font-bold"
+                    : "bg-opacity-55 text-black"
+                }`}
+              >
+                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
+                ข้อมูลการจอง (รออนุมัติ)
               </Link>
             </li>
             <li>

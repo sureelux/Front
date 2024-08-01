@@ -23,6 +23,7 @@ import DataBookingUser from "../layout/DataBookingUser";
 import Type_table from "../layout/TypeTableUser";
 import TypeTableUser from "../layout/TypeTableUser";
 import ProfileAdmin from "../layout/ProfileAdmin";
+import DataBooing_Approval from "../layout/DataBooing_approval";
 
 const guesRouter = createBrowserRouter([
   {
@@ -90,6 +91,7 @@ const adminRouter = createBrowserRouter([
       { path: "/DataUser", element: <DataUser /> },
       { path: "/DataType", element: <DataType /> },
       { path: "/DataTable", element: <DataTable /> },
+      { path: "/DataBooing_Approval", element: <DataBooing_Approval />},
       { path: "/DataBooking", element: <DataBooking /> },
       { path: "/CreateType", element: <CreateType /> },
       { path: "/CreateTable", element: <CreateTable /> },
