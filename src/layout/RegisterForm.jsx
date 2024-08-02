@@ -63,6 +63,7 @@ export default function RegisterForm() {
         Swal.fire({
           icon: "warning",
           title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonColor: '#3996fa',
         });
         return;
       }

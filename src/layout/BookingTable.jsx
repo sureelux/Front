@@ -4,28 +4,36 @@ import { useNavigate } from "react-router-dom";
 import userAuth from "../hooks/userAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook } from "@fortawesome/free-solid-svg-icons";
-import moment from 'moment';
+import { format } from "date-fns";
+import { th } from 'date-fns/locale';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { addDays, startOfToday } from 'date-fns';
+import Swal from 'sweetalert2';
 
 export default function BookingTable() {
   const navigate = useNavigate();
   const { user } = userAuth();
   const tableId = location.pathname.split("/")[2];
 
-  const [bookingtable, setBookingTable] = useState([]);
+  const toBuddhistEra = (year) => year + 543;
+  
+  const [bookingtable, setBookingTable] = useState({});
   const [input, setInput] = useState({
     booking_datatime: "",
     status_booking: "",
     user_id: +user.user_id,
     table_id: tableId,
   });
+  const [startDate, setStartDate] = useState(new Date());
+  const [time, setTime] = useState("");
 
   useEffect(() => {
     const getBookingTable = async () => {
       try {
-        const id = tableId;
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          `http://localhost:8889/user/tables/${id}`,
+          `http://localhost:8889/user/tables/${tableId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -38,39 +46,44 @@ export default function BookingTable() {
     getBookingTable();
   }, [tableId]);
 
-  const hdlChange = (e) => {
-    setInput((prv) => ({ ...prv, [e.target.name]: e.target.value }));
+  const hdlChangeTime = (e) => {
+    setTime(e.target.value);
+  };
+
+  const clearDate = () => {
+    setStartDate(new Date()); 
   };
 
   const hdlSubmit = async () => {
-    if (!input.booking_datatime) {
-      alert("กรุณาเลือกเวลาจองโต๊ะอาหาร");
+    if (!startDate || !time) {
+      Swal.fire("กรุณาเลือกวันที่และเวลาจองโต๊ะอาหาร");
       return;
     }
+
+    const bookingDateTime = `${format(startDate, "yyyy-MM-dd")} ${time}`;
 
     try {
       const token = localStorage.getItem("token");
       const rs = await axios.post(
         "http://localhost:8889/user/bookings",
-        input, 
+        { ...input, booking_datatime: bookingDateTime },
         {
           headers: { Authorization: `Bearer ${token}` },
-        } 
+        }
       );
       if (rs.status === 200) {
         navigate("/Succeed");
       } else {
-        alert("ไม่สามารถจองได้ ... ");
+        Swal.fire("ไม่สามารถจองได้ ... ");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("เกิดข้อผิดพลาดในการจอง");
+      Swal.fire("เกิดข้อผิดพลาดในการจอง");
     }
   };
 
-  // Convert datetime to dd/MM/yyyy format
-  const formatDate = (dateString) => {
-    return moment(dateString).format('DD/MM/YYYY HH:mm');
+  const formatDate = (date) => {
+    return format(date, "dd MMMM yyyy", { locale: th });
   };
 
   return (
@@ -97,12 +110,16 @@ export default function BookingTable() {
               <div className="w-full pl-5 space-y-9">
                 <div className="mb-4 text-left">
                   <label className="text-5xl font-bold">
-                    ชื่อโต๊ะ : <a className="font-normal">{bookingtable.table_name}</a>
+                    ชื่อโต๊ะ :{" "}
+                    <a className="font-normal">{bookingtable.table_name}</a>
                   </label>
                 </div>
                 <div className="mb-4 text-left">
                   <label className="text-2xl font-bold">
-                    ประเภท : <a className="font-normal">{bookingtable.type_table?.type_name}</a>
+                    ประเภท :{" "}
+                    <a className="font-normal">
+                      {bookingtable.type_table?.type_name}
+                    </a>
                   </label>
                 </div>
                 <div className="mb-4 text-left">
@@ -118,16 +135,43 @@ export default function BookingTable() {
                   <label className="form-control w-full max-w-[300px]">
                     <div className="label">
                       <span className="label-text-alt font-bold text-xl">
-                        เลือกวันที่/เวลาการจอง
+                        เลือกวันที่การจอง
+                      </span>
+                    </div>
+                    </label>
+                    <DatePicker
+                      selected={startDate}
+                      onChange={date => setStartDate(date)}
+                      dateFormat="dd/MM/yyyy"
+                      locale={th}
+                      className="text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-8 py-2.5 mb-1"
+                      placeholderText="วัน/เดือน/ปี"
+                      minDate={startOfToday()}
+                    />
+                  <button
+                    type="button"
+                    onClick={clearDate}
+                    className="mt-1 ml-4 text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
+                  >
+                    ล้างวันที่
+                  </button>
+                  
+                  <p className="mt-4">
+                    วันที่เลือกจอง : {formatDate(startDate)}
+                  </p>
+                  <label className="form-control w-full max-w-[300px] mt-5">
+                    <div className="label">
+                      <span className="label-text-alt font-bold text-xl">
+                        เลือกเวลาการจอง
                       </span>
                     </div>
                     <input
-                      className="text-black hover:text-white bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
-                      type="datetime-local"
-                      name="booking_datatime"
-                      value={input.booking_datatime}
-                      onChange={hdlChange}
+                      type="time"
+                      onChange={hdlChangeTime}
+                      value={time}
+                      required
                     />
+                    <p className="mt-5">เวลาที่เลือกจอง : {time}</p>
                   </label>
                 </div>
               </div>
@@ -136,13 +180,14 @@ export default function BookingTable() {
         </div>
 
         <div className="flex justify-end ">
-          <p
-            className="text-white bg-gradient-to-l bg-green-500 from-green-00 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-3xl text-sm px-20 py-4 text-center me-2 mb-1"
+          <button
+            type="button"
+            className="text-white bg-gradient-to-l bg-green-500 from-green-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-3xl text-sm px-20 py-4 text-center me-2 mb-1"
             onClick={hdlSubmit}
           >
             <FontAwesomeIcon icon={faBook} className="mr-2" />
             จอง
-          </p>
+          </button>
         </div>
       </form>
     </div>

@@ -10,6 +10,7 @@ import {
   faTable,
   faClipboardList,
   faCalendarCheck,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import DatePicker from "react-datepicker";
@@ -20,11 +21,8 @@ export default function DataBooking() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(7);
-  const [approvedCount, setApprovedCount] = useState(0);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [rejectedCount, setRejectedCount] = useState(0);
   const [selectedDate, setSelectedDate] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [availableDates, setAvailableDates] = useState([]);
 
   const location = useLocation();
   const token = localStorage.getItem("token");
@@ -61,6 +59,63 @@ export default function DataBooking() {
     }
   };
 
+  const handleStatusChange = async (e, booking_id, currentStatus) => {
+    e.stopPropagation();
+  
+    if (currentStatus !== "APPROVE") {
+      Swal.fire({
+        title: "ไม่สามารถยกเลิกการจองได้",
+        text: "การจองนี้ไม่อยู่ในสถานะที่สามารถยกเลิกได้",
+        icon: "info",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "ตกลง",
+      });
+      return;
+    }
+  
+    Swal.fire({
+      title: "คุณต้องการยกเลิกการจองไหม?",
+      text: "การยกเลิกจะทำให้สถานะการจองเป็น 'ยกเลิก'",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#02ab21",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.patch(
+            `http://localhost:8889/admin/updateStatusBooking/${booking_id}`,
+            { status_booking: "CANCEL" },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+  
+          if (response.status === 200) {
+            Swal.fire({
+              title: "ยกเลิกเรียบร้อย",
+              text: "สถานะการจองถูกเปลี่ยนเป็นยกเลิก",
+              icon: "success",
+              confirmButtonText: "ตกลง",
+              confirmButtonColor: "#3085d6",
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
+          }
+        } catch (err) {
+          console.error(
+            "Error updating booking status:",
+            err.response ? err.response.data : err.message
+          );
+          Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
+        }
+      }
+    });
+  };
+  
+
   function FormatDate(dateString) {
     const date = new Date(dateString);
     const formatter = new Intl.DateTimeFormat("th-TH", {
@@ -83,23 +138,19 @@ export default function DataBooking() {
     const searchTermLower = searchTerm.trim().toLowerCase();
     const thaiStatusMapping = {
       APPROVE: "อนุมัติ",
-      NOT_APPROVED: "ไม่อนุมัติ",
-      WAIT: "รออนุมัติ",
+      CANCEL: "ยกเลิก",
     };
 
     const formattedDateTime = new Date(booking.booking_datatime)
       .toLocaleString("th-TH")
       .toLowerCase();
 
-    const bookingDate = new Date(booking.booking_datatime);
-    const formattedBookingDate = formatISODateToThai(booking.booking_datatime);
-
-    const dateMatch = selectedDate
-      ? formatISODateToThai(selectedDate) === formattedBookingDate
-      : true;
+    const bookingDate = new Date(booking.booking_datatime)
+      .toISOString()
+      .split("T")[0]; // YYYY-MM-DD format
 
     return (
-      dateMatch &&
+      (selectedDate === "" || selectedDate === bookingDate) &&
       (booking.table.table_name.toLowerCase().includes(searchTermLower) ||
         booking.table.type_table.type_name
           .toLowerCase()
@@ -137,9 +188,7 @@ export default function DataBooking() {
 
   const counts = {
     approved: bookings.filter((b) => b.status_booking === "APPROVE").length,
-    pending: bookings.filter((b) => b.status_booking === "WAIT").length,
-    canceled: bookings.filter((b) => b.status_booking === "NOT_APPROVED")
-      .length,
+    canceled: bookings.filter((b) => b.status_booking === "CANCEL").length,
   };
 
   const isActive = (path) => location.pathname === path;
@@ -169,13 +218,19 @@ export default function DataBooking() {
                 >
                   เลือกวันที่
                 </label>
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="วัน/เดือน/ปี"
+                <select
+                  id="date-filter"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
                   className="block p-2 w-52 text-sm border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
+                >
+                  <option value="">ทั้งหมด</option>
+                  {availableDates.map((date) => (
+                    <option key={date} value={date}>
+                      {formatISODateToThai(date)}
+                    </option>
+                  ))}
+                </select>
                 <button
                   type="button"
                   className="px-4 py-2 text-sm font-medium text-gray-900 bg-gray-200 border border-gray-400 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-gray-300"
@@ -237,75 +292,66 @@ export default function DataBooking() {
                   </tr>
                 </thead>
                 <tbody className="font-medium text-black text-center">
-                  {currentItems.map((bookings, index) => (
-                    <tr
-                      key={bookings.booking_id}
-                      bookings={bookings}
-                      className="hover:bg-gray-100"
-                    >
-                      <td>{index + 1}</td>{" "}
-                      <td>
-                        {new Date(bookings.booking_datatime).toLocaleString(
-                          "th-TH"
-                        )}
-                      </td>
-                      <td>{bookings.table.table_name}</td>
-                      <td>{bookings.table.type_table.type_name}</td>
-                      <td>{bookings.table.table_price}</td>
-                      <td>{bookings.user.firstname}</td>
-                      <td
-                        className={
-                          bookings.status_booking === "APPROVE"
-                            ? "text-green-500"
-                            : bookings.status_booking === "NOT_APPROVED"
-                            ? "text-red-500 font-medium"
-                            : bookings.status_booking === "WAIT"
-                            ? "text-yellow-400 font-medium"
-                            : ""
-                        }
+                  {currentItems
+                    .filter(
+                      (booking) =>
+                        booking.status_booking === "APPROVE" ||
+                        booking.status_booking === "CANCEL"
+                    )
+                    .map((booking, index) => (
+                      <tr
+                        key={booking.booking_id}
+                        className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900"
                       >
-                        {bookings.status_booking === "APPROVE"
-                          ? "อนุมัติ"
-                          : bookings.status_booking === "NOT_APPROVED"
-                          ? "ไม่อนุมัติ"
-                          : bookings.status_booking === "WAIT"
-                          ? "รออนุมัติ"
-                          : ""}
-                      </td>
-                      <td>
-                        <button
-                          className={`${
-                            bookings.status_booking === "APPROVE"
-                              ? "btn btn-success text-xs rounded-2xl shadow-xl"
-                              : bookings.status_booking === "NOT_APPROVED"
-                              ? "btn btn-error text-xs rounded-2xl shadow-xl"
-                              : "btn btn-warning text-xs rounded-2xl shadow-xl"
-                          }`}
-                          onClick={() =>
-                            document
-                              .getElementById(`my_modal_${bookings.booking_id}`)
-                              .showModal()
-                          }
-                        >
-                          <svg
-                            className="w-4 h-4 text-white"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 20 20"
+                        <td className="py-4 px-6">
+                          {indexOfFirstItem + index + 1}
+                        </td>
+                        <td className="py-4 px-6">
+                          {formatISODateToThai(booking.booking_datatime)}
+                        </td>
+                        <td className="py-4 px-6">
+                          {booking.table.table_name}
+                        </td>
+                        <td className="py-4 px-6">
+                          {booking.table.type_table.type_name}
+                        </td>
+                        <td className="py-4 px-6">
+                          {booking.table.table_price}
+                        </td>
+                        <td className="py-4 px-6">{booking.user.firstname}</td>
+                        <td className="py-4 px-6">
+                          {booking.status_booking === "APPROVE" ? (
+                            <span className="text-green-600 font-bold">
+                              อนุมัติ
+                            </span>
+                          ) : booking.status_booking === "CANCEL" ? (
+                            <span className="text-red-600 font-bold">
+                              ยกเลิก
+                            </span>
+                          ) : null}
+                        </td>
+                        <td className="px-6 py-4 flex space-x-2 justify-center">
+                          <button
+                            onClick={(e) =>
+                              handleStatusChange(
+                                e,
+                                booking.booking_id,
+                                booking.status_booking
+                              )
+                            }
+                            className={`bg-red-600 hover:bg-red-700 text-white py-3 px-2 rounded-full  dark:text-red-500 dark:hover:text-red-700 text-xs ${
+                              booking.status_booking !== "APPROVE"
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }`}
+                            disabled={booking.status_booking !== "APPROVE"}
                           >
-                            <path
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M5 1v3m5-3v3m5-3v3M1 7h7m1.506 3.429 2.065 2.065M19 7h-2M2 3h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1Zm6 13H6v-2l5.227-5.292a1.46 1.46 0 0 1 2.065 2.065L8 16Z"
-                            />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                            <FontAwesomeIcon icon={faTimes} className="mr-2" />
+                            ยกเลิกการจอง
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             ) : (
@@ -352,10 +398,6 @@ export default function DataBooking() {
                 </button>
               </div>
             )}
-
-            {bookings.map((booking, index) => (
-              <Modal key={index} booking={booking} />
-            ))}
           </div>
         </div>
 
@@ -421,7 +463,7 @@ export default function DataBooking() {
               <Link
                 to="/DataBooing_Approval"
                 className={`flex items-center p-2 rounded-lg ${
-                  isActive("/DataBooking")
+                  isActive("/DataBooing_Approval")
                     ? "bg-black text-white font-bold"
                     : "bg-opacity-55 text-black"
                 }`}
@@ -449,123 +491,3 @@ export default function DataBooking() {
     </div>
   );
 }
-
-const Modal = ({ booking }) => {
-  const modalId = `my_modal_${booking.booking_id}`;
-  let token = localStorage.getItem("token");
-
-  const hdlModalAccept = async (modalId, tableId, bookingId) => {
-    try {
-      const data = { table_status: "BUSY" };
-      const data2 = { status_booking: "APPROVE" };
-      const rs = await axios.patch(
-        `http://localhost:8889/admin/updateStatus/${tableId}`,
-        data,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const rs2 = await axios.patch(
-        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
-        data2,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (rs2.status === 200 && rs.status === 200) {
-        alert("คุณได้ทำการอนุมัติเรียบร้อยแล้ว");
-        document.getElementById(modalId).close();
-        location.reload();
-      }
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-    }
-  };
-
-  const hdlModalCancel = async (modalId, tableId, bookingId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const data = { table_status: "FREE" };
-      const data2 = { status_booking: "NOT_APPROVED" };
-      const rs = await axios.patch(
-        `http://localhost:8889/admin/updateStatus/${tableId}`,
-        data,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const rs2 = await axios.patch(
-        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
-        data2,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (rs2.status === 200) {
-        alert("คุณได้ทำการไม่อนุมัติเรียบร้อยแล้ว");
-        document.getElementById(modalId).close();
-        location.reload();
-      }
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-    }
-  };
-
-  return (
-    <dialog id={modalId} className="modal">
-      <div className="modal-box">
-        <form method="dialog">
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 border bg-red-500 text-white">
-            ✕
-          </button>
-        </form>
-        <svg
-          className="mx-auto mb-4 text-gray-400 w-14 h-14 dark:text-red-200"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 20 20"
-        >
-          <path
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-          />
-        </svg>
-        <h3 className="font-bold text-xl text-center">
-          คุณต้องการอนุมัติการจองหรือไม่?
-        </h3>
-        <div className="mt-8 flex justify-center">
-          <button
-            className="btn btn-success text-white font-normal mr-5 rounded-xl"
-            onClick={() =>
-              hdlModalAccept(
-                modalId,
-                booking.table.table_id,
-                booking.booking_id
-              )
-            }
-          >
-            <FontAwesomeIcon icon={faCheck} className="mr-2" />
-            อนุมัติ
-          </button>
-          <button
-            className="btn btn-error text-white font-normal rounded-xl"
-            onClick={() =>
-              hdlModalCancel(
-                modalId,
-                booking.table.table_id,
-                booking.booking_id
-              )
-            }
-          >
-            <FontAwesomeIcon icon={faTimes} className="mr-2" />
-            ไม่อนุมัติ
-          </button>
-        </div>
-      </div>
-    </dialog>
-  );
-};

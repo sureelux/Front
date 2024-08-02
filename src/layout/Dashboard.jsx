@@ -21,8 +21,8 @@ import {
   Legend,
   TimeScale,
 } from "chart.js";
-import "chartjs-adapter-date-fns"; // Import date adapter for handling dates
-import { format } from "date-fns-tz"; // Import date-fns-tz for time zone handling
+import "chartjs-adapter-date-fns"; 
+import { format } from "date-fns-tz"; 
 
 ChartJS.register(
   CategoryScale,
