@@ -5,19 +5,23 @@ import userAuth from "../hooks/userAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
-import { th } from 'date-fns/locale';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { addDays, startOfToday } from 'date-fns';
-import Swal from 'sweetalert2';
+import { th } from "date-fns/locale";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { startOfToday } from "date-fns";
+import Swal from "sweetalert2";
+
+const formatDate = (date) => {
+  if (!date) return "";
+  const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+  return new Intl.DateTimeFormat("th-TH", options).format(date);
+};
 
 export default function BookingTable() {
   const navigate = useNavigate();
   const { user } = userAuth();
   const tableId = location.pathname.split("/")[2];
 
-  const toBuddhistEra = (year) => year + 543;
-  
   const [bookingtable, setBookingTable] = useState({});
   const [input, setInput] = useState({
     booking_datatime: "",
@@ -25,7 +29,7 @@ export default function BookingTable() {
     user_id: +user.user_id,
     table_id: tableId,
   });
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(null);
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -46,12 +50,19 @@ export default function BookingTable() {
     getBookingTable();
   }, [tableId]);
 
-  const hdlChangeTime = (e) => {
-    setTime(e.target.value);
+  const hdlChangeTime = (event) => {
+    const newTime = event.target.value;
+    setTime(newTime);
   };
 
-  const clearDate = () => {
-    setStartDate(new Date()); 
+  const handleClearDate = (e) => {
+    e.preventDefault();
+    setStartDate(null);
+  };
+
+  const handleClearTime = (e) => {
+    e.preventDefault();
+    setTime("");
   };
 
   const hdlSubmit = async () => {
@@ -80,10 +91,6 @@ export default function BookingTable() {
       console.error("Error:", error);
       Swal.fire("เกิดข้อผิดพลาดในการจอง");
     }
-  };
-
-  const formatDate = (date) => {
-    return format(date, "dd MMMM yyyy", { locale: th });
   };
 
   return (
@@ -138,25 +145,25 @@ export default function BookingTable() {
                         เลือกวันที่การจอง
                       </span>
                     </div>
-                    </label>
+                  </label>
+                  <div className="flex items-center">
                     <DatePicker
                       selected={startDate}
-                      onChange={date => setStartDate(date)}
+                      onChange={(date) => setStartDate(date)}
                       dateFormat="dd/MM/yyyy"
                       locale={th}
-                      className="text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-8 py-2.5 mb-1"
+                      className="mt-1 ml-1 text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-8 py-2.5 mb-1"
                       placeholderText="วัน/เดือน/ปี"
                       minDate={startOfToday()}
                     />
-                  <button
-                    type="button"
-                    onClick={clearDate}
-                    className="mt-1 ml-4 text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
-                  >
-                    ล้างวันที่
-                  </button>
-                  
-                  <p className="mt-4">
+                    <button
+                      onClick={handleClearDate}
+                      className="ml-4 text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 mb-1"
+                    >
+                      ล้างวันที่
+                    </button>
+                  </div>
+                  <p className="mt-4 text-start">
                     วันที่เลือกจอง : {formatDate(startDate)}
                   </p>
                   <label className="form-control w-full max-w-[300px] mt-5">
@@ -165,13 +172,23 @@ export default function BookingTable() {
                         เลือกเวลาการจอง
                       </span>
                     </div>
-                    <input
-                      type="time"
-                      onChange={hdlChangeTime}
-                      value={time}
-                      required
-                    />
-                    <p className="mt-5">เวลาที่เลือกจอง : {time}</p>
+                    <div className="flex items-center">
+                      <input
+                        type="time"
+                        onChange={hdlChangeTime}
+                        value={time}
+                        required
+                        className="ml-1 mt-1 text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-6 py-2 mb-1"
+                      />
+                      <button
+                        onClick={handleClearTime}
+                        type="button"
+                        className="ml-4 text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 mb-1"
+                      >
+                        ล้างเวลา
+                      </button>
+                    </div>
+                    <p className="mt-5 text-start">เวลาที่เลือกจอง : {time}</p>
                   </label>
                 </div>
               </div>
