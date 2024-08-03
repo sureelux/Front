@@ -152,7 +152,7 @@ export default function BookingTable() {
                       onChange={(date) => setStartDate(date)}
                       dateFormat="dd/MM/yyyy"
                       locale={th}
-                      className="mt-1 ml-1 text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-8 py-2.5 mb-1"
+                      className="mt-1 ml-1 text-black hover:text-black bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-4 py-2.5 mb-1 cursor-pointer"
                       placeholderText="วัน/เดือน/ปี"
                       minDate={startOfToday()}
                     />
@@ -164,7 +164,7 @@ export default function BookingTable() {
                     </button>
                   </div>
                   <p className="mt-4 text-start">
-                    วันที่เลือกจอง : {formatDate(startDate)}
+                    วันที่เลือกจอง : <span className="text-red-500">{formatDate(startDate)}</span>
                   </p>
                   <label className="form-control w-full max-w-[300px] mt-5">
                     <div className="label">
@@ -178,7 +178,7 @@ export default function BookingTable() {
                         onChange={hdlChangeTime}
                         value={time}
                         required
-                        className="ml-1 mt-1 text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-6 py-2 mb-1"
+                        className="ml-1 mt-1 text-black bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-6 py-2 mb-1 cursor-pointer"
                       />
                       <button
                         onClick={handleClearTime}
@@ -188,7 +188,7 @@ export default function BookingTable() {
                         ล้างเวลา
                       </button>
                     </div>
-                    <p className="mt-5 text-start">เวลาที่เลือกจอง : {time}</p>
+                    <p className="mt-5 text-start">เวลาที่เลือกจอง : <span className="text-red-500">{time}</span></p>
                   </label>
                 </div>
               </div>
