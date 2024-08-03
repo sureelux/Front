@@ -254,7 +254,7 @@ export default function DataType() {
                 </thead>
                 <tbody className="font-medium text-black text-center">
                   {currentItems.map((type, index) => (
-                    <tr key={type.type_id} className="hover:bg-gray-100">
+                    <tr key={type.type_id} className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700">
                       <td>{index + 1}</td>{" "}
                       <td>{type.type_name}</td>
                       <td>

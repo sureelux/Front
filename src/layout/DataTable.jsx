@@ -320,7 +320,7 @@ export default function DataTable() {
                     <tr
                       key={tables.table_id}
                       tables={tables}
-                      className="hover:bg-gray-100"
+                      className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       <td>{index + 1}</td>{" "}
                       <td>

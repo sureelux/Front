@@ -152,20 +152,24 @@ export default function BookingTable() {
                       onChange={(date) => setStartDate(date)}
                       dateFormat="dd/MM/yyyy"
                       locale={th}
-                      className="mt-1 ml-1 text-black hover:text-black bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-4 py-2.5 mb-1 cursor-pointer"
+                      className="mt-1 ml-1 text-black hover:text-black bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2.5 mb-1 cursor-pointer"
                       placeholderText="วัน/เดือน/ปี"
                       minDate={startOfToday()}
                     />
                     <button
                       onClick={handleClearDate}
-                      className="ml-4 text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 mb-1"
+                      className="ml-4 text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mb-1"
                     >
                       ล้างวันที่
                     </button>
                   </div>
-                  <p className="mt-4 text-start">
-                    วันที่เลือกจอง : <span className="text-red-500">{formatDate(startDate)}</span>
+                  <p className="mt-4 text-start font-bold">
+                    วันที่เลือกจอง :{" "}
+                    <span className="text-red-600 font-normal">
+                      {startDate ? formatDate(startDate) : "ยังไม่ระบุ"}
+                    </span>
                   </p>
+
                   <label className="form-control w-full max-w-[300px] mt-5">
                     <div className="label">
                       <span className="label-text-alt font-bold text-xl">
@@ -177,7 +181,6 @@ export default function BookingTable() {
                         type="time"
                         onChange={hdlChangeTime}
                         value={time}
-                        required
                         className="ml-1 mt-1 text-black bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-lg px-6 py-2 mb-1 cursor-pointer"
                       />
                       <button
@@ -188,7 +191,12 @@ export default function BookingTable() {
                         ล้างเวลา
                       </button>
                     </div>
-                    <p className="mt-5 text-start">เวลาที่เลือกจอง : <span className="text-red-500">{time}</span></p>
+                    <p className="mt-5 text-start font-bold">
+                      เวลาที่เลือกจอง :
+                      <span className="text-red-600 font-normal">
+                        {time ? time : " ยังไม่ระบุ "}
+                      </span>
+                    </p>
                   </label>
                 </div>
               </div>
@@ -199,7 +207,7 @@ export default function BookingTable() {
         <div className="flex justify-end ">
           <button
             type="button"
-            className="text-white bg-gradient-to-l bg-green-500 from-green-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-3xl text-sm px-20 py-4 text-center me-2 mb-1"
+            className="text-white bg-gradient-to-l bg-green-500 from-green-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-2xl text-sm px-20 py-4 text-center me-4"
             onClick={hdlSubmit}
           >
             <FontAwesomeIcon icon={faBook} className="mr-2" />

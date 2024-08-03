@@ -12,19 +12,15 @@ import {
   faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-export default function DataBooing_Approval() {
+export default function DataBooking() {
   const [bookings, setBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(7);
-  const [approvedCount, setApprovedCount] = useState(0);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [rejectedCount, setRejectedCount] = useState(0);
+  const [perPage] = useState(10);
   const [selectedDate, setSelectedDate] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [availableDates, setAvailableDates] = useState([]);
 
   const location = useLocation();
   const token = localStorage.getItem("token");
@@ -39,8 +35,16 @@ export default function DataBooing_Approval() {
           }
         );
         setBookings(response.data.bookings);
+        
+        const datesResponse = await axios.get(
+          "http://localhost:8889/admin/availableDates",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setAvailableDates(datesResponse.data.dates);
       } catch (error) {
-        console.error("Error fetching bookings:", error);
+        console.error("Error fetching bookings or available dates:", error);
       }
     };
     getBookings();
@@ -55,10 +59,66 @@ export default function DataBooing_Approval() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      getBookings(); // Refresh bookings data
+      getBookings(); 
     } catch (err) {
       console.error("Error deleting booking:", err);
     }
+  };
+
+  const handleStatusChange = async (e, booking_id, currentStatus) => {
+    e.stopPropagation();
+
+    if (currentStatus !== "APPROVE") {
+      Swal.fire({
+        title: "ไม่สามารถยกเลิกการจองได้",
+        text: "การจองนี้ไม่อยู่ในสถานะที่สามารถยกเลิกได้",
+        icon: "info",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "ตกลง",
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: "คุณต้องการยกเลิกการจองไหม?",
+      text: "การยกเลิกจะทำให้สถานะการจองเป็น 'ยกเลิก'",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#02ab21",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.patch(
+            `http://localhost:8889/admin/updateStatusBooking/${booking_id}`,
+            { status_booking: "CANCEL" },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          if (response.status === 200) {
+            Swal.fire({
+              title: "ยกเลิกเรียบร้อย",
+              text: "สถานะการจองถูกเปลี่ยนเป็นยกเลิก",
+              icon: "success",
+              confirmButtonText: "ตกลง",
+              confirmButtonColor: "#3085d6",
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
+          }
+        } catch (err) {
+          console.error(
+            "Error updating booking status:",
+            err.response ? err.response.data : err.message
+          );
+          Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
+        }
+      }
+    });
   };
 
   function FormatDate(dateString) {
@@ -74,32 +134,50 @@ export default function DataBooing_Approval() {
   function formatISODateToThai(dateString) {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // เดือนใน JavaScript เริ่มจาก 0
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const year = date.getFullYear() + 543;
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
 
-  const filteredBookings = bookings.filter((booking) => {
+  const extractUniqueDates = (bookings) => {
+    const dates = bookings
+      .filter((booking) => booking.status_booking === "WAIT")
+      .map((booking) => new Date(booking.booking_datatime).toISOString().split("T")[0]);
+  
+    const uniqueDates = [...new Set(dates)];
+  
+    const sortedDates = uniqueDates
+      .map(date => new Date(date))
+      .sort((a, b) => a - b)
+      .map(date => date.toISOString().split("T")[0]);
+  
+    return sortedDates;
+  };
+  
+
+  const uniqueDates = extractUniqueDates(bookings);
+
+  const filteredBookings_Approval = bookings.filter((booking) => {
     const searchTermLower = searchTerm.trim().toLowerCase();
     const thaiStatusMapping = {
       APPROVE: "อนุมัติ",
       CANCEL: "ยกเลิก",
-      WAIT: "รออนุมัติ",
     };
 
     const formattedDateTime = new Date(booking.booking_datatime)
       .toLocaleString("th-TH")
       .toLowerCase();
 
-    const bookingDate = new Date(booking.booking_datatime);
-    const formattedBookingDate = formatISODateToThai(booking.booking_datatime);
-
-    const dateMatch = selectedDate
-      ? formatISODateToThai(selectedDate) === formattedBookingDate
-      : true;
+    const bookingDate = new Date(booking.booking_datatime)
+      .toISOString()
+      .split("T")[0];
 
     return (
-      dateMatch &&
+      (selectedDate === "" || selectedDate === bookingDate) &&
       (booking.table.table_name.toLowerCase().includes(searchTermLower) ||
         booking.table.type_table.type_name
           .toLowerCase()
@@ -116,7 +194,7 @@ export default function DataBooing_Approval() {
 
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
-  const currentItems = filteredBookings.slice(
+  const currentItems = filteredBookings_Approval.slice(
     indexOfFirstItem,
     indexOfLastItem
   );
@@ -124,7 +202,7 @@ export default function DataBooing_Approval() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const nextPage = () => {
-    if (currentPage < Math.ceil(filteredBookings.length / perPage)) {
+    if (currentPage < Math.ceil(filteredBookings_Approval.length / perPage)) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -137,12 +215,10 @@ export default function DataBooing_Approval() {
 
   const counts = {
     approved: bookings.filter((b) => b.status_booking === "APPROVE").length,
-    pending: bookings.filter((b) => b.status_booking === "WAIT").length,
     canceled: bookings.filter((b) => b.status_booking === "CANCEL").length,
   };
 
   const isActive = (path) => location.pathname === path;
-
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -168,16 +244,23 @@ export default function DataBooing_Approval() {
                 >
                   เลือกวันที่
                 </label>
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="วัน/เดือน/ปี"
-                  className="block p-2 w-52 text-sm border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                />
+                <select
+                  id="date-filter"
+                  className="select select-bordered select-sm w-full max-w-xs max-h-48 overflow-auto"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                >
+                  <option value="">ทั้งหมด</option>
+                  {uniqueDates.map((date, index) => (
+                    <option key={index} value={date}>
+                      {FormatDate(date)}
+                    </option>
+                  ))}
+                </select>
+
                 <button
                   type="button"
-                  className="px-4 py-2 text-sm font-medium text-gray-900 bg-gray-200 border border-gray-400 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-gray-300"
+                  className="px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 border border-gray-400 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-gray-300"
                   onClick={handleClear}
                 >
                   ล้าง
@@ -221,7 +304,7 @@ export default function DataBooing_Approval() {
               </div>
             </div>
 
-            {filteredBookings.length > 0 ? (
+            {filteredBookings_Approval.length > 0 ? (
               <table className="table mt-2">
                 <thead>
                   <tr className="text-sm text-black uppercase bg-gradient-to-r from-sky-400 to-cyan-300 text-center">
@@ -242,13 +325,11 @@ export default function DataBooing_Approval() {
                       <tr
                         key={bookings.booking_id}
                         bookings={bookings}
-                        className="hover:bg-gray-100"
+                        className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                       >
                         <td>{index + 1}</td>{" "}
                         <td>
-                          {new Date(bookings.booking_datatime).toLocaleString(
-                            "th-TH"
-                          )}
+                          {formatISODateToThai(bookings.booking_datatime)}
                         </td>
                         <td>{bookings.table.table_name}</td>
                         <td>{bookings.table.type_table.type_name}</td>
@@ -323,7 +404,7 @@ export default function DataBooing_Approval() {
                 </p>
               </div>
             )}
-            {filteredBookings.length > perPage && (
+            {filteredBookings_Approval.length > perPage && (
               <div className="mt-2 flex items-center justify-center space-x-4">
                 <button
                   className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
@@ -334,13 +415,13 @@ export default function DataBooing_Approval() {
                 </button>
                 <span className="text-sm text-gray-900">
                   หน้า {currentPage} จาก{" "}
-                  {Math.ceil(filteredBookings.length / perPage)}
+                  {Math.ceil(filteredBookings_Approval.length / perPage)}
                 </span>
                 <button
                   className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
                   onClick={nextPage}
                   disabled={
-                    currentPage === Math.ceil(filteredBookings.length / perPage)
+                    currentPage === Math.ceil(filteredBookings_Approval.length / perPage)
                   }
                 >
                   ถัดไป
@@ -470,7 +551,7 @@ const Modal = ({ booking }) => {
       if (rs2.status === 200 && rs.status === 200) {
         alert("คุณได้ทำการอนุมัติการจองเรียบร้อยแล้ว");
         document.getElementById(modalId).close();
-        window.location.href = '/DataBooking';
+        window.location.href = "/DataBooking";
       }
     } catch (error) {
       console.error("Error updating booking status:", error);
@@ -499,7 +580,7 @@ const Modal = ({ booking }) => {
       if (rs2.status === 200) {
         alert("คุณได้ทำการยกเลิกการจองเรียบร้อยแล้ว");
         document.getElementById(modalId).close();
-        window.location.href = '/DataBooking';
+        window.location.href = "/DataBooking";
       }
     } catch (error) {
       console.error("Error updating booking status:", error);

@@ -4,16 +4,13 @@ import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTachometerAlt,
-  faCheck,
   faTimes,
   faUser,
   faTable,
   faClipboardList,
   faCalendarCheck,
-  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function DataBooking() {
@@ -37,8 +34,16 @@ export default function DataBooking() {
           }
         );
         setBookings(response.data.bookings);
+        // Assuming your API endpoint for available dates is `/admin/availableDates`
+        const datesResponse = await axios.get(
+          "http://localhost:8889/admin/availableDates",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setAvailableDates(datesResponse.data.dates);
       } catch (error) {
-        console.error("Error fetching bookings:", error);
+        console.error("Error fetching bookings or available dates:", error);
       }
     };
     getBookings();
@@ -61,7 +66,7 @@ export default function DataBooking() {
 
   const handleStatusChange = async (e, booking_id, currentStatus) => {
     e.stopPropagation();
-  
+
     if (currentStatus !== "APPROVE") {
       Swal.fire({
         title: "ไม่สามารถยกเลิกการจองได้",
@@ -72,7 +77,7 @@ export default function DataBooking() {
       });
       return;
     }
-  
+
     Swal.fire({
       title: "คุณต้องการยกเลิกการจองไหม?",
       text: "การยกเลิกจะทำให้สถานะการจองเป็น 'ยกเลิก'",
@@ -90,7 +95,7 @@ export default function DataBooking() {
             { status_booking: "CANCEL" },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-  
+
           if (response.status === 200) {
             Swal.fire({
               title: "ยกเลิกเรียบร้อย",
@@ -114,7 +119,6 @@ export default function DataBooking() {
       }
     });
   };
-  
 
   function FormatDate(dateString) {
     const date = new Date(dateString);
@@ -130,9 +134,34 @@ export default function DataBooking() {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0"); // เดือนใน JavaScript เริ่มจาก 0
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    const year = date.getFullYear()+ 543;
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
   }
+
+  const extractUniqueDates = (bookings) => {
+    const dates = bookings
+      .filter((booking) => 
+        booking.status_booking === "APPROVE" || booking.status_booking === "CANCEL"
+      )
+      .map((booking) =>
+        new Date(booking.booking_datatime).toISOString().split("T")[0]
+      );
+      const uniqueDates = [...new Set(dates)];
+  
+      const sortedDates = uniqueDates
+        .map(date => new Date(date))
+        .sort((a, b) => a - b)
+        .map(date => date.toISOString().split("T")[0]);
+    
+      return sortedDates;
+  };
+  
+
+  const uniqueDates = extractUniqueDates(bookings);
 
   const filteredBookings = bookings.filter((booking) => {
     const searchTermLower = searchTerm.trim().toLowerCase();
@@ -147,7 +176,7 @@ export default function DataBooking() {
 
     const bookingDate = new Date(booking.booking_datatime)
       .toISOString()
-      .split("T")[0]; // YYYY-MM-DD format
+      .split("T")[0];
 
     return (
       (selectedDate === "" || selectedDate === bookingDate) &&
@@ -214,26 +243,26 @@ export default function DataBooking() {
               <div className="ml-4 flex items-center space-x-2">
                 <label
                   htmlFor="date-filter"
-                  className="text-sm font-bold text-gray-700 dark:text-gray-300"
+                  className="text-sm font-bold text-gray-700 dark:text-gray-300 "
                 >
                   เลือกวันที่
                 </label>
                 <select
                   id="date-filter"
+                  className="select select-bordered select-sm w-full max-w-xs max-h-48 overflow-auto"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="block p-2 w-52 text-sm border border-gray-500 rounded-lg bg-gray-50 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 >
                   <option value="">ทั้งหมด</option>
-                  {availableDates.map((date) => (
-                    <option key={date} value={date}>
-                      {formatISODateToThai(date)}
+                  {uniqueDates.map((date, index) => (
+                    <option key={index} value={date}>
+                      {FormatDate(date)}
                     </option>
                   ))}
                 </select>
                 <button
                   type="button"
-                  className="px-4 py-2 text-sm font-medium text-gray-900 bg-gray-200 border border-gray-400 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-gray-300"
+                  className="px-2 py-1 text-sm font-medium text-gray-900 bg-gray-200 border border-gray-400 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-gray-300"
                   onClick={handleClear}
                 >
                   ล้าง
@@ -339,7 +368,7 @@ export default function DataBooking() {
                                 booking.status_booking
                               )
                             }
-                            className={`bg-red-600 hover:bg-red-700 text-white py-3 px-2 rounded-full  dark:text-red-500 dark:hover:text-red-700 text-xs ${
+                            className={`bg-red-600 hover:bg-red-700 text-white py-3 px-2 rounded-2xl  dark:text-red-500 dark:hover:text-red-700 text-xs ${
                               booking.status_booking !== "APPROVE"
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
