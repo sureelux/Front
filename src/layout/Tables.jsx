@@ -10,9 +10,9 @@ import { FaSearch, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 export default function Tables() {
   const [tables, setTables] = useState([]);
   const [types, setTypes] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const itemsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; 
 
   const { user } = userAuth();
   const navigate = useNavigate();
@@ -70,33 +70,30 @@ export default function Tables() {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
+    setCurrentPage(1); 
   };
 
-  const filteredTables = tables?.filter((table) =>
+  const filteredTables = tables.filter((table) =>
     table.table_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleBooking = (id) => {
+  const totalPages = Math.ceil(filteredTables.length / itemsPerPage);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTables = filteredTables.slice(indexOfFirstItem, indexOfLastItem);
+
+  const hdlBooking = (id) => {
     user?.user_id ? navigate(`/BookingTable/${id}`) : navigate("/login");
   };
 
-  const handlePreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => (prev === 1 ? prev : prev - 1));
   };
 
   const handleNextPage = () => {
-    setCurrentPage((prevPage) =>
-      prevPage < Math.ceil(filteredTables.length / itemsPerPage)
-        ? prevPage + 1
-        : prevPage
-    );
+    setCurrentPage((prev) => (prev === totalPages ? prev : prev + 1));
   };
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedTables = filteredTables?.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
 
   return (
     <div className="drawer lg:drawer-open">
@@ -137,7 +134,7 @@ export default function Tables() {
           </div>
         </div>
 
-        <div className="flex justify-center items-center my-4 ml-auto me-4">
+        <div className="flex justify-center items-center my-7 ml-auto me-4">
           <label
             htmlFor="search"
             className="text-lg font-bold text-gray-700 dark:text-gray-300 mr-2"
@@ -159,14 +156,18 @@ export default function Tables() {
           </div>
         </div>
 
-        <div className="relative my-2 w-full mt-3">
+        <div className="relative my-2 w-[1450px] mt-2 mx-auto">
           <hr className="absolute top-0 left-0 w-full h-1 rounded-full animate-pulse bg-gradient-to-r from-gray-300 to-gray-600" />
           <div className="absolute top-0 left-0 w-full h-full rounded-full border-transparent animated-gradient"></div>
         </div>
 
+        {tables.length === 0 ? (
+          <div className="text-center text-xl font-bold mt-8">ไม่พบข้อมูล</div>
+        ) : (
+          <>
         <div className="max-w-[100rem] mx-auto gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center">
-          {paginatedTables.length > 0 ? (
-            paginatedTables.map((item) => (
+          {currentTables.length > 0 ? (
+            currentTables.map((item) => (
               <div
                 key={item.table_id}
                 className="card-body items-center text-center"
@@ -196,17 +197,17 @@ export default function Tables() {
                         className={`text-base font-normal ${
                           item.table_status === "FREE"
                             ? "text-green-500"
-                            : "text-red-500"
+                            : "text-red-600"
                         }`}
                       >
                         {item.table_status === "FREE" ? "ว่าง" : "ไม่ว่าง"}
                       </span>
                     </h3>
-                    <div className="card-actions mx-auto px-4 text-center">
+                    <div className="card-actions mx-auto px-20 text-center">
                       <button
                         disabled={item.table_status === "BUSY"}
-                        onClick={() => handleBooking(item.table_id)}
-                        className="text-white bg-gradient-to-r from-blue-500 to-blue-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-colors duration-300"
+                        onClick={() => hdlBooking(item.table_id)}
+                        className="text-white bg-gradient-to-r from-blue-500 to-blue-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-8 disabled:opacity-50 disabled:cursor-no-drop shadow-xl"
                       >
                         จอง
                       </button>
@@ -216,40 +217,44 @@ export default function Tables() {
               </div>
             ))
           ) : (
-            <div className="col-span-4 text-center py-20 text-2xl text-gray-700 font-medium">
-              ไม่พบข้อมูลโต๊ะอาหาร
+            <div className="col-span-full text-center py-6">
+              <p className="text-xl text-gray-500">ไม่พบข้อมูล</p>
             </div>
           )}
         </div>
 
-        <div className="flex justify-center items-center mt-4 mx-4">
+        <div className="flex justify-center mt-1 mb-8">
           <button
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-            className={`flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              currentPage === 1 ? "cursor-not-allowed opacity-50" : ""
-            }`}
-          >
-            <FaArrowLeft className="text-xl" />
-          </button>
-          <span className="text-xl font-semibold px-4">
-            หน้า {currentPage} /{" "}
-            {Math.ceil(filteredTables.length / itemsPerPage)}
-          </span>
-          <button
-            onClick={handleNextPage}
-            disabled={
-              currentPage === Math.ceil(filteredTables.length / itemsPerPage)
+            onClick={() =>
+              setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))
             }
-            className={`flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              currentPage === Math.ceil(filteredTables.length / itemsPerPage)
-                ? "cursor-not-allowed opacity-50"
-                : ""
-            }`}
+            className={`px-4 py-2 rounded-lg mr-2 ${
+              currentPage === 1
+                ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                : "bg-blue-500"
+            } text-white`}
+            disabled={currentPage === 1}
           >
-            <FaArrowRight className="text-xl" />
+            <FaArrowLeft />
+          </button>
+          <span className="flex items-center">{`Page ${currentPage} of ${totalPages}`}</span>
+          <button
+            onClick={() =>
+              setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages))
+            }
+            className={`px-4 py-2 rounded-lg ml-2 ${
+              currentPage === totalPages
+                ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                : "bg-blue-500"
+            } text-white`}
+            disabled={currentPage === totalPages}
+          >
+            <FaArrowRight />
           </button>
         </div>
+        </>
+        )}
+
 
         <footer class="bg-gradient-to-tl bg-sky-600 from-orange-100 via-cyan-400 text-white py-8 w-full mt-3">
           <div class="container mx-auto px-4">
