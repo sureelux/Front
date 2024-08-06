@@ -16,6 +16,10 @@ export default function RegisterForm() {
     email: "",
     role: "USER",
   });
+  const [phoneError, setPhoneError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [lastnameError, setLastnameError] = useState("");
 
   const hdlReset = () => {
     setInput({
@@ -29,6 +33,10 @@ export default function RegisterForm() {
       email: "",
       role: "USER",
     });
+    setPhoneError("");
+    setEmailError("");
+    setNameError("");
+    setLastnameError("");
   };
 
   const validateName = (value) => {
@@ -36,22 +44,55 @@ export default function RegisterForm() {
     return regex.test(value);
   };
 
+  const validatePhone = (value) => {
+    const regex = /^[0-9]{0,10}$/;
+    return regex.test(value);
+  };
+
+  const validateEmail = (value) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(value);
+  };
+
   const hdlChange = (e) => {
     const { name, value } = e.target;
-    if (name === "firstname" || name === "lastname") {
+
+    if (name === "firstname") {
       if (!validateName(value)) {
-        Swal.fire({
-          icon: "warning",
-          title: "ข้อมูลไม่ถูกต้อง",
-          text: "ชื่อและนามสกุลต้องประกอบด้วยตัวอักษรภาษาไทยและภาษาอังกฤษเท่านั้น",
-          confirmButtonText: "ตกลง",
-          confirmButtonColor: "#3996fa",
-        });
-        setInput((prv) => ({ ...prv, [name]: "" }));
-        return;
+        setNameError("กรุณากรอกชื่อให้ถูกต้อง (ภาษาไทยหรือภาษาอังกฤษ)");
+      } else {
+        setNameError("");
       }
     }
-  
+
+    if (name === "lastname") {
+      if (!validateName(value)) {
+        setLastnameError("กรุณากรอกนามสกุลให้ถูกต้อง (ภาษาไทยหรือภาษาอังกฤษ)");
+      } else {
+        setLastnameError("");
+      }
+    }
+
+    if (name === "phone") {
+      if (!validatePhone(value)) {
+        setPhoneError("กรุณากรอกให้ถูกต้อง เบอร์โทรศัพท์ต้องประกอบด้วยตัวเลข 10 ตัวเท่านั้น");
+        setInput((prv) => ({ ...prv, [name]: value.slice(0, 10) }));
+        return;
+      } else {
+        setPhoneError("");
+      }
+    }
+
+    if (name === "email") {
+      if (!validateEmail(value)) {
+        setEmailError("กรุณากรอกอีเมลให้ถูกต้อง");
+        setInput((prv) => ({ ...prv, [name]: value }));
+        return;
+      } else {
+        setEmailError("");
+      }
+    }
+
     setInput((prv) => ({ ...prv, [name]: value }));
   };
 
@@ -127,7 +168,7 @@ export default function RegisterForm() {
               สมัครสมาชิก
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <label className="flex flex-col w-full">
               <div className="label mb-1">
                 <span className="label-text font-bold text-gray-700 text-lg">
@@ -170,7 +211,7 @@ export default function RegisterForm() {
                 onChange={hdlChange}
               />
             </label>
-            <label className="w-full">
+            <label className="w-full relative">
               <div className="label">
                 <span className="label-text font-bold text-gray-700 text-lg">
                   ชื่อ :
@@ -183,8 +224,14 @@ export default function RegisterForm() {
                 value={input.firstname}
                 onChange={hdlChange}
               />
+              {nameError && (
+                <div className="absolute mt-1 text-red-600 text-sm border border-white bg-white p-2 rounded-lg shadow-md">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  {nameError}
+                </div>
+              )}
             </label>
-            <label className="w-full">
+            <label className="w-full relative">
               <div className="label">
                 <span className="label-text font-bold text-gray-700 text-lg">
                   นามสกุล :
@@ -197,6 +244,12 @@ export default function RegisterForm() {
                 value={input.lastname}
                 onChange={hdlChange}
               />
+              {lastnameError && (
+                <div className="absolute mt-1 text-red-600 text-sm border border-white bg-white p-2 rounded-lg shadow-md">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  {lastnameError}
+                </div>
+              )}
             </label>
             <label className="w-full">
               <div className="label">
@@ -212,21 +265,27 @@ export default function RegisterForm() {
                 onChange={hdlChange}
               />
             </label>
-            <label className="w-full">
+            <label className="w-full relative">
               <div className="label">
                 <span className="label-text font-bold text-gray-700 text-lg">
-                  เบอร์โทรศัพท์ :
+                  เบอร์โทร :
                 </span>
               </div>
               <input
-                type="tel"
+                type="text"
                 className="input input-bordered w-8/12 border-gray-400"
                 name="phone"
                 value={input.phone}
                 onChange={hdlChange}
               />
+              {phoneError && (
+                <div className="absolute mt-1 text-red-600 text-sm border border-white bg-white p-2 rounded-lg shadow-md">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  {phoneError}
+                </div>
+              )}
             </label>
-            <label className="w-full">
+            <label className="w-full relative">
               <div className="label">
                 <span className="label-text font-bold text-gray-700 text-lg">
                   อีเมล :
@@ -239,28 +298,28 @@ export default function RegisterForm() {
                 value={input.email}
                 onChange={hdlChange}
               />
+              {emailError && (
+                <div className="absolute mt-1 text-red-600 text-sm border border-white bg-white p-2 rounded-lg shadow-md">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  {emailError}
+                </div>
+              )}
             </label>
           </div>
-          <div className="flex gap-4 justify-end items-center mt-6">
+          <div className="flex justify-end mt-8 gap-4 mr-20">
             <button
               type="submit"
-              className="btn bg-green-600 hover:bg-green-700 text-white font-medium"
+              className="bg-sky-400 hover:bg-sky-500 text-white py-4 px-4 rounded-full w-64"
             >
               สมัครสมาชิก
             </button>
             <button
-              type="reset"
-              className="btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium"
+              type="button"
               onClick={hdlReset}
+              className="bg-red-600 hover:bg-red-700 text-white py-4 px-2 rounded-full w-48"
             >
-              รีเซ็ต
+              ล้างข้อมูล
             </button>
-            <Link
-              to="/login"
-              className="btn bg-red-600 hover:bg-red-700 text-white font-medium"
-            >
-              ย้อนกลับ
-            </Link>
           </div>
         </form>
       </div>

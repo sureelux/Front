@@ -48,14 +48,25 @@ export default function updateProfile() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      alert("คุณได้แก้ไขข้อมูลบัญชีเรียบร้อยแล้ว");
-      navigate("/Profile")
-      location.reload();
+      Swal.fire({
+        icon: "success",
+        title: "สำเร็จ",
+        text: "คุณได้แก้ไขข้อมูลบัญชีเรียบร้อยแล้ว",
+        showConfirmButton: false,
+        timer: 1500,
+      }).then(() => {
+        navigate("/Profile");
+        location.reload();
+      });
     } catch (err) {
-      alert(err.message);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: err.message,
+        confirmButtonText: "ตกลง",
+      });
     }
   };
-
   return (
     <div className="text-center min-h-screen pb-16">
       <div className="flex absolute top-0 left-0 mt-20">

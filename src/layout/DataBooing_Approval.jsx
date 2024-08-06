@@ -35,7 +35,7 @@ export default function DataBooking() {
           }
         );
         setBookings(response.data.bookings);
-        
+
         const datesResponse = await axios.get(
           "http://localhost:8889/admin/availableDates",
           {
@@ -59,7 +59,7 @@ export default function DataBooking() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      getBookings(); 
+      getBookings();
     } catch (err) {
       console.error("Error deleting booking:", err);
     }
@@ -83,7 +83,7 @@ export default function DataBooking() {
       title: "คุณต้องการยกเลิกการจองไหม?",
       text: "การยกเลิกจะทำให้สถานะการจองเป็น 'ยกเลิก'",
       icon: "warning",
-      showCancelButton: true,
+      showCloseButton: true,
       confirmButtonColor: "#02ab21",
       cancelButtonColor: "#d33",
       confirmButtonText: "ยืนยัน",
@@ -134,7 +134,7 @@ export default function DataBooking() {
   function formatISODateToThai(dateString) {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear() + 543;
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
@@ -146,18 +146,20 @@ export default function DataBooking() {
   const extractUniqueDates = (bookings) => {
     const dates = bookings
       .filter((booking) => booking.status_booking === "WAIT")
-      .map((booking) => new Date(booking.booking_datatime).toISOString().split("T")[0]);
-  
+      .map(
+        (booking) =>
+          new Date(booking.booking_datatime).toISOString().split("T")[0]
+      );
+
     const uniqueDates = [...new Set(dates)];
-  
+
     const sortedDates = uniqueDates
-      .map(date => new Date(date))
+      .map((date) => new Date(date))
       .sort((a, b) => a - b)
-      .map(date => date.toISOString().split("T")[0]);
-  
+      .map((date) => date.toISOString().split("T")[0]);
+
     return sortedDates;
   };
-  
 
   const uniqueDates = extractUniqueDates(bookings);
 
@@ -421,7 +423,8 @@ export default function DataBooking() {
                   className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
                   onClick={nextPage}
                   disabled={
-                    currentPage === Math.ceil(filteredBookings_Approval.length / perPage)
+                    currentPage ===
+                    Math.ceil(filteredBookings_Approval.length / perPage)
                   }
                 >
                   ถัดไป

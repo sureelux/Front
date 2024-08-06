@@ -70,7 +70,7 @@ export default function BookingUser() {
               className={`${
                 booking.status_booking === "APPROVE"
                   ? "text-green-700"
-                  : booking.status_booking === "NOT_APPROVED"
+                  : booking.status_booking === "CANCEL"
                   ? "text-red-700"
                   : booking.status_booking === "WAIT"
                   ? "text-yellow-700"
@@ -79,8 +79,8 @@ export default function BookingUser() {
             >
               {booking.status_booking === "APPROVE"
                 ? "อนุมัติ"
-                : booking.status_booking === "NOT_APPROVED"
-                ? "ไม่อนุมัติ"
+                : booking.status_booking === "CANCEL"
+                ? "ยกเลิก"
                 : booking.status_booking === "WAIT"
                 ? "รออนุมัติ"
                 : "ไม่ทราบสถานะ"}
@@ -167,7 +167,7 @@ export default function BookingUser() {
                         className={`px-6 py-4 border-b border-gray-200 text-sm font-medium text-center ${
                           booking.status_booking === "APPROVE"
                             ? "text-green-500"
-                            : booking.status_booking === "NOT_APPROVED"
+                            : booking.status_booking === "CANCEL"
                             ? "text-red-500"
                             : booking.status_booking === "WAIT"
                             ? "text-yellow-400"
@@ -176,8 +176,8 @@ export default function BookingUser() {
                       >
                         {booking.status_booking === "APPROVE"
                           ? "อนุมัติ"
-                          : booking.status_booking === "NOT_APPROVED"
-                          ? "ไม่อนุมัติ"
+                          : booking.status_booking === "CANCEL"
+                          ? "ยกเลิก"
                           : booking.status_booking === "WAIT"
                           ? "รออนุมัติ"
                           : ""}
