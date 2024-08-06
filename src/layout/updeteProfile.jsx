@@ -176,7 +176,7 @@ export default function updateProfile() {
         </div>
         <div className="mt-8 flex justify-center">
           <button
-            className="text-white bg-gradient-to-br from-yellow-300 to-yellow-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-yellow-200 dark:focus:ring-yellow-800 font-medium rounded-3xl text-sm px-5 py-2.5 text-center mr-4 mb-2 w-48 shadow-xl"
+            className="text-black bg-gradient-to-br from-yellow-300 to-yellow-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-yellow-200 dark:focus:ring-yellow-800 font-medium rounded-3xl text-sm px-5 py-2.5 text-center mr-4 mb-2 w-72 shadow-xl"
             onClick={hdlSubmit}
           >
             บันทึก

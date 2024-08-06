@@ -17,7 +17,7 @@ export default function DataBooking() {
   const [bookings, setBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(7);
+  const [perPage] = useState(5);
   const [selectedDate, setSelectedDate] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
 
@@ -134,7 +134,7 @@ export default function DataBooking() {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0"); // เดือนใน JavaScript เริ่มจาก 0
-    const year = date.getFullYear()+ 543;
+    const year = date.getFullYear() + 543;
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
     const seconds = String(date.getSeconds()).padStart(2, "0");
@@ -144,22 +144,24 @@ export default function DataBooking() {
 
   const extractUniqueDates = (bookings) => {
     const dates = bookings
-      .filter((booking) => 
-        booking.status_booking === "APPROVE" || booking.status_booking === "CANCEL"
+      .filter(
+        (booking) =>
+          booking.status_booking === "APPROVE" ||
+          booking.status_booking === "CANCEL"
       )
-      .map((booking) =>
-        new Date(booking.booking_datatime).toISOString().split("T")[0]
+      .map(
+        (booking) =>
+          new Date(booking.booking_datatime).toISOString().split("T")[0]
       );
-      const uniqueDates = [...new Set(dates)];
-  
-      const sortedDates = uniqueDates
-        .map(date => new Date(date))
-        .sort((a, b) => a - b)
-        .map(date => date.toISOString().split("T")[0]);
-    
-      return sortedDates;
+    const uniqueDates = [...new Set(dates)];
+
+    const sortedDates = uniqueDates
+      .map((date) => new Date(date))
+      .sort((a, b) => a - b)
+      .map((date) => date.toISOString().split("T")[0]);
+
+    return sortedDates;
   };
-  
 
   const uniqueDates = extractUniqueDates(bookings);
 
@@ -223,7 +225,7 @@ export default function DataBooking() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div>
+    <div className="">
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center mt-20">
@@ -274,7 +276,7 @@ export default function DataBooking() {
                   htmlFor="default-search"
                   className="text-sm font-bold text-gray-700 dark:text-gray-300 mr-2"
                 >
-                  ค้นหา
+                  ค้นหา :
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -333,7 +335,7 @@ export default function DataBooking() {
                         className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900"
                       >
                         <td className="py-4 px-6">
-                          {indexOfFirstItem + index + 1}
+                          {index + 1 + indexOfFirstItem}
                         </td>
                         <td className="py-4 px-6">
                           {formatISODateToThai(booking.booking_datatime)}
@@ -368,7 +370,7 @@ export default function DataBooking() {
                                 booking.status_booking
                               )
                             }
-                            className={`bg-red-600 hover:bg-red-700 text-white py-3 px-2 rounded-2xl  dark:text-red-500 dark:hover:text-red-700 text-xs ${
+                            className={`bg-red-600 hover:bg-red-700 text-white py-3 px-2 rounded-2xl dark:text-red-500 dark:hover:text-red-700 text-xs ${
                               booking.status_booking !== "APPROVE"
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""

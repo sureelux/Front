@@ -354,7 +354,7 @@ export default function Dashboard() {
               <Link
                 to="/DataBooing_Approval"
                 className={`flex items-center p-2 rounded-lg ${
-                  isActive("/DataBooking")
+                  isActive("/DataBooing_Approval")
                     ? "bg-black text-white font-bold"
                     : "bg-opacity-55 text-black"
                 }`}

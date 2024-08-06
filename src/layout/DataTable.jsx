@@ -78,13 +78,18 @@ export default function DataTable() {
   const handleEditClick = async (table) => {
     try {
       // Fetch table types
-      const tableTypesResponse = await axios.get("http://localhost:8889/admin/types", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
-      const tableTypes = Array.isArray(tableTypesResponse.data.types) ? tableTypesResponse.data.types : [];
+      const tableTypesResponse = await axios.get(
+        "http://localhost:8889/admin/types",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const tableTypes = Array.isArray(tableTypesResponse.data.types)
+        ? tableTypesResponse.data.types
+        : [];
       console.log("tableTypes:", tableTypes);
-  
+
       // Display Swal for editing table
       const { value: formValues } = await Swal.fire({
         title: "แก้ไขข้อมูลโต๊ะ",
@@ -92,30 +97,48 @@ export default function DataTable() {
           <div class="space-y-4 mb-4">
               <div class="flex items-center space-x-4">
                   <label for="table_img" class="flex-shrink-0 w-20 text-gray-700 font-medium">ภาพ</label>
-                  <input id="table_img" class="swal2-input border border-gray-300 rounded-md p-2 flex-grow text-lg" type="text" value="${table.table_img}" />
+                  <input id="table_img" class="swal2-input border border-gray-300 rounded-md p-2 flex-grow text-lg" type="text" value="${
+                    table.table_img
+                  }" />
               </div>
               <div class="flex items-center space-x-4">
                   <label for="table_name" class="flex-shrink-0 w-20 text-gray-700 font-medium">ชื่อโต๊ะ</label>
-                  <input id="table_name" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="text" value="${table.table_name}" />
+                  <input id="table_name" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="text" value="${
+                    table.table_name
+                  }" />
               </div>
               <div class="flex items-center space-x-4">
                   <label for="table_status" class="flex-shrink-0 w-20 text-gray-700 font-medium">สถานะ</label>
                   <select id="table_status" class="border border-gray-300 rounded-md p-2 flex-grow text-lg">
-                      <option value="FREE" ${table.table_status === "FREE" ? "selected" : ""}>ว่าง</option>
-                      <option value="BUSY" ${table.table_status === "BUSY" ? "selected" : ""}>ไม่ว่าง</option>
+                      <option value="FREE" ${
+                        table.table_status === "FREE" ? "selected" : ""
+                      }>ว่าง</option>
+                      <option value="BUSY" ${
+                        table.table_status === "BUSY" ? "selected" : ""
+                      }>ไม่ว่าง</option>
                   </select>
               </div>
               <div class="flex items-center space-x-4">
                   <label for="table_price" class="flex-shrink-0 w-20 text-gray-700 font-medium">ราคา</label>
-                  <input id="table_price" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="number" value="${table.table_price}" />
+                  <input id="table_price" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="number" value="${
+                    table.table_price
+                  }" />
               </div>
               <div class="flex items-center space-x-4">
                   <label for="type_id" class="flex-shrink-0 w-32 text-gray-700 font-medium">ประเภทโต๊ะ</label>
                   <select id="type_id" class="border border-gray-300 rounded-md p-2 flex-grow text-lg">
-                      ${tableTypes.map(type => `
-                          <option value="${type.type_id}" ${type.type_id === table.type_table?.type_id ? "selected" : ""}>
+                      ${tableTypes
+                        .map(
+                          (type) => `
+                          <option value="${type.type_id}" ${
+                            type.type_id === table.type_table?.type_id
+                              ? "selected"
+                              : ""
+                          }>
                               ${type.type_name}
-                          </option>`).join("")}
+                          </option>`
+                        )
+                        .join("")}
                   </select>
               </div>
           </div>
@@ -126,7 +149,10 @@ export default function DataTable() {
             table_img: document.getElementById("table_img").value,
             table_name: document.getElementById("table_name").value,
             table_status: document.getElementById("table_status").value,
-            table_price: parseInt(document.getElementById("table_price").value, 10),
+            table_price: parseInt(
+              document.getElementById("table_price").value,
+              10
+            ),
             type_id: document.getElementById("type_id").value,
           };
         },
@@ -140,7 +166,7 @@ export default function DataTable() {
           cancelButton: "rounded-xl shadow-2xl",
         },
       });
-  
+
       if (formValues) {
         // Update table with new values
         await axios.patch(
@@ -156,7 +182,7 @@ export default function DataTable() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-  
+
         Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -164,7 +190,7 @@ export default function DataTable() {
           showConfirmButton: false,
           timer: 1500,
         });
-  
+
         // Refresh table list
         const rs = await axios.get("http://localhost:8889/user/tables", {
           headers: { Authorization: `Bearer ${token}` },
@@ -180,7 +206,7 @@ export default function DataTable() {
       });
     }
   };
-  
+
   function showStatusAlert() {
     Swal.fire({
       icon: "info",
@@ -322,8 +348,8 @@ export default function DataTable() {
                       tables={tables}
                       className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
-                      <td>{index + 1}</td>{" "}
-                      <td>
+                      <td>{index + 1 + indexOfFirstItem}</td>
+                      <td className="flex justify-center items-center">
                         <figure className="hover:scale-110 transition duration-300 ease-in-out">
                           <img
                             src={tables.table_img}

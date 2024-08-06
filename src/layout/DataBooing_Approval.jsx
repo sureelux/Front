@@ -14,7 +14,7 @@ import {
 import Swal from "sweetalert2";
 import "react-datepicker/dist/react-datepicker.css";
 
-export default function DataBooking() {
+export default function DataBooking_Approval() {
   const [bookings, setBookings] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,7 +59,9 @@ export default function DataBooking() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      getBookings();
+      setBookings(
+        bookings.filter((booking) => booking.booking_id !== booking_id)
+      );
     } catch (err) {
       console.error("Error deleting booking:", err);
     }
@@ -221,6 +223,7 @@ export default function DataBooking() {
   };
 
   const isActive = (path) => location.pathname === path;
+
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -233,7 +236,7 @@ export default function DataBooking() {
             ดูข้อมูล
           </label>
           <div className="overflow-auto w-full h-screen mt-15">
-            <p className="mt-3 ml-2 text-3xl font-bold drop-shadow-[2px_2px_var(--tw-shadow-color)] shadow-gray-300">
+            <p className="mt-3 ml-2 text-3xl font-bold drop-shadow-lg">
               รายละเอียดข้อมูลการจอง (รออนุมัติ)
             </p>
             <hr className="border my-3 ml-10 border-sky-400 dark:border-sky-300" />
@@ -274,7 +277,7 @@ export default function DataBooking() {
                   htmlFor="default-search"
                   className="text-sm font-bold text-gray-700 dark:text-gray-300 mr-2"
                 >
-                  ค้นหา
+                  ค้นหา :
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -322,45 +325,32 @@ export default function DataBooking() {
                 </thead>
                 <tbody className="font-medium text-black text-center">
                   {currentItems
-                    .filter((bookings) => bookings.status_booking === "WAIT")
-                    .map((bookings, index) => (
+                    .filter((booking) => booking.status_booking === "WAIT")
+                    .map((booking, index) => (
                       <tr
-                        key={bookings.booking_id}
-                        bookings={bookings}
+                        key={booking.booking_id}
                         className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                       >
-                        <td>{index + 1}</td>{" "}
-                        <td>
-                          {formatISODateToThai(bookings.booking_datatime)}
-                        </td>
-                        <td>{bookings.table.table_name}</td>
-                        <td>{bookings.table.type_table.type_name}</td>
-                        <td>{bookings.table.table_price}</td>
-                        <td>{bookings.user.firstname}</td>
-                        <td
-                          className={
-                            bookings.status_booking === "WAIT"
-                              ? "text-yellow-400 font-medium"
-                              : ""
-                          }
-                        >
-                          {bookings.status_booking === "WAIT"
-                            ? "รออนุมัติ"
-                            : ""}
+                        <td>{index + 1 + indexOfFirstItem}</td>
+                        <td>{formatISODateToThai(booking.booking_datatime)}</td>
+                        <td>{booking.table.table_name}</td>
+                        <td>{booking.table.type_table.type_name}</td>
+                        <td>{booking.table.table_price}</td>
+                        <td>{booking.user.firstname}</td>
+                        <td className="text-yellow-400 font-medium">
+                          รออนุมัติ
                         </td>
                         <td>
                           <button
-                            className={`${
-                              bookings.status_booking === "APPROVE"
-                                ? "btn btn-success text-xs rounded-2xl shadow-xl"
-                                : bookings.status_booking === "NOT_APPROVED"
-                                ? "btn btn-error text-xs rounded-2xl shadow-xl"
-                                : "btn btn-warning text-xs rounded-2xl shadow-xl"
-                            }`}
+                            className={`btn ${
+                              booking.status_booking === "WAIT"
+                                ? "btn-warning"
+                                : ""
+                            } text-xs rounded-2xl shadow-xl`}
                             onClick={() =>
                               document
                                 .getElementById(
-                                  `my_modal_${bookings.booking_id}`
+                                  `my_modal_${booking.booking_id}`
                                 )
                                 .showModal()
                             }
@@ -374,9 +364,9 @@ export default function DataBooking() {
                             >
                               <path
                                 stroke="currentColor"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
                                 d="M5 1v3m5-3v3m5-3v3M1 7h7m1.506 3.429 2.065 2.065M19 7h-2M2 3h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1Zm6 13H6v-2l5.227-5.292a1.46 1.46 0 0 1 2.065 2.065L8 16Z"
                               />
                             </svg>
@@ -406,6 +396,7 @@ export default function DataBooking() {
                 </p>
               </div>
             )}
+
             {filteredBookings_Approval.length > perPage && (
               <div className="mt-2 flex items-center justify-center space-x-4">
                 <button
@@ -432,7 +423,7 @@ export default function DataBooking() {
               </div>
             )}
 
-            {bookings.map((booking, index) => (
+            {filteredBookings_Approval.map((booking, index) => (
               <Modal key={index} booking={booking} />
             ))}
           </div>
@@ -607,9 +598,9 @@ const Modal = ({ booking }) => {
         >
           <path
             stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
             d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
           />
         </svg>

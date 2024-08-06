@@ -23,7 +23,7 @@ import DataBookingUser from "../layout/DataBookingUser";
 import Type_table from "../layout/TypeTableUser";
 import TypeTableUser from "../layout/TypeTableUser";
 import ProfileAdmin from "../layout/ProfileAdmin";
-import DataBooing_Approval from "../layout/DataBooing_approval";
+import DataBooing_Approval from "../layout/DataBooing_Approval";
 
 const guesRouter = createBrowserRouter([
   {
