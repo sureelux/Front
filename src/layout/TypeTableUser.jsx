@@ -89,8 +89,8 @@ export default function Tables() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="text-4xl font-bold shadow-lg bg-gradient-to-l from-green-400 via-violet-400 to-pink-400 text-white p-4 mt-20 text-center">
-        <div className="[text-shadow:2px_1px_6px_var(--tw-shadow-color)] shadow-gray-800 animate-pulse">
+      <div className="text-4xl font-bold shadow-lg bg-gradient-to-l from-green-400  to-sky-400 text-white p-4 mt-28 text-center w-96 rounded-br-full">
+        <div className="[text-shadow:3px_2px_5px_var(--tw-shadow-color)] shadow-gray-900 animate-pulse">
           {nameType}
         </div>
       </div>
@@ -101,10 +101,10 @@ export default function Tables() {
       </div>
 
       {typetable.length === 0 ? (
-        <div className="text-center text-xl font-bold mt-8">ไม่พบข้อมูล</div>
+        <div className="text-2xl text-gray-700 py-20 text-center">ไม่พบข้อมูล...</div>
       ) : (
         <>
-          <div className="max-w-[100rem] mx-auto gap-4 grid grid-cols-4 grid-rows-2 justify-items-center flex-grow">
+          <div className="max-w-[100rem] mx-auto gap-4 grid grid-cols-4 grid-rows-1 justify-items-center flex-grow">
             {currentItems.map((item) => (
               <div key={item.table_id} className="card-body items-center text-center">
                 <div className="relative my-2 w-full">

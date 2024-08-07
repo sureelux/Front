@@ -298,7 +298,7 @@ export default function DataType() {
             {filteredTypes.length > perPage && (
               <div className="mt-2 flex items-center justify-center space-x-4">
                 <button
-                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-xs"
                   onClick={prevPage}
                   disabled={currentPage === 1}
                 >
@@ -309,7 +309,7 @@ export default function DataType() {
                   {Math.ceil(filteredTypes.length / perPage)}
                 </span>
                 <button
-                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-xs"
                   onClick={nextPage}
                   disabled={
                     currentPage === Math.ceil(filteredTypes.length / perPage)

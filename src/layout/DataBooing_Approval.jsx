@@ -398,9 +398,9 @@ export default function DataBooking_Approval() {
             )}
 
             {filteredBookings_Approval.length > perPage && (
-              <div className="mt-2 flex items-center justify-center space-x-4">
+              <div className="mt-4 flex items-center justify-center space-x-4">
                 <button
-                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-xs"
                   onClick={prevPage}
                   disabled={currentPage === 1}
                 >
@@ -411,7 +411,7 @@ export default function DataBooking_Approval() {
                   {Math.ceil(filteredBookings_Approval.length / perPage)}
                 </span>
                 <button
-                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-sm"
+                  className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-xs"
                   onClick={nextPage}
                   disabled={
                     currentPage ===
@@ -491,7 +491,7 @@ export default function DataBooking_Approval() {
               <Link
                 to="/DataBooing_Approval"
                 className={`flex items-center p-2 rounded-lg ${
-                  isActive("DataBooing_Approval")
+                  isActive("/DataBooing_Approval")
                     ? "bg-black text-white font-bold"
                     : "bg-opacity-55 text-black"
                 }`}

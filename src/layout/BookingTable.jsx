@@ -93,9 +93,51 @@ export default function BookingTable() {
     getBookingTable();
   }, [tableId]);
 
-  const hdlChangeTime = (event) => {
+  const timeOptions = [];
+  for (let hour = 8; hour <= 16; hour++) {
+    for (let minute of [0, 30]) {
+      const time = `${String(hour).padStart(2, "0")}:${String(minute).padStart(
+        2,
+        "0"
+      )}`;
+      timeOptions.push(time);
+    }
+  }
+
+  const handleChangeTime = (event) => {
     const newTime = event.target.value;
+    const [hours, minutes] = newTime.split(":").map(Number);
+    if (
+      hours < 8 ||
+      (hours === 8 && minutes < 30) ||
+      hours > 16 ||
+      (hours === 16 && minutes > 30)
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "เวลานอกช่วงที่กำหนด",
+        text: "กรุณาเลือกเวลาในช่วง 08:30 - 16:30",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#28a745",
+      });
+      setTime("");
+      return;
+    }
     setTime(newTime);
+  };
+
+  // CSS for disabled time options
+  const timeButtonStyle = (time) => {
+    const [hours] = time.split(":").map(Number);
+    if (
+      hours < 8 ||
+      (hours === 8 && minutes < 30) ||
+      hours > 16 ||
+      (hours === 16 && minutes > 30)
+    ) {
+      return "bg-gray-500 text-gray-200 cursor-not-allowed";
+    }
+    return "bg-gray-300 text-black cursor-pointer";
   };
 
   const handleClearDate = (e) => {
@@ -109,8 +151,36 @@ export default function BookingTable() {
   };
 
   const hdlSubmit = async () => {
-    if (!startDate || !time) {
-      Swal.fire("กรุณาเลือกวันที่และเวลาจองโต๊ะอาหาร");
+    if (!startDate && !time) {
+      Swal.fire({
+        icon: "warning",
+        title: "ข้อมูลไม่ครบถ้วน",
+        text: "กรุณาเลือกวันที่และเวลาในการจองโต๊ะอาหาร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#28a745",
+      });
+      return;
+    }
+    
+    if (!startDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "ข้อมูลไม่ครบถ้วน",
+        text: "กรุณาเลือกวันที่จองโต๊ะอาหาร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#28a745",
+      });
+      return;
+    }
+
+    if (!time) {
+      Swal.fire({
+        icon: "warning",
+        title: "ข้อมูลไม่ครบถ้วน",
+        text: "กรุณาเลือกเวลาจองโต๊ะอาหาร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#28a745",
+      });
       return;
     }
 
@@ -162,7 +232,7 @@ export default function BookingTable() {
                 </figure>
               </div>
 
-              <div className="w-full pl-16 space-y-2">
+              <div className="w-full pl-16 space-y-1">
                 <div className="mb-4 text-left">
                   <label className="text-2xl font-bold">
                     ชื่อโต๊ะ :{" "}
@@ -223,31 +293,37 @@ export default function BookingTable() {
                     </span>
                   </p>
 
-                  <label className="form-control w-full max-w-[300px] mt-5">
-                    <div className="label">
-                      <span className="label-text-alt font-bold text-sm">
-                        เลือกเวลาการจอง
+                  <label className="form-control w-full max-w-[300px]">
+                    <div className="text-left mt-6">
+                      <span className="block label-text-alt font-bold text-sm mb-1 text-blue-600">
+                        เวลาเลือกได้แค่ช่วงเวลา 08.30 - 16.30
                       </span>
                     </div>
+                    <div className="text-left">
+                      <span className="block label-text-alt font-bold text-sm mb-1">
+                      เลือกเวลา (08.30 AM - 04.30 PM)
+                      </span>
+                    </div>
+
                     <div className="flex items-center">
                       <input
                         type="time"
-                        onChange={hdlChangeTime}
+                        onChange={handleChangeTime}
                         value={time}
-                        className="ml-1 mt-1 text-black bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-xs px-6 py-2 mb-1 cursor-pointer"
+                        className="ml-1 mt-1 text-black bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-xs px-4 py-2.5 mb-1 cursor-pointer"
                       />
                       <button
                         onClick={handleClearTime}
                         type="button"
-                        className="ml-4 text-white text-xs bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg px-4 py-2.5 mb-1"
+                        className="ml-4 text-white text-xs bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg px-4 py-2 mb-1"
                       >
                         ล้างเวลา
                       </button>
                     </div>
                     <p className="mt-2 text-start font-bold text-sm">
-                      เวลาที่เลือกจอง :
+                      เวลาที่เลือกจอง : &nbsp;
                       <span className="text-red-600 font-normal text-sm">
-                        {time ? time : " ยังไม่ระบุ "}
+                        {time ? time : "ยังไม่ระบุ "}
                       </span>
                     </p>
                   </label>

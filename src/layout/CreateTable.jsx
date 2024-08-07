@@ -17,7 +17,6 @@ export default function CreateTable() {
   });
   const [loading, setLoading] = useState(false);
 
-  // Fetch table types from the server
   useEffect(() => {
     const fetchTypes = async () => {
       const token = localStorage.getItem("token");
@@ -38,7 +37,6 @@ export default function CreateTable() {
     fetchTypes();
   }, []);
 
-  // Handle input field changes
   const handleChange = (e) => {
     setTables((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -46,14 +44,14 @@ export default function CreateTable() {
   const checkTableNameUnique = async (name) => {
     const token = localStorage.getItem("token");
     try {
-      console.log("Checking table name uniqueness for:", name); // Log table name being checked
+      console.log("Checking table name uniqueness for:", name); 
   
       const response = await axios.get(`http://localhost:8889/admin/tables/check`, {
         headers: { Authorization: `Bearer ${token}` },
         params: { name }
       });
   
-      console.log("API response:", response.data); // Log API response
+      console.log("API response:", response.data); 
   
       return response.data.isUnique;
     } catch (err) {
@@ -67,11 +65,9 @@ export default function CreateTable() {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    // Validate form fields
     if (!tables.table_img || !tables.table_name || !tables.table_price) {
       Swal.fire({
         icon: 'error',
@@ -81,7 +77,6 @@ export default function CreateTable() {
       return;
     }
   
-    // Check if the table name is unique
     const isUnique = await checkTableNameUnique(tables.table_name);
     if (!isUnique) {
       Swal.fire({

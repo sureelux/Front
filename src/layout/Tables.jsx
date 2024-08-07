@@ -162,7 +162,7 @@ export default function Tables() {
         </div>
 
         {tables.length === 0 ? (
-          <div className="text-center text-xl font-bold mt-8">ไม่พบข้อมูล</div>
+          <div className="text-xl text-gray-700 py-20">ไม่พบข้อมูล</div>
         ) : (
           <>
         <div className="max-w-[100rem] mx-auto gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center">
@@ -217,8 +217,8 @@ export default function Tables() {
               </div>
             ))
           ) : (
-            <div className="col-span-full text-center py-6">
-              <p className="text-xl text-gray-500">ไม่พบข้อมูล</p>
+            <div className="col-span-full text-center py-20">
+              <p className="text-xl text-gray-700">ไม่พบข้อมูล</p>
             </div>
           )}
         </div>

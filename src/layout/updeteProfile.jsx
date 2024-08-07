@@ -1,14 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/userAuth";
-
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const guestNav = [{ to: "/" }];
-
 const userNav = [{ to: "/", text: "Home" }];
 
-export default function updateProfile() {
+export default function UpdateProfile() {
   const { user, logout } = useAuth();
   const finalNav = user?.user_id ? userNav : guestNav;
   const navigate = useNavigate();
@@ -21,6 +20,12 @@ export default function updateProfile() {
     phone: "",
     email: "",
   });
+
+  const [firstnameError, setFirstnameError] = useState("");
+  const [lastnameError, setLastnameError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [emailError, setEmailError] = useState("");
+
   useEffect(() => {
     setInput({
       username: user?.username,
@@ -32,16 +37,65 @@ export default function updateProfile() {
     });
   }, [user?.user_id]);
 
+  const validateName = (value) => /^[A-Za-zก-ฮะ-์]+$/.test(value);
+  const validatePhone = (value) => /^[0-9]{10}$/.test(value);
+  const validateEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
   const hdlChange = (e) => {
-    setInput((prv) => ({ ...prv, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+
+    if (name === "firstname") {
+      if (!validateName(value)) {
+        setFirstnameError("กรุณากรอกชื่อให้ถูกต้อง (ภาษาไทยหรือภาษาอังกฤษ)");
+      } else {
+        setFirstnameError("");
+      }
+    }
+
+    if (name === "lastname") {
+      if (!validateName(value)) {
+        setLastnameError("กรุณากรอกนามสกุลให้ถูกต้อง (ภาษาไทยหรือภาษาอังกฤษ)");
+      } else {
+        setLastnameError("");
+      }
+    }
+
+    if (name === "phone") {
+      if (!validatePhone(value)) {
+        setPhoneError("กรุณากรอกให้ถูกต้อง เบอร์โทรศัพท์ต้องประกอบด้วยตัวเลข 10 ตัวเท่านั้น");
+        setInput((prv) => ({ ...prv, [name]: value.slice(0, 10) }));
+        return;
+      } else {
+        setPhoneError("");
+      }
+    }
+
+    if (name === "email") {
+      if (!validateEmail(value)) {
+        setEmailError("กรุณากรอกอีเมลให้ถูกต้อง");
+      } else {
+        setEmailError("");
+      }
+    }
+
+    setInput((prv) => ({ ...prv, [name]: value }));
   };
 
   const hdlSubmit = async (e) => {
     try {
       e.preventDefault();
+      if (firstnameError || lastnameError || phoneError || emailError) {
+        Swal.fire({
+          icon: "warning",
+          title: "ข้อมูลไม่ถูกต้อง",
+          text: "กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนบันทึก",
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      }
       const output = { ...input };
       const token = localStorage.getItem("token");
-      const rs = await axios.put(
+      await axios.put(
         `http://localhost:8889/user/${user.user_id}`,
         output,
         {
@@ -67,6 +121,7 @@ export default function updateProfile() {
       });
     }
   };
+
   return (
     <div className="text-center min-h-screen pb-16">
       <div className="flex absolute top-0 left-0 mt-20">
@@ -80,7 +135,10 @@ export default function updateProfile() {
           {user?.user_id ? user.username : "Guest"}
         </label>
       </p>
-      <form className="flex flex-col min-w-[600px] border-2 w-4/5 border-black mx-auto p-14 gap-1 mt-1 rounded-xl bg-sky-200 shadow-xl">
+      <form
+        className="flex flex-col min-w-[600px] border-2 w-4/5 border-black mx-auto p-14 gap-1 mt-1 rounded-xl bg-sky-200 shadow-xl"
+        onSubmit={hdlSubmit}
+      >
         <div className="flex items-center justify-center h-40 w-40 bg-gray-300 rounded-full overflow-hidden shadow-2xl">
           <img
             className="w-full object-cover"
@@ -115,6 +173,12 @@ export default function updateProfile() {
                 value={input.firstname}
                 onChange={hdlChange}
               />
+              {firstnameError && (
+                <div className="absolute mt-1 text-red-600 text-sm border border-white bg-white p-2 rounded-lg shadow-md">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  {firstnameError}
+                </div>
+              )}
             </label>
           </div>
           <div className="w-full sm:w-1/3 p-1">
@@ -129,6 +193,12 @@ export default function updateProfile() {
                 value={input.lastname}
                 onChange={hdlChange}
               />
+              {lastnameError && (
+                <div className="absolute mt-1 text-red-600 text-sm border border-white bg-white p-2 rounded-lg shadow-md">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  {lastnameError}
+                </div>
+              )}
             </label>
           </div>
           <div className="w-full sm:w-1/3 p-1">
@@ -157,6 +227,12 @@ export default function updateProfile() {
                 value={input.phone}
                 onChange={hdlChange}
               />
+              {phoneError && (
+                <div className="absolute mt-1 text-red-600 text-sm border border-white bg-white p-2 rounded-lg shadow-md">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  {phoneError}
+                </div>
+              )}
             </label>
           </div>
           <div className="w-full sm:w-1/3 p-1">
@@ -171,13 +247,19 @@ export default function updateProfile() {
                 value={input.email}
                 onChange={hdlChange}
               />
+              {emailError && (
+                <div className="absolute mt-1 text-red-600 text-sm border border-white bg-white p-2 rounded-lg shadow-md">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  {emailError}
+                </div>
+              )}
             </label>
           </div>
         </div>
         <div className="mt-8 flex justify-center">
           <button
             className="text-black bg-gradient-to-br from-yellow-300 to-yellow-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-yellow-200 dark:focus:ring-yellow-800 font-medium rounded-3xl text-sm px-5 py-2.5 text-center mr-4 mb-2 w-72 shadow-xl"
-            onClick={hdlSubmit}
+            type="submit"
           >
             บันทึก
           </button>
