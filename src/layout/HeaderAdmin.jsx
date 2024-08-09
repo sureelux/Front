@@ -89,7 +89,7 @@ export default function HeaderAdmin() {
               ระบบจองโต๊ะอาหาร
             </a>
           </div>
-          <div className="navbar-center hidden lg:flex text-white ">
+          <div className="navbar-center hidden lg:flex text-white">
             <ul className="menu menu-horizontal px-1 bg-white-100">
               <li>
                 <a onClick={hdlAdminHome}>หน้าหลัก</a>
@@ -102,6 +102,9 @@ export default function HeaderAdmin() {
         </div>
       </div>
       <div className="flex-none gap-2">
+        <span className="text-white mr-4">
+          สวัสดี, {user?.user_id ? user.username : 'Guest'}
+        </span>
         <div className="dropdown dropdown-end">
           <div
             tabIndex={0}
