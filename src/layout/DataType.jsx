@@ -291,7 +291,7 @@ export default function DataType() {
                   </thead>
                 </table>
                 <p className="text-center text-xl font-bold text-gray-500 mt-10">
-                  ไม่พบข้อมูลผู้ใช้งาน
+                  ไม่พบข้อมูลประเภทโต๊ะ
                 </p>
               </div>
             )}

@@ -51,7 +51,6 @@ export default function Dashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch users
         const usersResponse = await axios.get(
           `http://localhost:8889/admin/users`,
           {
@@ -60,7 +59,6 @@ export default function Dashboard() {
         );
         setTotalUsers(usersResponse.data.users.length);
 
-        // Fetch table types
         const typesResponse = await axios.get(
           `http://localhost:8889/admin/types`,
           {
@@ -69,7 +67,6 @@ export default function Dashboard() {
         );
         setTotalTableTypes(typesResponse.data.types.length);
 
-        // Fetch tables
         const tablesResponse = await axios.get(
           "http://localhost:8889/user/tables",
           {
@@ -78,7 +75,6 @@ export default function Dashboard() {
         );
         setTotalTables(tablesResponse.data.tables.length);
 
-        // Fetch bookings
         const bookingsResponse = await axios.get(
           `http://localhost:8889/admin/bookings`,
           {
@@ -86,7 +82,7 @@ export default function Dashboard() {
           }
         );
         setTotalBookings(bookingsResponse.data.bookings.length);
-        setBookingData(bookingsResponse.data.bookings || []); // Ensure bookingData is an array
+        setBookingData(bookingsResponse.data.bookings || []); 
       } catch (error) {
         setError(error.message || "เกิดข้อผิดพลาดในการดึงข้อมูล");
         console.error("Error fetching data:", error);
@@ -101,7 +97,6 @@ export default function Dashboard() {
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      // Format the date in Thailand timezone
       const formattedTime = format(now, "yyyy-MM-dd HH:mm:ss", {
         timeZone: "Asia/Bangkok",
       });
@@ -109,7 +104,6 @@ export default function Dashboard() {
     };
 
     updateTime();
-    // Update every second
     const interval = setInterval(updateTime, 1000);
 
     return () => clearInterval(interval);
@@ -145,46 +139,8 @@ export default function Dashboard() {
     };
   };
 
-  const { labels, data } = processBookingData();
 
-  const chartData = {
-    labels: labels,
-    datasets: [
-      {
-        label: "ค่าเฉลี่ยการจองต่อวัน",
-        data: data,
-        fill: false,
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        tension: 0.1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "day",
-          tooltipFormat: "YYYY-MM-DD",
-        },
-        title: {
-          display: true,
-          text: "วันที่",
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: "ค่าเฉลี่ยการจอง",
-        },
-      },
-    },
-  };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  
 
   return (
     <div className="drawer lg:drawer-open">
@@ -196,7 +152,7 @@ export default function Dashboard() {
         >
           ดูข้อมูล
         </label>
-        <div className="p-8 bg-gray-50 w-full">
+        <div className="p-8 bg-white w-full">
           <h1 className="text-4xl font-bold text-gray-800 mb-10">แดชบอร์ด</h1>
           <div className="text-right mb-4 text-gray-600">
             <p className="text-xl text-black font-bold">
@@ -281,13 +237,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </Link>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-              กราฟค่าเฉลี่ยการจองต่อวัน
-            </h2>
-            <Line data={chartData} options={chartOptions} />
           </div>
         </div>
       </div>

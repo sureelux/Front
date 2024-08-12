@@ -119,6 +119,12 @@ export default function DataTable() {
                   </select>
               </div>
               <div class="flex items-center space-x-4">
+                  <label for="table_seat" class="flex-shrink-0 w-20 text-gray-700 font-medium">ราคา</label>
+                  <input id="table_seat" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="number" value="${
+                    table.table_seat
+                  }" />
+              </div>
+              <div class="flex items-center space-x-4">
                   <label for="table_price" class="flex-shrink-0 w-20 text-gray-700 font-medium">ราคา</label>
                   <input id="table_price" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="number" value="${
                     table.table_price
@@ -149,6 +155,10 @@ export default function DataTable() {
             table_img: document.getElementById("table_img").value,
             table_name: document.getElementById("table_name").value,
             table_status: document.getElementById("table_status").value,
+            table_seat: parseInt(
+              document.getElementById("table_seat").value,
+              10
+            ),
             table_price: parseInt(
               document.getElementById("table_price").value,
               10
@@ -174,7 +184,8 @@ export default function DataTable() {
           {
             table_img: formValues.table_img,
             table_name: formValues.table_name,
-            table_status: formValues.table_status, // Use updated value from form
+            table_status: formValues.table_status, 
+            table_seat: parseInt(formValues.table_seat, 10),
             table_price: parseInt(formValues.table_price, 10),
             type_id: formValues.type_id,
           },
@@ -230,10 +241,12 @@ export default function DataTable() {
 
   const filteredTables = tables.filter((table) => {
     const priceString = table.table_price ? table.table_price.toString() : "";
+    const seatString = table.table_seat ? table.table_seat.toString() : "";
     return (
       table.table_id.toString().includes(searchTerm.toLowerCase()) ||
       table.table_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       priceString.includes(searchTerm.toLowerCase()) ||
+      seatString.includes(searchTerm.toLowerCase()) ||
       table.type_table.type_name
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
@@ -336,6 +349,7 @@ export default function DataTable() {
                     <th>ภาพ</th>
                     <th>ชื่อโต๊ะ</th>
                     <th>สถานะโต๊ะ</th>
+                    <th>จำนวนที่นั่ง</th>
                     <th>ราคา</th>
                     <th>ประเภทโต๊ะ</th>
                     <th>จัดการ</th>
@@ -374,6 +388,7 @@ export default function DataTable() {
                           ? "ไม่ว่าง"
                           : ""}
                       </td>
+                      <td>{tables.table_seat}</td>
                       <td>{tables.table_price}</td>
                       <td>{tables.type_table.type_name}</td>
                       <td>
@@ -407,6 +422,7 @@ export default function DataTable() {
                       <th>ภาพ</th>
                       <th>ชื่อโต๊ะ</th>
                       <th>สถานะโต๊ะ</th>
+                      <th>จำนวนที่นั่ง</th>
                       <th>ราคา</th>
                       <th>ประเภทโต๊ะ</th>
                       <th>การดำเนินการ</th>

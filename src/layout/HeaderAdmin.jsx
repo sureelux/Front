@@ -102,8 +102,8 @@ export default function HeaderAdmin() {
         </div>
       </div>
       <div className="flex-none gap-2">
-        <span className="text-white mr-4">
-          สวัสดี, {user?.user_id ? user.username : 'Guest'}
+        <span className="text-white mr-4 text-lg">
+          สวัสดี, <span className="text-sm">{user?.user_id ? user.username : 'Guest'}</span>
         </span>
         <div className="dropdown dropdown-end">
           <div

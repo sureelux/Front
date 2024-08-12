@@ -4,7 +4,7 @@ export default function Succeed() {
   const navigate = useNavigate();
 
   const hdlHome = () => {
-    navigate("/Tables");
+    navigate("/");
   };
 
   return (

@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImage, faChair, faDollarSign, faTag, faSave } from "@fortawesome/free-solid-svg-icons";
+import { faImage, faChair, faDollarSign, faTag, faSave, faTable } from "@fortawesome/free-solid-svg-icons";
 import Swal from 'sweetalert2';
 
 export default function CreateTable() {
@@ -12,6 +12,7 @@ export default function CreateTable() {
     table_img: "",
     table_name: "",
     table_status: "FREE",
+    table_seat: "",
     table_price: "",
     type_name: "1",
   });
@@ -68,7 +69,7 @@ export default function CreateTable() {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    if (!tables.table_img || !tables.table_name || !tables.table_price) {
+    if (!tables.table_img || !tables.table_name || !tables.table_seat || !tables.table_price) {
       Swal.fire({
         icon: 'error',
         title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
@@ -154,6 +155,23 @@ export default function CreateTable() {
               name="table_name"
               value={tables.table_name}
               onChange={handleChange}
+            />
+          </label>
+          <label className="form-control w-full">
+            <div className="label">
+              <span className="label-text font-bold">
+                <FontAwesomeIcon icon={faTable} className="mr-2" />
+                จำนวนที่นั่ง
+              </span>
+            </div>
+            <input
+              type="text"
+              className="input input-bordered w-full pl-5"
+              name="table_seat"
+              value={tables.table_seat}
+              onChange={handleChange}
+              pattern="\d*"
+              title="กรุณาใส่ตัวเลขเท่านั้น"
             />
           </label>
           <label className="form-control w-full">

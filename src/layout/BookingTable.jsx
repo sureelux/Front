@@ -126,7 +126,6 @@ export default function BookingTable() {
     setTime(newTime);
   };
 
-  // CSS for disabled time options
   const timeButtonStyle = (time) => {
     const [hours] = time.split(":").map(Number);
     if (
@@ -223,6 +222,7 @@ export default function BookingTable() {
               key={bookingtable.table_id}
               className="card-body text-center grid grid-cols-2 gap-4"
             >
+              <div>
               <div className="w-full flex justify-center">
                 <figure className="w-full">
                   <img
@@ -231,16 +231,17 @@ export default function BookingTable() {
                   />
                 </figure>
               </div>
-
-              <div className="w-full pl-16 space-y-1">
-                <div className="mb-4 text-left">
-                  <label className="text-2xl font-bold">
+              <div className="mt-10 text-center">
+                  <label className="text-4xl font-bold">
                     ชื่อโต๊ะ :{" "}
                     <a className="font-normal">{bookingtable.table_name}</a>
                   </label>
                 </div>
+                </div>
+
+              <div className="w-full pl-16 space-y-1">
                 <div className="mb-4 text-left">
-                  <label className="text-xl font-bold">
+                  <label className="text-lg font-bold">
                     ประเภท :{" "}
                     <a className="font-normal">
                       {bookingtable.type_table?.type_name}
@@ -248,9 +249,15 @@ export default function BookingTable() {
                   </label>
                 </div>
                 <div className="mb-4 text-left">
-                  <label className="product-price font-bold text-xl">
+                  <label className="text-lg font-bold">
+                    จำนวนที่นั่ง :{" "}
+                    <a className="font-normal">{bookingtable.table_seat}</a>
+                  </label>
+                </div>
+                <div className="mb-4 text-left">
+                  <label className="product-price font-bold text-lg">
                     ราคา{" "}
-                    <a className="text-red-600 text-2xl font-normal">
+                    <a className="text-red-600 text-lg font-normal">
                       {bookingtable.table_price}
                     </a>{" "}
                     บาท

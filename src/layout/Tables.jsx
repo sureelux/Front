@@ -179,20 +179,26 @@ export default function Tables() {
                   <div className="flex flex-col gap-4 mt-2 p-4">
                     <h3 className="text-3xl font-bold">{item.table_name}</h3>
                     <p className="text-2xl font-bold">
-                      ราคา:{" "}
+                      ราคา :{" "}
                       <span className="text-red-600 text-xl font-bold">
                         {item.table_price}
                       </span>{" "}
                       บาท
                     </p>
+                    <p className="text-lg font-bold">
+                      จำนวนที่นั่ง :{" "}
+                      <span className="text-red-600 text-xl font-normal">
+                        {item.table_seat}
+                      </span>{" "}
+                    </p>
                     <h3 className="font-bold">
-                      ประเภท:{" "}
+                      ประเภท :{" "}
                       <span className="text-base font-normal">
                         {item.type_table.type_name}
                       </span>
                     </h3>
                     <h3 className="font-bold">
-                      สถานะ:{" "}
+                      สถานะ :{" "}
                       <span
                         className={`text-base font-normal ${
                           item.table_status === "FREE"
