@@ -19,6 +19,7 @@ export default function DataUser() {
   const [notification, setNotification] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(7);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -28,6 +29,7 @@ export default function DataUser() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUsers(rs.data.users);
+        setTotalUsers(rs.data.users.filter(user => user.role !== "ADMIN").length);
       } catch (err) {
         console.error(err);
       }
@@ -59,6 +61,7 @@ export default function DataUser() {
         );
 
         setUsers(users.filter((user) => user.user_id !== user_id));
+        setTotalUsers(totalUsers - 1);
 
         Swal.fire({
           icon: "success",
@@ -88,6 +91,10 @@ export default function DataUser() {
     const date = new Date(dateString);
     return date.toLocaleDateString("th-TH", options);
   }
+
+  const countUsersByRole = (role) => {
+    return users.filter(user => user.role === role).length;
+  };
 
   const filteredUsers = users
     .filter(
@@ -139,7 +146,9 @@ export default function DataUser() {
               รายละเอียดข้อมูลผู้ใช้
             </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
-
+            <p className="text-xl font-semibold text-gray-700 ml-10">
+              จำนวนข้อมูลผู้ใช้งานทั้งหมด <spen className="text-3xl text-red-600">{totalUsers}</spen>
+            </p>
             <div className="flex justify-end items-end mb-4">
               <div className="flex items-center mt-8 mr-5">
                 <label
@@ -197,7 +206,10 @@ export default function DataUser() {
                 </thead>
                 <tbody className="font-medium text-black text-center">
                   {currentItems.map((user, index) => (
-                    <tr key={user.user_id} className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <tr
+                      key={user.user_id}
+                      className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
                       <td>{index + 1 + indexOfFirstItem}</td>
                       <td>{user.firstname}</td>
                       <td>{user.lastname}</td>
@@ -273,19 +285,6 @@ export default function DataUser() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-            <li>
-              <Link
-                to="/Dashboard"
-                className={`flex items-center p-2 rounded-lg ${
-                  isActive("/Dashboard")
-                    ? "bg-black text-white font-bold"
-                    : "bg-opacity-55 text-white"
-                }`}
-              >
-                <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
-                แดชบอร์ด
-              </Link>
-            </li>
             <li>
               <Link
                 to="/DataUser"

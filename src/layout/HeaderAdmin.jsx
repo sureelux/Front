@@ -32,11 +32,11 @@ export default function HeaderAdmin() {
   };
 
   const hdlDashboard = () => {
-    navigate("/Dashboard");
+    navigate("/DataUser");
   };
 
   const hdlAdminHome = () => {
-    navigate("/AdminHome");
+    navigate("/Dashboard");
   };
 
   const hdlProfileAdmin = () => {
@@ -78,7 +78,7 @@ export default function HeaderAdmin() {
                   <a onClick={hdlAdminHome}>หน้าหลัก</a>
                 </li>
                 <li>
-                  <a onClick={hdlDashboard}>แดชบอร์ด</a>
+                  <a onClick={hdlDashboard}>ข้อมูล</a>
                 </li>
               </ul>
             </div>

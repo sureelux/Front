@@ -7,7 +7,6 @@ import UserHome from "../layout/UserHome";
 import HeaderAdmin from "../layout/HeaderAdmin";
 import Dashboard from "../layout/Dashboard";
 import Tables from "../layout/Tables";
-import AdminHome from "../layout/AdminHome";
 import DataUser from "../layout/DataUser";
 import DataType from "../layout/DataType";
 import DataTable from "../layout/DataTable";
@@ -85,9 +84,8 @@ const adminRouter = createBrowserRouter([
     ),
 
     children: [
-      { index: true, element: <AdminHome /> },
+      { index: true, element: <Dashboard/> },
       { path: "/Dashboard", element: <Dashboard /> },
-      { path: "/AdminHome", element: <AdminHome /> },
       { path: "/DataUser", element: <DataUser /> },
       { path: "/DataType", element: <DataType /> },
       { path: "/DataTable", element: <DataTable /> },

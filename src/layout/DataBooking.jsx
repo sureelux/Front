@@ -9,6 +9,7 @@ import {
   faTable,
   faClipboardList,
   faCalendarCheck,
+  faList
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import "react-datepicker/dist/react-datepicker.css";
@@ -19,7 +20,9 @@ export default function DataBooking() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(5);
   const [selectedDate, setSelectedDate] = useState("");
-  const [availableDates, setAvailableDates] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [counts, setCounts] = useState({ approved: 0, canceled: 0 });
+  const [filterStatus, setFilterStatus] = useState(null);
 
   const location = useLocation();
   const token = localStorage.getItem("token");
@@ -34,16 +37,18 @@ export default function DataBooking() {
           }
         );
         setBookings(response.data.bookings);
-        // Assuming your API endpoint for available dates is `/admin/availableDates`
-        const datesResponse = await axios.get(
-          "http://localhost:8889/admin/availableDates",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setAvailableDates(datesResponse.data.dates);
+
+        // Count status bookings
+        setCounts({
+          approved: response.data.bookings.filter(
+            (b) => b.status_booking === "APPROVE"
+          ).length,
+          canceled: response.data.bookings.filter(
+            (b) => b.status_booking === "CANCEL"
+          ).length,
+        });
       } catch (error) {
-        console.error("Error fetching bookings or available dates:", error);
+        console.error("Error fetching bookings:", error);
       }
     };
     getBookings();
@@ -58,7 +63,7 @@ export default function DataBooking() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      getBookings(); // Refresh bookings data
+      await getBookings();
     } catch (err) {
       console.error("Error deleting booking:", err);
     }
@@ -104,7 +109,7 @@ export default function DataBooking() {
               confirmButtonText: "ตกลง",
               confirmButtonColor: "#3085d6",
             }).then(() => {
-              window.location.reload();
+              getBookings();
             });
           } else {
             Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
@@ -133,7 +138,7 @@ export default function DataBooking() {
   function formatISODateToThai(dateString) {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // เดือนใน JavaScript เริ่มจาก 0
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear() + 543;
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
@@ -217,9 +222,8 @@ export default function DataBooking() {
     }
   };
 
-  const counts = {
-    approved: bookings.filter((b) => b.status_booking === "APPROVE").length,
-    canceled: bookings.filter((b) => b.status_booking === "CANCEL").length,
+  const handleFilter = (status) => {
+    setFilterStatus(status);
   };
 
   const isActive = (path) => location.pathname === path;
@@ -240,6 +244,44 @@ export default function DataBooking() {
               รายละเอียดข้อมูลการจอง
             </p>
             <hr className="border my-3 ml-10 border-sky-400 dark:border-sky-300" />
+            <div className="flex justify-start gap-4 mt-1 p-4">
+              <div
+                className="flex items-center p-4 border-2 border-gray-500 rounded-lg shadow-md bg-gray-50 cursor-pointer"
+                onClick={() => handleFilter(null)}
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-500 text-white">
+                  <FontAwesomeIcon icon={faList} size="lg" />
+                </div>
+                <div className="ml-4">
+                <p className="text-lg font-medium">ทั้งหมด</p>
+                <p className="text-gray-600">ข้อมูลทั้งหมด : {counts.approved + counts.canceled}</p>
+                </div>
+              </div>
+              <div
+                className="flex items-center p-4 border-2 border-green-500 rounded-lg shadow-md bg-green-50 cursor-pointer"
+                onClick={() => handleFilter("APPROVE")}
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white">
+                  <FontAwesomeIcon icon={faCalendarCheck} size="lg" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-lg font-medium">อนุมัติ</p>
+                  <p className="text-gray-600">ข้อมูลอนุมัติทั้งหมด : {counts.approved}</p>
+                </div>
+              </div>
+              <div
+                className="flex items-center p-4 border-2 border-red-500 rounded-lg shadow-md bg-red-50 cursor-pointer"
+                onClick={() => handleFilter("CANCEL")}
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500 text-white">
+                  <FontAwesomeIcon icon={faTimes} size="lg" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-lg font-medium">ยกเลิก</p>
+                  <p className="text-gray-600">ข้อมูลยกเลิกทั้งหมด : {counts.canceled}</p>
+                </div>
+              </div>
+            </div>
 
             <div className="flex justify-between items-center mb-4">
               <div className="ml-4 flex items-center space-x-2">
@@ -324,11 +366,14 @@ export default function DataBooking() {
                 </thead>
                 <tbody className="font-medium text-black text-center">
                   {currentItems
-                    .filter(
-                      (booking) =>
-                        booking.status_booking === "APPROVE" ||
-                        booking.status_booking === "CANCEL"
-                    )
+                    .filter((booking) => {
+                      if (filterStatus === "APPROVE") {
+                        return booking.status_booking === "APPROVE";
+                      } else if (filterStatus === "CANCEL") {
+                        return booking.status_booking === "CANCEL";
+                      } else { return booking.status_booking === "APPROVE" || booking.status_booking === "CANCEL";
+                      }
+                    })
                     .map((booking, index) => (
                       <tr
                         key={booking.booking_id}
@@ -439,19 +484,6 @@ export default function DataBooking() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-            <li>
-              <Link
-                to="/Dashboard"
-                className={`flex items-center p-2 rounded-lg ${
-                  isActive("/Dashboard")
-                    ? "bg-black text-white font-bold"
-                    : "bg-opacity-55 text-black"
-                }`}
-              >
-                <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
-                แดชบอร์ด
-              </Link>
-            </li>
             <li>
               <Link
                 to="/DataUser"

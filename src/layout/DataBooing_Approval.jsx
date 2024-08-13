@@ -220,6 +220,7 @@ export default function DataBooking_Approval() {
   const counts = {
     approved: bookings.filter((b) => b.status_booking === "APPROVE").length,
     canceled: bookings.filter((b) => b.status_booking === "CANCEL").length,
+    waiting: bookings.filter((b) => b.status_booking === "WAIT").length, 
   };
 
   const isActive = (path) => location.pathname === path;
@@ -240,8 +241,10 @@ export default function DataBooking_Approval() {
               รายละเอียดข้อมูลการจอง (รออนุมัติ)
             </p>
             <hr className="border my-3 ml-10 border-sky-400 dark:border-sky-300" />
-
-            <div className="flex justify-between items-center mb-4">
+            <p className="text-xl font-bold text-gray-700 ml-10">
+              จำนวนข้อมูลการจองที่รออนุมัติทั้งหมด <spen className="text-3xl text-red-600"> {counts.waiting}</spen>
+            </p>
+            <div className="flex justify-between items-center mb-3 mt-3">
               <div className="ml-4 flex items-center space-x-2">
                 <label
                   htmlFor="date-filter"
@@ -436,19 +439,7 @@ export default function DataBooking_Approval() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-            <li>
-              <Link
-                to="/Dashboard"
-                className={`flex items-center p-2 rounded-lg ${
-                  isActive("/Dashboard")
-                    ? "bg-black text-white font-bold"
-                    : "bg-opacity-55 text-black"
-                }`}
-              >
-                <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
-                แดชบอร์ด
-              </Link>
-            </li>
+          
             <li>
               <Link
                 to="/DataUser"

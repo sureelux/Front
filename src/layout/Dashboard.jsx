@@ -3,44 +3,21 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faTachometerAlt,
   faUser,
   faTable,
   faClipboardList,
   faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale,
-} from "chart.js";
-import "chartjs-adapter-date-fns"; 
-import { format } from "date-fns-tz"; 
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale
-);
+import { format } from "date-fns-tz";
+import useAuth from "../hooks/userAuth"; // Import useAuth hook
 
 export default function Dashboard() {
+  const { user } = useAuth(); // Get the user object
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalTableTypes, setTotalTableTypes] = useState(0);
   const [totalTables, setTotalTables] = useState(0);
   const [totalBookings, setTotalBookings] = useState(0);
-  const [bookingData, setBookingData] = useState([]);
+  const [totalWaitingBookings, setTotalWaitingBookings] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentTime, setCurrentTime] = useState("");
@@ -51,38 +28,32 @@ export default function Dashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const usersResponse = await axios.get(
-          `http://localhost:8889/admin/users`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const [usersResponse, typesResponse, tablesResponse, bookingsResponse] =
+          await Promise.all([
+            axios.get("http://localhost:8889/admin/users", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:8889/admin/types", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:8889/user/tables", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:8889/admin/bookings", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
+
         setTotalUsers(usersResponse.data.users.length);
-
-        const typesResponse = await axios.get(
-          `http://localhost:8889/admin/types`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
         setTotalTableTypes(typesResponse.data.types.length);
-
-        const tablesResponse = await axios.get(
-          "http://localhost:8889/user/tables",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
         setTotalTables(tablesResponse.data.tables.length);
-
-        const bookingsResponse = await axios.get(
-          `http://localhost:8889/admin/bookings`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
         setTotalBookings(bookingsResponse.data.bookings.length);
-        setBookingData(bookingsResponse.data.bookings || []); 
+
+        // Filter bookings with status 'WAIT'
+        const waitingBookings = bookingsResponse.data.bookings.filter(
+          (booking) => booking.status_booking === "WAIT"
+        );
+        setTotalWaitingBookings(waitingBookings.length); // Set the state with the count of waiting bookings
       } catch (error) {
         setError(error.message || "เกิดข้อผิดพลาดในการดึงข้อมูล");
         console.error("Error fetching data:", error);
@@ -97,7 +68,13 @@ export default function Dashboard() {
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      const formattedTime = format(now, "yyyy-MM-dd HH:mm:ss", {
+      const formattedTime = now.toLocaleDateString("th-TH", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
         timeZone: "Asia/Bangkok",
       });
       setCurrentTime(formattedTime);
@@ -111,221 +88,125 @@ export default function Dashboard() {
 
   const isActive = (path) => location.pathname === path;
 
-  const processBookingData = () => {
-    if (!Array.isArray(bookingData)) return { labels: [], data: [] };
-
-    const approvedBookings = bookingData.filter(
-      (booking) => booking.status === "approved"
-    ); 
-
-    const counts = approvedBookings.reduce((acc, booking) => {
-      const date = booking.date;
-      if (date) {
-        const formattedDate = new Date(date).toISOString().split("T")[0]; // Format as YYYY-MM-DD
-        if (!acc[formattedDate]) acc[formattedDate] = 0;
-        acc[formattedDate]++;
-      }
-      return acc;
-    }, {});
-
-  
-    const totalDays = Object.keys(counts).length;
-    const totalBookingsCount = Object.values(counts).reduce((sum, count) => sum + count, 0);
-    const averageBookingsPerDay = totalDays > 0 ? totalBookingsCount / totalDays : 0;
-
-    return {
-      labels: Object.keys(counts),
-      data: Object.keys(counts).map(date => averageBookingsPerDay),
-    };
-  };
-
-
-  
-
   return (
-    <div className="drawer lg:drawer-open">
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col items-center justify-center mt-20">
-        <label
-          htmlFor="my-drawer-2"
-          className="btn btn-info drawer-button lg:hidden text-white font-normal mt-5"
-        >
-          ดูข้อมูล
-        </label>
-        <div className="p-8 bg-white w-full">
-          <h1 className="text-4xl font-bold text-gray-800 mb-10">แดชบอร์ด</h1>
-          <div className="text-right mb-4 text-gray-600">
-            <p className="text-xl text-black font-bold">
-              <span className="block text-3xl mb-2">เวลาปัจจุบัน</span>
-              <span className="block text-gray-600">{currentTime}</span>
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <Link
-              to="/DataUser"
-              className="p-6 bg-white rounded-lg shadow-lg flex items-center space-x-4 cursor-pointer hover:bg-blue-50 transition"
-            >
-              <div className="p-6 bg-blue-100 rounded-lg shadow-lg flex items-center space-x-4 border border-gray-200">
-                <FontAwesomeIcon
-                  icon={faUser}
-                  className="text-blue-500 text-4xl"
-                />
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-700">
-                    จำนวนผู้ใช้งานทั้งหมด
-                  </h2>
-                  <p className="text-4xl font-bold text-blue-600">
-                    {totalUsers}
-                  </p>
-                </div>
-              </div>
-            </Link>
-            <Link
-              to="/DataType"
-              className="p-6 bg-white rounded-lg shadow-lg flex items-center space-x-4 cursor-pointer hover:bg-green-50 transition"
-            >
-              <div className="p-6 bg-green-100 rounded-lg shadow-lg flex items-center space-x-4 border border-gray-200">
-                <FontAwesomeIcon
-                  icon={faTable}
-                  className="text-green-500 text-4xl"
-                />
-                <div>
-                  <h2 className="text-lg  font-semibold text-gray-700">
-                    จำนวนประเภทโต๊ะทั้งหมด
-                  </h2>
-                  <p className="text-4xl font-bold text-green-600">
-                    {totalTableTypes}
-                  </p>
-                </div>
-              </div>
-            </Link>
-            <Link
-              to="/DataTable"
-              className="p-6 bg-white rounded-lg shadow-lg flex items-center space-x-4 cursor-pointer hover:bg-yellow-50 transition"
-            >
-              <div className="p-6 bg-yellow-100 rounded-lg shadow-lg flex items-center space-x-4 border border-gray-200">
-                <FontAwesomeIcon
-                  icon={faClipboardList}
-                  className="text-yellow-500 text-4xl"
-                />
-                <div>
-                  <h2 className="text-xl  font-semibold text-gray-700">
-                    จำนวนโต๊ะทั้งหมด
-                  </h2>
-                  <p className="text-4xl font-bold text-yellow-600">
-                    {totalTables}
-                  </p>
-                </div>
-              </div>
-            </Link>
-            <Link
-              to="/DataBooking"
-              className="p-6 bg-white rounded-lg shadow-lg flex items-center space-x-4 cursor-pointer hover:bg-red-50 transition"
-            >
-              <div className="p-6 bg-red-100 rounded-lg shadow-lg flex items-center space-x-4 border border-gray-200">
-                <FontAwesomeIcon
-                  icon={faCalendarCheck}
-                  className="text-red-500 text-4xl"
-                />
-                <div>
-                  <h2 className="text-lg  font-semibold text-gray-700">
-                    จำนวนการจองทั้งหมด
-                  </h2>
-                  <p className="text-4xl font-bold text-red-600">
-                    {totalBookings}
-                  </p>
-                </div>
-              </div>
-            </Link>
+    <div className="h-screen p-8 mt-20">
+      <div className="border-4 border-sky-300 p-12 rounded-xl bg-sky-50">
+        <div className="mt-10 text-start">
+          <p className="text-5xl font-bold mb-6">
+            สวัสดีผู้ดูแลระบบ คุณ{" "}
+            <spen className="text-5xl text-yellow-500">{user?.username}</spen>
+          </p>{" "}
+          <div className="mt-12">
+          <Link
+            to="/DataUser"
+            className="text-center p-3 bg-sky-100 text-black rounded-lg shadow-lg flex items-center space-x-2 border-2 border-sky-300 w-48 hover:underline"
+          >
+            ดูข้อมูล
+          </Link>
           </div>
         </div>
       </div>
 
-      <div className="drawer-side mt-20 overflow-y-hidden">
-        <label
-          htmlFor="my-drawer-2"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-          <li>
-            <Link
-              to="/Dashboard"
-              className={`flex items-center p-2 rounded-lg ${
-                isActive("/Dashboard")
-                  ? "bg-black text-white font-bold"
-                  : "bg-opacity-55 text-black"
-              }`}
-            >
-              <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />{" "}
-              แดชบอร์ด
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/DataUser"
-              className={`flex items-center p-2 rounded-lg ${
-                isActive("/DataUser")
-                  ? "bg-black text-white font-bold"
-                  : "bg-opacity-55 text-black"
-              }`}
-            >
-              <FontAwesomeIcon icon={faUser} className="mr-2" /> ข้อมูลผู้ใช้
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/DataType"
-              className={`flex items-center p-2 rounded-lg ${
-                isActive("/DataType")
-                  ? "bg-black text-white font-bold"
-                  : "bg-opacity-55 text-black"
-              }`}
-            >
-              <FontAwesomeIcon icon={faTable} className="mr-2" />{" "}
-              ข้อมูลประเภทโต๊ะ
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/DataTable"
-              className={`flex items-center p-2 rounded-lg ${
-                isActive("/DataTable")
-                  ? "bg-black text-white font-bold"
-                  : "bg-opacity-55 text-black"
-              }`}
-            >
-              <FontAwesomeIcon icon={faClipboardList} className="mr-2" />{" "}
-              ข้อมูลโต๊ะ
-            </Link>
-          </li>
-          <li>
-              <Link
-                to="/DataBooing_Approval"
-                className={`flex items-center p-2 rounded-lg ${
-                  isActive("/DataBooing_Approval")
-                    ? "bg-black text-white font-bold"
-                    : "bg-opacity-55 text-black"
-                }`}
-              >
-                <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />
-                ข้อมูลการจอง (รออนุมัติ)
-              </Link>
-            </li>
-          <li>
-            <Link
-              to="/DataBooking"
-              className={`flex items-center p-2 rounded-lg ${
-                isActive("/DataBooking")
-                  ? "bg-black text-white font-bold"
-                  : "bg-opacity-55 text-black"
-              }`}
-            >
-              <FontAwesomeIcon icon={faCalendarCheck} className="mr-2" />{" "}
-              ข้อมูลการจอง
-            </Link>
-          </li>
-        </ul>
+      <div className="text-right mt-6 text-gray-600 p-4">
+        <p className="text-xl text-black font-bold">
+          <span className="block text-3xl mb-2">เวลาปัจจุบัน</span>
+          <span className="block text-gray-600">{currentTime}</span>
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 p-8">
+        <Link
+          to="/DataUser"
+          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-blue-50 transition"
+        >
+          <div className="p-6 bg-blue-100 rounded-lg shadow-lg flex items-center space-x-4 border border-sky-200">
+            <FontAwesomeIcon icon={faUser} className="text-blue-500 text-4xl" />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-700">
+                จำนวนผู้ใช้งานทั้งหมด
+              </h2>
+              <p className="text-4xl font-bold text-blue-600">{totalUsers}</p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/DataType"
+          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-green-50 transition"
+        >
+          <div className="p-6 bg-green-100 rounded-lg shadow-lg flex items-center space-x-4 border border-green-200">
+            <FontAwesomeIcon
+              icon={faTable}
+              className="text-green-500 text-4xl"
+            />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-700">
+                จำนวนประเภทโต๊ะทั้งหมด
+              </h2>
+              <p className="text-4xl font-bold text-green-600">
+                {totalTableTypes}
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/DataTable"
+          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-yellow-50 transition"
+        >
+          <div className="p-6 bg-yellow-100 rounded-lg shadow-lg flex items-center space-x-4 border border-yellow-200">
+            <FontAwesomeIcon
+              icon={faClipboardList}
+              className="text-yellow-500 text-4xl"
+            />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-700">
+                จำนวนโต๊ะทั้งหมด
+              </h2>
+              <p className="text-4xl font-bold text-yellow-600">
+                {totalTables}
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/DataBooing_Approval"
+          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-purple-50 transition"
+        >
+          <div className="p-6 bg-purple-100 rounded-lg shadow-lg flex items-center space-x-4 border border-purple-200">
+            <FontAwesomeIcon
+              icon={faCalendarCheck}
+              className="text-purple-500 text-4xl"
+            />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-700">
+                การจองที่รออนุมัติทั้งหมด
+              </h2>
+              <p className="text-4xl font-bold text-purple-600">
+                {totalWaitingBookings}
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/DataBooking"
+          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-red-50 transition"
+        >
+          <div className="p-6 bg-red-100 rounded-lg shadow-lg flex items-center space-x-4 border border-red-200">
+            <FontAwesomeIcon
+              icon={faCalendarCheck}
+              className="text-red-500 text-4xl"
+            />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-700">
+                จำนวนการจองทั้งหมด
+              </h2>
+              <p className="text-4xl font-bold text-red-600">{totalBookings}</p>
+            </div>
+          </div>
+        </Link>
       </div>
     </div>
   );

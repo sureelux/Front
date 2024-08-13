@@ -136,8 +136,8 @@ export default function DataType() {
         return input.value;
       },
       customClass: {
-        confirmButton: 'rounded-xl',
-      cancelButton: 'rounded-xl'
+        confirmButton: "rounded-xl",
+        cancelButton: "rounded-xl",
       },
     });
 
@@ -196,6 +196,9 @@ export default function DataType() {
               รายละเอียดข้อมูลประเภทโต๊ะ
             </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
+            <p className="text-xl font-semibold text-gray-700 ml-10">
+              จำนวนข้อมูลประเภทโต๊ะทั้งหมด<spen className="text-3xl text-red-600"> {types.length}</spen>
+            </p>
             <div className="flex justify-end items-end mb-2">
               <div className="flex items-center mr-5">
                 <label
@@ -254,7 +257,10 @@ export default function DataType() {
                 </thead>
                 <tbody className="font-medium text-black text-center">
                   {currentItems.map((type, index) => (
-                    <tr key={type.type_id} className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <tr
+                      key={type.type_id}
+                      className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
                       <td>{index + 1 + indexOfFirstItem}</td>
                       <td>{type.type_name}</td>
                       <td>
@@ -305,7 +311,7 @@ export default function DataType() {
                   ก่อนหน้า
                 </button>
                 <span className="text-sm text-gray-900">
-                  หน้า {currentPage} จาก {" "}
+                  หน้า {currentPage} จาก{" "}
                   {Math.ceil(filteredTypes.length / perPage)}
                 </span>
                 <button
@@ -328,19 +334,6 @@ export default function DataType() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-            <li>
-              <Link
-                to="/Dashboard"
-                className={`flex items-center p-2 rounded-lg ${
-                  isActive("/Dashboard")
-                    ? "bg-black text-white font-bold"
-                    : "bg-opacity-55 text-black"
-                }`}
-              >
-                <FontAwesomeIcon icon={faTachometerAlt} className="mr-2" />
-                แดชบอร์ด
-              </Link>
-            </li>
             <li>
               <Link
                 to="/DataUser"

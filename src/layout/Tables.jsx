@@ -12,7 +12,7 @@ export default function Tables() {
   const [types, setTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; 
+  const itemsPerPage = 8;
 
   const { user } = userAuth();
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ export default function Tables() {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-    setCurrentPage(1); 
+    setCurrentPage(1);
   };
 
   const filteredTables = tables.filter((table) =>
@@ -165,102 +165,118 @@ export default function Tables() {
           <div className="text-xl text-gray-700 py-20">ไม่พบข้อมูล</div>
         ) : (
           <>
-        <div className="max-w-[100rem] mx-auto gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center">
-          {currentTables.length > 0 ? (
-            currentTables.map((item) => (
-              <div
-                key={item.table_id}
-                className="card-body items-center text-center"
-              >
-                <div className="card w-80 border-2 border-gray-500 shadow-2xl bg-white bg-[url('path-to-your-pattern.png')] bg-contain bg-no-repeat">
-                  <figure className="px-10 pt-10 hover:scale-110 transition-transform duration-300 ease-in-out">
-                    <img src={item.table_img} alt={item.table_name} />
-                  </figure>
-                  <div className="flex flex-col gap-4 mt-2 p-4">
-                    <h3 className="text-3xl font-bold">{item.table_name}</h3>
-                    <p className="text-2xl font-bold">
-                      ราคา :{" "}
-                      <span className="text-red-600 text-xl font-bold">
-                        {item.table_price}
-                      </span>{" "}
-                      บาท
-                    </p>
-                    <p className="text-lg font-bold">
-                      จำนวนที่นั่ง :{" "}
-                      <span className="text-red-600 text-xl font-normal">
-                        {item.table_seat}
-                      </span>{" "}
-                    </p>
-                    <h3 className="font-bold">
-                      ประเภท :{" "}
-                      <span className="text-base font-normal">
-                        {item.type_table.type_name}
-                      </span>
-                    </h3>
-                    <h3 className="font-bold">
-                      สถานะ :{" "}
-                      <span
-                        className={`text-base font-normal ${
-                          item.table_status === "FREE"
-                            ? "text-green-500"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {item.table_status === "FREE" ? "ว่าง" : "ไม่ว่าง"}
-                      </span>
-                    </h3>
-                    <div className="card-actions mx-auto px-20 text-center">
-                      <button
-                        disabled={item.table_status === "BUSY"}
-                        onClick={() => hdlBooking(item.table_id)}
-                        className="text-white bg-gradient-to-r from-blue-500 to-blue-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-8 disabled:opacity-50 disabled:cursor-no-drop shadow-xl"
-                      >
-                        จอง
-                      </button>
+            <div className="max-w-[100rem] mx-auto gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center">
+              {currentTables.length > 0 ? (
+                currentTables.map((item) => (
+                  <div
+                    key={item.table_id}
+                    className="card-body items-center text-center"
+                  >
+                    <div className="card w-80 border-2 border-gray-500 shadow-2xl bg-white bg-[url('path-to-your-pattern.png')] bg-contain bg-no-repeat">
+                      <figure className="px-10 pt-10 hover:scale-110 transition-transform duration-300 ease-in-out">
+                        <img src={item.table_img} alt={item.table_name} />
+                      </figure>
+                      <div className="flex flex-col gap-4 mt-2 p-4">
+                        <h3 className="text-3xl font-bold">
+                          {item.table_name}
+                        </h3>
+                        <p className="text-2xl font-bold">
+                          ราคา :{" "}
+                          <span className="text-red-600 text-xl font-bold">
+                            {item.table_price}
+                          </span>{" "}
+                          บาท
+                        </p>
+                        <p className="text-lg font-bold">
+                          จำนวนที่นั่ง :{" "}
+                          <span className="text-red-600 text-xl font-normal">
+                            {item.table_seat}
+                          </span>{" "}
+                        </p>
+                        <h3 className="font-bold">
+                          ประเภท :{" "}
+                          <span className="text-base font-normal">
+                            {item.type_table.type_name}
+                          </span>
+                        </h3>
+                        <h3 className="font-bold">
+                          สถานะ :{" "}
+                          <span
+                            className={`text-base font-normal ${
+                              item.table_status === "FREE"
+                                ? "text-green-500"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {item.table_status === "FREE" ? "ว่าง" : "ไม่ว่าง"}
+                          </span>
+                        </h3>
+                        <div className="card-actions mx-auto px-20 text-center">
+                          <button 
+                          disabled={item.table_status === "BUSY"}
+                          onClick={() => hdlBooking(item.table_id)}
+                          className="flex overflow-hidden  w-[5.1rem] hover:w-[6.5rem] items-center gap-2 cursor-pointer bg-gradient-to-r from-blue-500 to-sky-400 text-white px-5 py-2 rounded-full transition-all ease-in-out hover:scale hover:scale-105 font-[revert] active:scale-100 shadow-lg">
+                            จอง
+                            <svg
+                              className="size-6 mt-0.5"
+                              stroke="currentColor"
+                              strokeWidth="1.0"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672Zm-7.518-.267A8.25 8.25 0 1 1 20.25 10.5M8.288 14.212A5.25 5.25 0 1 1 17.25 10.5"
+                                strokeLinejoin="round"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-20">
+                  <p className="text-xl text-gray-700">ไม่พบข้อมูล</p>
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-20">
-              <p className="text-xl text-gray-700">ไม่พบข้อมูล</p>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="flex justify-center mt-1 mb-8">
-          <button
-            onClick={() =>
-              setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))
-            }
-            className={`px-4 py-2 rounded-lg mr-2 ${
-              currentPage === 1
-                ? "bg-blue-500 opacity-50 cursor-not-allowed"
-                : "bg-blue-500"
-            } text-white`}
-            disabled={currentPage === 1}
-          >
-            <FaArrowLeft />
-          </button>
-          <span className="flex items-center">{`Page ${currentPage} of ${totalPages}`}</span>
-          <button
-            onClick={() =>
-              setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages))
-            }
-            className={`px-4 py-2 rounded-lg ml-2 ${
-              currentPage === totalPages
-                ? "bg-blue-500 opacity-50 cursor-not-allowed"
-                : "bg-blue-500"
-            } text-white`}
-            disabled={currentPage === totalPages}
-          >
-            <FaArrowRight />
-          </button>
-        </div>
-        </>
+            <div className="flex justify-center mt-1 mb-8">
+              <button
+                onClick={() =>
+                  setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))
+                }
+                className={`px-4 py-2 rounded-lg mr-2 ${
+                  currentPage === 1
+                    ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                    : "bg-blue-500"
+                } text-white`}
+                disabled={currentPage === 1}
+              >
+                <FaArrowLeft />
+              </button>
+              <span className="flex items-center">{`Page ${currentPage} of ${totalPages}`}</span>
+              <button
+                onClick={() =>
+                  setCurrentPage((prevPage) =>
+                    Math.min(prevPage + 1, totalPages)
+                  )
+                }
+                className={`px-4 py-2 rounded-lg ml-2 ${
+                  currentPage === totalPages
+                    ? "bg-blue-500 opacity-50 cursor-not-allowed"
+                    : "bg-blue-500"
+                } text-white`}
+                disabled={currentPage === totalPages}
+              >
+                <FaArrowRight />
+              </button>
+            </div>
+          </>
         )}
-
 
         <footer class="bg-gradient-to-tl bg-sky-600 from-orange-100 via-cyan-400 text-white py-8 w-full mt-3">
           <div class="container mx-auto px-4">
