@@ -196,8 +196,8 @@ export default function DataType() {
               รายละเอียดข้อมูลประเภทโต๊ะ
             </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
-            <p className="text-xl font-semibold text-gray-700 ml-10">
-              จำนวนข้อมูลประเภทโต๊ะทั้งหมด<spen className="text-3xl text-red-600"> {types.length}</spen>
+            <p className="text-2xl font-semibold text-gray-700 ml-10">
+              จำนวนข้อมูลประเภทโต๊ะทั้งหมด : <spen className="text-3xl text-red-600"> {types.length}</spen>
             </p>
             <div className="flex justify-end items-end mb-2">
               <div className="flex items-center mr-5">
@@ -259,12 +259,12 @@ export default function DataType() {
                   {currentItems.map((type, index) => (
                     <tr
                       key={type.type_id}
-                      className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      className="bg-gray-50 border border-gray-300 dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       <td>{index + 1 + indexOfFirstItem}</td>
                       <td>{type.type_name}</td>
-                      <td>
-                        <div className="flex justify-center items-center">
+                      <td className="border border-gray-300">
+                        <div className="flex justify-center items-center ">
                           <button
                             className="btn btn-warning text-black text-xs font-normal rounded-xl shadow-xl flex items-center mr-2"
                             onClick={() =>

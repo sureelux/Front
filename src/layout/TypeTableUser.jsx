@@ -101,12 +101,17 @@ export default function Tables() {
       </div>
 
       {typetable.length === 0 ? (
-        <div className="text-2xl text-gray-700 py-20 text-center">ไม่พบข้อมูล...</div>
+        <div className="text-2xl text-gray-700 py-20 text-center">
+          ไม่พบข้อมูล...
+        </div>
       ) : (
         <>
           <div className="max-w-[100rem] mx-auto gap-4 grid grid-cols-4 grid-rows-1 justify-items-center flex-grow">
             {currentItems.map((item) => (
-              <div key={item.table_id} className="card-body items-center text-center">
+              <div
+                key={item.table_id}
+                className="card-body items-center text-center"
+              >
                 <div className="relative my-2 w-full">
                   <div className="absolute top-0 left-0 w-full h-full rounded-full border-transparent animated-gradient"></div>
                 </div>
@@ -123,12 +128,19 @@ export default function Tables() {
                       </label>{" "}
                       บาท
                     </p>
+                    <p className="text-lg font-bold">
+                      จำนวนที่นั่ง :{" "}
+                      <span className="text-red-600 text-xl font-normal">
+                        {item.table_seat}
+                      </span>{" "}
+                    </p>
                     <h3 className="product-category font-bold">
                       ประเภท :{" "}
                       <label className="text-base font-normal">
                         {item.type_table.type_name}
                       </label>
                     </h3>
+
                     <h3 className="font-bold">
                       สถานะ :{" "}
                       <label
@@ -160,7 +172,9 @@ export default function Tables() {
 
       <div className="flex justify-center mt-1 mb-8">
         <button
-          onClick={() => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))}
+          onClick={() =>
+            setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))
+          }
           className={`px-4 py-2 bg-blue-500 text-white rounded-lg mr-2 ${
             currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
           }`}
@@ -170,7 +184,9 @@ export default function Tables() {
         </button>
         <span className="flex items-center">{`Page ${currentPage} of ${totalPages}`}</span>
         <button
-          onClick={() => setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages))
+          }
           className={`px-4 py-2 bg-blue-500 text-white rounded-lg ml-2 ${
             currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
           }`}

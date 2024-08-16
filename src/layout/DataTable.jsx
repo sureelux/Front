@@ -1,9 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faTachometerAlt,
   faTrash,
   faEdit,
   faPlus,
@@ -18,23 +17,27 @@ export default function DataTable() {
   const [tables, setTables] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(4);
+  const [perPage] = useState(3);
+  const [filterStatus, setFilterStatus] = useState(null);
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const getTables = async (req, res, next) => {
-      const rs = await axios.get(`http://localhost:8889/user/tables`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTables(rs.data.tables);
+    const getTables = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8889/user/tables`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTables(response.data.tables);
+      } catch (error) {
+        console.error("Error fetching tables:", error);
+      }
     };
     getTables();
-  }, []);
+  }, [token]);
 
   const hdlDelete = async (e, table_id) => {
     e.preventDefault();
-
     const result = await Swal.fire({
       title: "คุณต้องการลบข้อมูลหรือไม่?",
       icon: "warning",
@@ -47,16 +50,13 @@ export default function DataTable() {
 
     if (result.isConfirmed) {
       try {
-        const token = localStorage.getItem("token");
         await axios.delete(
           `http://localhost:8889/admin/deleteTable/${table_id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-
         setTables(tables.filter((table) => table.table_id !== table_id));
-
         Swal.fire({
           icon: "success",
           title: "ลบข้อมูลเรียบร้อย",
@@ -64,7 +64,7 @@ export default function DataTable() {
           confirmButtonColor: "#3996fa",
         });
       } catch (err) {
-        console.error(err);
+        console.error("Error deleting table:", err);
         Swal.fire({
           icon: "error",
           title: "เกิดข้อผิดพลาดในการลบข้อมูล",
@@ -77,123 +77,45 @@ export default function DataTable() {
 
   const handleEditClick = async (table) => {
     try {
-      // Fetch table types
       const tableTypesResponse = await axios.get(
         "http://localhost:8889/admin/types",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      const tableTypes = tableTypesResponse.data.types || [];
 
-      const tableTypes = Array.isArray(tableTypesResponse.data.types)
-        ? tableTypesResponse.data.types
-        : [];
-      console.log("tableTypes:", tableTypes);
-
-      // Display Swal for editing table
       const { value: formValues } = await Swal.fire({
         title: "แก้ไขข้อมูลโต๊ะ",
         html: `
-          <div class="space-y-4 mb-4">
-              <div class="flex items-center space-x-4">
-                  <label for="table_img" class="flex-shrink-0 w-20 text-gray-700 font-medium">ภาพ</label>
-                  <input id="table_img" class="swal2-input border border-gray-300 rounded-md p-2 flex-grow text-lg" type="text" value="${
-                    table.table_img
-                  }" />
-              </div>
-              <div class="flex items-center space-x-4">
-                  <label for="table_name" class="flex-shrink-0 w-20 text-gray-700 font-medium">ชื่อโต๊ะ</label>
-                  <input id="table_name" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="text" value="${
-                    table.table_name
-                  }" />
-              </div>
-              <div class="flex items-center space-x-4">
-                  <label for="table_status" class="flex-shrink-0 w-20 text-gray-700 font-medium">สถานะ</label>
-                  <select id="table_status" class="border border-gray-300 rounded-md p-2 flex-grow text-lg">
-                      <option value="FREE" ${
-                        table.table_status === "FREE" ? "selected" : ""
-                      }>ว่าง</option>
-                      <option value="BUSY" ${
-                        table.table_status === "BUSY" ? "selected" : ""
-                      }>ไม่ว่าง</option>
-                  </select>
-              </div>
-              <div class="flex items-center space-x-4">
-                  <label for="table_seat" class="flex-shrink-0 w-20 text-gray-700 font-medium">ราคา</label>
-                  <input id="table_seat" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="number" value="${
-                    table.table_seat
-                  }" />
-              </div>
-              <div class="flex items-center space-x-4">
-                  <label for="table_price" class="flex-shrink-0 w-20 text-gray-700 font-medium">ราคา</label>
-                  <input id="table_price" class="border border-gray-300 rounded-md p-2 flex-grow text-lg" type="number" value="${
-                    table.table_price
-                  }" />
-              </div>
-              <div class="flex items-center space-x-4">
-                  <label for="type_id" class="flex-shrink-0 w-32 text-gray-700 font-medium">ประเภทโต๊ะ</label>
-                  <select id="type_id" class="border border-gray-300 rounded-md p-2 flex-grow text-lg">
-                      ${tableTypes
-                        .map(
-                          (type) => `
-                          <option value="${type.type_id}" ${
-                            type.type_id === table.type_table?.type_id
-                              ? "selected"
-                              : ""
-                          }>
-                              ${type.type_name}
-                          </option>`
-                        )
-                        .join("")}
-                  </select>
-              </div>
-          </div>
-          `,
+        `,
         focusConfirm: false,
-        preConfirm: () => {
-          return {
-            table_img: document.getElementById("table_img").value,
-            table_name: document.getElementById("table_name").value,
-            table_status: document.getElementById("table_status").value,
-            table_seat: parseInt(
-              document.getElementById("table_seat").value,
-              10
-            ),
-            table_price: parseInt(
-              document.getElementById("table_price").value,
-              10
-            ),
-            type_id: document.getElementById("type_id").value,
-          };
-        },
+        preConfirm: () => ({
+          table_img: document.getElementById("table_img").value,
+          table_name: document.getElementById("table_name").value,
+          table_status: document.getElementById("table_status").value,
+          table_seat: parseInt(document.getElementById("table_seat").value, 10),
+          table_price: parseInt(
+            document.getElementById("table_price").value,
+            10
+          ),
+          type_id: document.getElementById("type_id").value,
+        }),
         confirmButtonText: "บันทึก",
         cancelButtonText: "ยกเลิก",
         showCancelButton: true,
         cancelButtonColor: "#eb3b4c",
         confirmButtonColor: "#27ba48",
-        customClass: {
-          confirmButton: "rounded-xl shadow-2xl",
-          cancelButton: "rounded-xl shadow-2xl",
-        },
       });
 
       if (formValues) {
-        // Update table with new values
         await axios.patch(
           `http://localhost:8889/admin/updateTable/${table.table_id}`,
-          {
-            table_img: formValues.table_img,
-            table_name: formValues.table_name,
-            table_status: formValues.table_status,
-            table_seat: parseInt(formValues.table_seat, 10),
-            table_price: parseInt(formValues.table_price, 10),
-            type_id: formValues.type_id,
-          },
+          formValues,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-
         Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -201,15 +123,13 @@ export default function DataTable() {
           showConfirmButton: false,
           timer: 1500,
         });
-
-        // Refresh table list
-        const rs = await axios.get("http://localhost:8889/user/tables", {
+        const response = await axios.get("http://localhost:8889/user/tables", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setTables(rs.data.tables);
+        setTables(response.data.tables);
       }
     } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการแก้ไขข้อมูล", error);
+      console.error("Error editing table:", error);
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
@@ -218,44 +138,31 @@ export default function DataTable() {
     }
   };
 
-  function showStatusAlert() {
-    Swal.fire({
-      icon: "info",
-      title: "สถานะ",
-      text: "ไม่สามารถแก้ไขสถานะได้",
-      confirmButtonText: "ตกลง",
-      confirmButtonColor: "#3996fa",
-    });
-  }
-
-  function FormatDate(dateString) {
-    const options = {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("th-TH", options);
-  }
-
   const filteredTables = tables.filter((table) => {
+    const searchTermLower = searchTerm.toLowerCase();
     const priceString = table.table_price ? table.table_price.toString() : "";
     const seatString = table.table_seat ? table.table_seat.toString() : "";
+  
     return (
-      table.table_id.toString().includes(searchTerm.toLowerCase()) ||
-      table.table_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      priceString.includes(searchTerm.toLowerCase()) ||
-      seatString.includes(searchTerm.toLowerCase()) ||
-      table.type_table.type_name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (table.table_status === "FREE" &&
-        "ว่าง".includes(searchTerm.toLowerCase())) ||
-      (table.table_status === "BUSY" &&
-        "ไม่ว่าง".includes(searchTerm.toLowerCase()))
+      (table.table_id && table.table_id.toString().includes(searchTermLower)) ||
+      (table.table_name && table.table_name.toLowerCase().includes(searchTermLower)) ||
+      (priceString && priceString.includes(searchTermLower)) ||
+      (seatString && seatString.includes(searchTermLower)) ||
+      (table.type_table &&
+        table.type_table.type_name &&
+        table.type_table.type_name.toLowerCase().includes(searchTermLower)) ||
+      (table.table_status === "FREE" && "ว่าง".includes(searchTermLower)) ||
+      (table.table_status === "BUSY" && "ไม่ว่าง".includes(searchTermLower))
     );
   });
+  
+
+  const freeCount = filteredTables.filter(
+    (table) => table.table_status === "FREE"
+  ).length;
+  const busyCount = filteredTables.filter(
+    (table) => table.table_status === "BUSY"
+  ).length;
 
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
@@ -277,6 +184,19 @@ export default function DataTable() {
 
   const isActive = (path) => location.pathname === path;
 
+  const handleShowAllTables = () => {
+    setFilterStatus(null);
+  };
+  
+
+  const handleFreeClick = () => {
+    setFilterStatus("FREE");
+  };
+
+  const handleBusyClick = () => {
+    setFilterStatus("BUSY");
+  };
+
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -293,7 +213,33 @@ export default function DataTable() {
               รายละเอียดข้อมูลโต๊ะ
             </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
-              <p className="text-xl font-semibold text-gray-700 ml-10">จำนวนข้อมูลโต๊ะทั้งหมด <spen className="text-3xl text-red-600">{filteredTables.length} </spen></p>
+            <p className="text-2xl font-semibold text-gray-700 ml-10 cursor-pointer" onClick={handleShowAllTables}>
+              จำนวนข้อมูลโต๊ะทั้งหมด : {" "}
+              <spen className="text-3xl text-sky-500">
+                {filteredTables.length}{" "}
+              </spen>
+            </p>
+            <div className="flex flex-row space-x-2">
+              <p
+                className="text-lg font-semibold text-gray-700 ml-10 mt-2 border border-gray-300 p-2 rounded bg-gray-100 flex items-center w-96 transform transition-transform duration-300 hover:scale-105 cursor-pointer"
+                onClick={handleFreeClick}
+              >
+                <i className="fas fa-check-circle text-green-600 mr-2"></i>
+                จำนวนโต๊ะ (ว่าง) : {" "}
+                <span className="text-2xl text-green-600 ml-2">
+                  {freeCount}
+                </span>
+              </p>
+              <p
+                className="text-lg font-semibold text-gray-700 ml-10 mt-2 border border-gray-300 p-2 rounded bg-gray-100 flex items-center w-96 transform transition-transform duration-300 hover:scale-105 cursor-pointer"
+                onClick={handleBusyClick}
+              >
+                <i className="fas fa-times-circle text-red-600 mr-2"></i>
+                จำนวนโต๊ะ (ไม่ว่าง) : {" "}
+                <span className="text-2xl text-red-600 ml-2">{busyCount}</span>
+              </p>
+            </div>
+
             <div className="flex justify-end items-end mb-2">
               <div className="flex items-center mr-5">
                 <label
@@ -357,61 +303,65 @@ export default function DataTable() {
                   </tr>
                 </thead>
                 <tbody className="font-medium text-black text-center">
-                  {currentItems.map((tables, index) => (
-                    <tr
-                      key={tables.table_id}
-                      tables={tables}
-                      className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
-                    >
-                      <td>{index + 1 + indexOfFirstItem}</td>
-                      <td className="flex justify-center items-center">
-                        <figure className="hover:scale-110 transition duration-300 ease-in-out">
-                          <img
-                            src={tables.table_img}
-                            className="max-w-32 rounded-lg shadow-lg"
-                          />
-                        </figure>
-                      </td>
-
-                      <td>{tables.table_name}</td>
-                      <td
-                        className={
-                          tables.table_status === "FREE"
-                            ? "text-green-500"
-                            : tables.table_status === "BUSY"
-                            ? "text-red-500 font-medium"
-                            : ""
-                        }
+                  {currentItems
+                    .filter((tables) =>
+                      filterStatus ? tables.table_status === filterStatus : true
+                    )
+                    .map((tables, index) => (
+                      <tr
+                        key={tables.table_id}
+                        tables={tables}
+                        className="bg-gray-50 border border-gray-300 dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                       >
-                        {tables.table_status === "FREE"
-                          ? "ว่าง"
-                          : tables.table_status === "BUSY"
-                          ? "ไม่ว่าง"
-                          : ""}
-                      </td>
-                      <td>{tables.table_seat}</td>
-                      <td>{tables.table_price}</td>
-                      <td>{tables.type_table.type_name}</td>
-                      <td>
-                        <div className="justify-center ">
-                          <button
-                            className="btn btn-warning text-black text-xs font-normal rounded-xl shadow-xl"
-                            style={{ marginRight: "20px" }}
-                            onClick={() => handleEditClick(tables)}
-                          >
-                            <FontAwesomeIcon icon={faEdit}></FontAwesomeIcon>
-                          </button>
+                        <td>{index + 1 + indexOfFirstItem}</td>
+                        <td className="flex justify-center items-center">
+                          <figure className="hover:scale-110 transition duration-300 ease-in-out">
+                            <img
+                              src={tables.table_img}
+                              className="max-w-32 rounded-lg shadow-lg"
+                            />
+                          </figure>
+                        </td>
 
-                          <button
-                            className="btn btn-error text-white text-xs font-normal rounded-xl shadow-xl"
-                            onClick={(e) => hdlDelete(e, tables.table_id)}
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        <td>{tables.table_name}</td>
+                        <td
+                          className={
+                            tables.table_status === "FREE"
+                              ? "text-green-500"
+                              : tables.table_status === "BUSY"
+                              ? "text-red-500 font-medium"
+                              : ""
+                          }
+                        >
+                          {tables.table_status === "FREE"
+                            ? "ว่าง"
+                            : tables.table_status === "BUSY"
+                            ? "ไม่ว่าง"
+                            : ""}
+                        </td>
+                        <td>{tables.table_seat}</td>
+                        <td>{tables.table_price}</td>
+                        <td>{tables.type_table.type_name}</td>
+                        <td className="border border-gray-300">
+                          <div className="justify-center ">
+                            <button
+                              className="btn btn-warning text-black text-xs font-normal rounded-xl shadow-xl"
+                              style={{ marginRight: "20px" }}
+                              onClick={() => handleEditClick(tables)}
+                            >
+                              <FontAwesomeIcon icon={faEdit}></FontAwesomeIcon>
+                            </button>
+
+                            <button
+                              className="btn btn-error text-white text-xs font-normal rounded-xl shadow-xl"
+                              onClick={(e) => hdlDelete(e, tables.table_id)}
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             ) : (

@@ -130,7 +130,7 @@ export default function DataUser() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div>
+    <div className="min-h-screen">
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center mt-20">
@@ -146,8 +146,8 @@ export default function DataUser() {
               รายละเอียดข้อมูลผู้ใช้
             </p>
             <hr className="border my-5 ml-10 border-sky-400 dark:border-sky-300" />
-            <p className="text-xl font-semibold text-gray-700 ml-10">
-              จำนวนข้อมูลผู้ใช้งานทั้งหมด <spen className="text-3xl text-red-600">{totalUsers}</spen>
+            <p className="text-2xl font-semibold text-gray-700 ml-10">
+              จำนวนข้อมูลผู้ใช้งานทั้งหมด : <spen className="text-3xl text-red-600">{totalUsers}</spen>
             </p>
             <div className="flex justify-end items-end mb-4">
               <div className="flex items-center mt-8 mr-5">
@@ -208,7 +208,7 @@ export default function DataUser() {
                   {currentItems.map((user, index) => (
                     <tr
                       key={user.user_id}
-                      className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      className="bg-gray-50 border border-gray-300 dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       <td>{index + 1 + indexOfFirstItem}</td>
                       <td>{user.firstname}</td>
@@ -217,7 +217,7 @@ export default function DataUser() {
                       <td>{user.phone}</td>
                       <td>{user.email}</td>
                       <td>{user.role === "USER" ? "ผู้ใช้งาน" : ""}</td>
-                      <td>
+                      <td className="border border-gray-300">
                         <div className="justify-center items-center">
                           <button
                             className="btn btn-error font-normal text-white text-xs shadow-xl rounded-xl"

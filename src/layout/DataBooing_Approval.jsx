@@ -50,78 +50,114 @@ export default function DataBooking_Approval() {
     getBookings();
   }, [token]);
 
-  const hdlDelete = async (e, booking_id) => {
+  const hdlModalAccept = async (tableId, bookingId) => {
     try {
-      e.stopPropagation();
-      await axios.delete(
-        `http://localhost:8889/admin/deleteBooking/${booking_id}`,
+      const data = { table_status: "BUSY" };
+      const data2 = { status_booking: "APPROVE" };
+      const rs = await axios.patch(
+        `http://localhost:8889/admin/updateStatus/${tableId}`,
+        data,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setBookings(
-        bookings.filter((booking) => booking.booking_id !== booking_id)
+      const rs2 = await axios.patch(
+        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
+        data2,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-    } catch (err) {
-      console.error("Error deleting booking:", err);
+      if (rs2.status === 200 && rs.status === 200) {
+        Swal.fire(
+          "สำเร็จ",
+          "คุณได้ทำการอนุมัติการจองเรียบร้อยแล้ว",
+          "success"
+        ).then(() => {
+          window.location.href = "/DataBooking";
+        },2000);
+      }
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถอนุมัติการจองได้", "error");
     }
   };
 
-  const handleStatusChange = async (e, booking_id, currentStatus) => {
-    e.stopPropagation();
-
-    if (currentStatus !== "APPROVE") {
-      Swal.fire({
-        title: "ไม่สามารถยกเลิกการจองได้",
-        text: "การจองนี้ไม่อยู่ในสถานะที่สามารถยกเลิกได้",
-        icon: "info",
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "ตกลง",
-      });
-      return;
-    }
-
-    Swal.fire({
-      title: "คุณต้องการยกเลิกการจองไหม?",
-      text: "การยกเลิกจะทำให้สถานะการจองเป็น 'ยกเลิก'",
-      icon: "warning",
-      showCloseButton: true,
-      confirmButtonColor: "#02ab21",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "ยืนยัน",
-      cancelButtonText: "ยกเลิก",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const response = await axios.patch(
-            `http://localhost:8889/admin/updateStatusBooking/${booking_id}`,
-            { status_booking: "CANCEL" },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-
-          if (response.status === 200) {
-            Swal.fire({
-              title: "ยกเลิกเรียบร้อย",
-              text: "สถานะการจองถูกเปลี่ยนเป็นยกเลิก",
-              icon: "success",
-              confirmButtonText: "ตกลง",
-              confirmButtonColor: "#3085d6",
-            }).then(() => {
-              window.location.reload();
-            });
-          } else {
-            Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
-          }
-        } catch (err) {
-          console.error(
-            "Error updating booking status:",
-            err.response ? err.response.data : err.message
-          );
-          Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
+  const hdlModalCancel = async (tableId, bookingId) => {
+    try {
+      const data = { table_status: "FREE" };
+      const data2 = { status_booking: "CANCEL" };
+      const rs = await axios.patch(
+        `http://localhost:8889/admin/updateStatus/${tableId}`,
+        data,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
+      );
+      const rs2 = await axios.patch(
+        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
+        data2,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (rs2.status === 200 && rs.status === 200) {
+        Swal.fire(
+          "สำเร็จ",
+          "คุณได้ทำการยกเลิกการจองเรียบร้อยแล้ว",
+          "success"
+        ).then(() => {
+          window.location.href = "/DataBooking";
+        },2000);
+      }
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
+    }
+  };
+
+  const handleApproveClick = (booking) => {
+    Swal.fire({
+      title: "คุณต้องการอนุมัติการจองหรือไม่?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText:
+        '<span class=" text-white py-2 px-4 rounded">อนุมัติ</span>',
+      cancelButtonText:
+        '<span class=" text-white py-2 px-4 rounded">ปิด</span>',
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#6c757d",
+      reverseButtons: true,
+      
+    }).then((result) => {
+      if (result.isConfirmed) {
+        hdlModalAccept(booking.table.table_id, booking.booking_id);
       }
     });
   };
+
+  const handleCancelClick = (booking) => {
+    Swal.fire({
+      title: "คุณต้องการยกเลิกการจองหรือไม่?",
+      text: "การยกเลิกจะไม่สามารถย้อนกลับได้",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: '<span class="text-white py-2 px-4 rounded">ปิด</span>',
+      confirmButtonText: '<span class="text-white py-2 px-4 rounded">ยกเลิกการจอง</span>',
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
+      reverseButtons: true,
+      customClass: {
+        confirmButton: 'mr-2',
+        cancelButton: 'ml-2'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        hdlModalCancel(booking.table.table_id, booking.booking_id);
+      }
+    });
+  };
+  
 
   function FormatDate(dateString) {
     const date = new Date(dateString);
@@ -220,7 +256,7 @@ export default function DataBooking_Approval() {
   const counts = {
     approved: bookings.filter((b) => b.status_booking === "APPROVE").length,
     canceled: bookings.filter((b) => b.status_booking === "CANCEL").length,
-    waiting: bookings.filter((b) => b.status_booking === "WAIT").length, 
+    waiting: bookings.filter((b) => b.status_booking === "WAIT").length,
   };
 
   const isActive = (path) => location.pathname === path;
@@ -241,8 +277,9 @@ export default function DataBooking_Approval() {
               รายละเอียดข้อมูลการจอง (รออนุมัติ)
             </p>
             <hr className="border my-3 ml-10 border-sky-400 dark:border-sky-300" />
-            <p className="text-xl font-bold text-gray-700 ml-10">
-              จำนวนข้อมูลการจองที่รออนุมัติทั้งหมด <spen className="text-3xl text-red-600"> {counts.waiting}</spen>
+            <p className="text2xl font-bold text-gray-700 ml-10">
+              จำนวนข้อมูลการจองที่รออนุมัติทั้งหมด :{" "}
+              <spen className="text-3xl text-red-600"> {counts.waiting}</spen>
             </p>
             <div className="flex justify-between items-center mb-3 mt-3">
               <div className="ml-4 flex items-center space-x-2">
@@ -275,7 +312,7 @@ export default function DataBooking_Approval() {
                 </button>
               </div>
 
-              <div className="flex items-center mt-8 mr-5">
+              <div className="flex items-center mt-1 mr-5">
                 <label
                   htmlFor="default-search"
                   className="text-sm font-bold text-gray-700 dark:text-gray-300 mr-2"
@@ -320,6 +357,7 @@ export default function DataBooking_Approval() {
                     <th>วันที่/เวลาจอง</th>
                     <th>ชื่อโต๊ะ</th>
                     <th>ประเภทโต๊ะ</th>
+                    <th>จำนวนที่นั่ง</th>
                     <th>ราคาโต๊ะ</th>
                     <th>ชื่อลูกค้า</th>
                     <th>สถานะ</th>
@@ -332,49 +370,32 @@ export default function DataBooking_Approval() {
                     .map((booking, index) => (
                       <tr
                         key={booking.booking_id}
-                        className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        className="bg-gray-50 border border-gray-300 dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                       >
                         <td>{index + 1 + indexOfFirstItem}</td>
                         <td>{formatISODateToThai(booking.booking_datatime)}</td>
                         <td>{booking.table.table_name}</td>
                         <td>{booking.table.type_table.type_name}</td>
+                        <td>{booking.table.table_seat}</td>
                         <td>{booking.table.table_price}</td>
                         <td>{booking.user.firstname}</td>
                         <td className="text-yellow-400 font-medium">
                           รออนุมัติ
                         </td>
-                        <td>
+                        <td className="border border-gray-300 p-2 text-center">
                           <button
-                            className={`btn ${
-                              booking.status_booking === "WAIT"
-                                ? "btn-warning"
-                                : ""
-                            } text-xs rounded-2xl shadow-xl`}
-                            onClick={() =>
-                              document
-                                .getElementById(
-                                  `my_modal_${booking.booking_id}`
-                                )
-                                .showModal()
-                            }
+                            onClick={() => handleApproveClick(booking)}
+                            className="bg-green-500 text-white rounded px-3 py-2 mr-2"
                           >
-                            <svg
-                              className="w-4 h-4 text-white"
-                              aria-hidden="true"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M5 1v3m5-3v3m5-3v3M1 7h7m1.506 3.429 2.065 2.065M19 7h-2M2 3h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1Zm6 13H6v-2l5.227-5.292a1.46 1.46 0 0 1 2.065 2.065L8 16Z"
-                              />
-                            </svg>
+                            <FontAwesomeIcon icon={faCheck} />
                           </button>
-                        </td>
+                          <button
+                            onClick={() => handleCancelClick(booking)}
+                            className="bg-red-500 text-white rounded px-3 py-2 "
+                          >
+                            <FontAwesomeIcon icon={faTimes} />
+                          </button>
+                        </td> 
                       </tr>
                     ))}
                 </tbody>
@@ -425,10 +446,6 @@ export default function DataBooking_Approval() {
                 </button>
               </div>
             )}
-
-            {filteredBookings_Approval.map((booking, index) => (
-              <Modal key={index} booking={booking} />
-            ))}
           </div>
         </div>
 
@@ -439,7 +456,6 @@ export default function DataBooking_Approval() {
             className="drawer-overlay"
           ></label>
           <ul className="menu p-4 w-60 min-h-full bg-gradient-to-r from-sky-100 to-sky-400">
-          
             <li>
               <Link
                 to="/DataUser"
@@ -510,123 +526,3 @@ export default function DataBooking_Approval() {
     </div>
   );
 }
-
-const Modal = ({ booking }) => {
-  const modalId = `my_modal_${booking.booking_id}`;
-  let token = localStorage.getItem("token");
-
-  const hdlModalAccept = async (modalId, tableId, bookingId) => {
-    try {
-      const data = { table_status: "BUSY" };
-      const data2 = { status_booking: "APPROVE" };
-      const rs = await axios.patch(
-        `http://localhost:8889/admin/updateStatus/${tableId}`,
-        data,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const rs2 = await axios.patch(
-        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
-        data2,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (rs2.status === 200 && rs.status === 200) {
-        alert("คุณได้ทำการอนุมัติการจองเรียบร้อยแล้ว");
-        document.getElementById(modalId).close();
-        window.location.href = "/DataBooking";
-      }
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-    }
-  };
-
-  const hdlModalCancel = async (modalId, tableId, bookingId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const data = { table_status: "FREE" };
-      const data2 = { status_booking: "CANCEL" };
-      const rs = await axios.patch(
-        `http://localhost:8889/admin/updateStatus/${tableId}`,
-        data,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const rs2 = await axios.patch(
-        `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
-        data2,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (rs2.status === 200) {
-        alert("คุณได้ทำการยกเลิกการจองเรียบร้อยแล้ว");
-        document.getElementById(modalId).close();
-        window.location.href = "/DataBooking";
-      }
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-    }
-  };
-
-  return (
-    <dialog id={modalId} className="modal">
-      <div className="modal-box">
-        <form method="dialog">
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 border bg-red-500 text-white">
-            ✕
-          </button>
-        </form>
-        <svg
-          className="mx-auto mb-4 text-gray-400 w-14 h-14 dark:text-red-200"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 20 20"
-        >
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-          />
-        </svg>
-        <h3 className="font-bold text-xl text-center">
-          คุณต้องการอนุมัติการจองหรือไม่?
-        </h3>
-        <div className="mt-8 flex justify-center">
-          <button
-            className="btn btn-success text-white font-normal mr-5 rounded-xl"
-            onClick={() =>
-              hdlModalAccept(
-                modalId,
-                booking.table.table_id,
-                booking.booking_id
-              )
-            }
-          >
-            <FontAwesomeIcon icon={faCheck} className="mr-2" />
-            อนุมัติ
-          </button>
-          <button
-            className="btn btn-error text-white font-normal rounded-xl"
-            onClick={() =>
-              hdlModalCancel(
-                modalId,
-                booking.table.table_id,
-                booking.booking_id
-              )
-            }
-          >
-            <FontAwesomeIcon icon={faTimes} className="mr-2" />
-            ยกเลิก
-          </button>
-        </div>
-      </div>
-    </dialog>
-  );
-};

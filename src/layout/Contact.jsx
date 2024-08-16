@@ -23,6 +23,7 @@ export default function Contact() {
   }, [images.length]);
 
   return (
+    <div className="min-h-screen">
     <div className="bg-pattern min-h-screen flex flex-col items-center py-10 px-1">
       <div className="overflow-hidden w-full max-w-10xl">
         <div className="relative overflow-hidden w-full mt-10 h-[200px]">
@@ -92,6 +93,7 @@ export default function Contact() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

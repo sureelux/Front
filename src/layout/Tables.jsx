@@ -212,25 +212,12 @@ export default function Tables() {
                           </span>
                         </h3>
                         <div className="card-actions mx-auto px-20 text-center">
-                          <button 
-                          disabled={item.table_status === "BUSY"}
-                          onClick={() => hdlBooking(item.table_id)}
-                          className="flex overflow-hidden  w-[5.1rem] hover:w-[6.5rem] items-center gap-2 cursor-pointer bg-gradient-to-r from-blue-500 to-sky-400 text-white px-5 py-2 rounded-full transition-all ease-in-out hover:scale hover:scale-105 font-[revert] active:scale-100 shadow-lg">
+                          <button
+                            disabled={item.table_status === "BUSY"}
+                            onClick={() => hdlBooking(item.table_id)}
+                            className="text-white bg-gradient-to-r from-blue-500 to-blue-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-8 disabled:opacity-50 disabled:cursor-no-drop shadow-xl"
+                          >
                             จอง
-                            <svg
-                              className="size-6 mt-0.5"
-                              stroke="currentColor"
-                              strokeWidth="1.0"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672Zm-7.518-.267A8.25 8.25 0 1 1 20.25 10.5M8.288 14.212A5.25 5.25 0 1 1 17.25 10.5"
-                                strokeLinejoin="round"
-                                strokeLinecap="round"
-                              />
-                            </svg>
                           </button>
                         </div>
                       </div>

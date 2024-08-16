@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faTachometerAlt,
   faTimes,
   faUser,
   faTable,
   faClipboardList,
   faCalendarCheck,
-  faList
+  faList,
+  faCheckCircle,
+  faTimesCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import "react-datepicker/dist/react-datepicker.css";
@@ -20,10 +21,8 @@ export default function DataBooking() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(5);
   const [selectedDate, setSelectedDate] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
-  const [counts, setCounts] = useState({ approved: 0, canceled: 0 });
   const [filterStatus, setFilterStatus] = useState(null);
-
+  const [counts, setCounts] = useState({ approved: 0, canceled: 0 });
   const location = useLocation();
   const token = localStorage.getItem("token");
 
@@ -37,14 +36,15 @@ export default function DataBooking() {
           }
         );
         setBookings(response.data.bookings);
-
-        // Count status bookings
         setCounts({
           approved: response.data.bookings.filter(
             (b) => b.status_booking === "APPROVE"
           ).length,
           canceled: response.data.bookings.filter(
             (b) => b.status_booking === "CANCEL"
+          ).length,
+          succeeded: response.data.bookings.filter(
+            (b) => b.status_booking === "SUCCEED"
           ).length,
         });
       } catch (error) {
@@ -72,70 +72,78 @@ export default function DataBooking() {
   const handleStatusChange = async (e, booking_id, currentStatus) => {
     e.stopPropagation();
 
-    if (currentStatus !== "APPROVE") {
+    if (currentStatus === "APPROVE") {
       Swal.fire({
-        title: "ไม่สามารถยกเลิกการจองได้",
-        text: "การจองนี้ไม่อยู่ในสถานะที่สามารถยกเลิกได้",
+        title: "คุณต้องการเปลี่ยนสถานะเป็นสำเร็จหรือไม่?",
+        text: "การเปลี่ยนสถานะจะทำให้การจองถูกตั้งค่าเป็นสำเร็จ",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00ba44",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "ยืนยัน",
+        cancelButtonText: "ยกเลิก",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const response = await axios.patch(
+              `http://localhost:8889/admin/updateStatusBooking/${booking_id}`,
+              { status_booking: "SUCCEED" },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (response.status === 200) {
+              Swal.fire({
+                title: "สำเร็จ",
+                text: "คุณได้ทำรายการสำเร็จแล้ว",
+                icon: "success",
+                timer: 2000,
+              }).then(() => {
+                setBookings(
+                  bookings.map((b) =>
+                    b.booking_id === booking_id
+                      ? { ...b, status_booking: "SUCCEED" }
+                      : b
+                  )
+                );
+              });
+            } else {
+              Swal.fire(
+                "เกิดข้อผิดพลาด",
+                "ไม่สามารถเปลี่ยนสถานะการจองได้",
+                "error"
+              );
+            }
+          } catch (err) {
+            console.error("Error updating booking status:", err);
+            Swal.fire(
+              "เกิดข้อผิดพลาด",
+              "ไม่สามารถเปลี่ยนสถานะการจองได้",
+              "error"
+            );
+          }
+        }
+      });
+    } else {
+      Swal.fire({
+        title: "ไม่สามารถเปลี่ยนสถานะนี้ได้",
+        text: "การจองนี้ไม่สามารถเปลี่ยนเป็นสำเร็จได้ในสถานะปัจจุบัน",
         icon: "info",
         confirmButtonColor: "#3085d6",
         confirmButtonText: "ตกลง",
       });
-      return;
     }
-
-    Swal.fire({
-      title: "คุณต้องการยกเลิกการจองไหม?",
-      text: "การยกเลิกจะทำให้สถานะการจองเป็น 'ยกเลิก'",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#02ab21",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "ยืนยัน",
-      cancelButtonText: "ยกเลิก",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const response = await axios.patch(
-            `http://localhost:8889/admin/updateStatusBooking/${booking_id}`,
-            { status_booking: "CANCEL" },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-
-          if (response.status === 200) {
-            Swal.fire({
-              title: "ยกเลิกเรียบร้อย",
-              text: "สถานะการจองถูกเปลี่ยนเป็นยกเลิก",
-              icon: "success",
-              confirmButtonText: "ตกลง",
-              confirmButtonColor: "#3085d6",
-            }).then(() => {
-              getBookings();
-            });
-          } else {
-            Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
-          }
-        } catch (err) {
-          console.error(
-            "Error updating booking status:",
-            err.response ? err.response.data : err.message
-          );
-          Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถยกเลิกการจองได้", "error");
-        }
-      }
-    });
   };
 
-  function FormatDate(dateString) {
+  const FormatDate = (dateString) => {
     const date = new Date(dateString);
-    const formatter = new Intl.DateTimeFormat("th-TH", {
+    return new Intl.DateTimeFormat("th-TH", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-    });
-    return formatter.format(date);
-  }
+    }).format(date);
+  };
 
-  function formatISODateToThai(dateString) {
+  const formatISODateToThai = (dateString) => {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -145,27 +153,20 @@ export default function DataBooking() {
     const seconds = String(date.getSeconds()).padStart(2, "0");
 
     return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-  }
+  };
 
   const extractUniqueDates = (bookings) => {
     const dates = bookings
-      .filter(
-        (booking) =>
-          booking.status_booking === "APPROVE" ||
-          booking.status_booking === "CANCEL"
+      .filter((booking) =>
+        ["APPROVE", "CANCEL", "SUCCEED"].includes(booking.status_booking)
       )
       .map(
         (booking) =>
           new Date(booking.booking_datatime).toISOString().split("T")[0]
       );
-    const uniqueDates = [...new Set(dates)];
-
-    const sortedDates = uniqueDates
-      .map((date) => new Date(date))
-      .sort((a, b) => a - b)
-      .map((date) => date.toISOString().split("T")[0]);
-
-    return sortedDates;
+    return [...new Set(dates)]
+      .sort()
+      .map((date) => new Date(date).toISOString().split("T")[0]);
   };
 
   const uniqueDates = extractUniqueDates(bookings);
@@ -175,12 +176,11 @@ export default function DataBooking() {
     const thaiStatusMapping = {
       APPROVE: "อนุมัติ",
       CANCEL: "ยกเลิก",
+      SUCCEED: "สำเร็จ",
     };
-
     const formattedDateTime = new Date(booking.booking_datatime)
       .toLocaleString("th-TH")
       .toLowerCase();
-
     const bookingDate = new Date(booking.booking_datatime)
       .toISOString()
       .split("T")[0];
@@ -197,9 +197,7 @@ export default function DataBooking() {
     );
   });
 
-  const handleClear = () => {
-    setSelectedDate("");
-  };
+  const handleClear = () => setSelectedDate("");
 
   const indexOfLastItem = currentPage * perPage;
   const indexOfFirstItem = indexOfLastItem - perPage;
@@ -222,14 +220,12 @@ export default function DataBooking() {
     }
   };
 
-  const handleFilter = (status) => {
-    setFilterStatus(status);
-  };
+  const handleFilter = (status) => setFilterStatus(status);
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="">
+    <div className="min-h-screen p-0 m-0">
       <div className="drawer lg:drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center mt-20">
@@ -246,19 +242,21 @@ export default function DataBooking() {
             <hr className="border my-3 ml-10 border-sky-400 dark:border-sky-300" />
             <div className="flex justify-start gap-4 mt-1 p-4">
               <div
-                className="flex items-center p-4 border-2 border-gray-500 rounded-lg shadow-md bg-gray-50 cursor-pointer"
+                className="flex items-center p-4 border-2 border-gray-500 rounded-lg shadow-md bg-gray-50 cursor-pointer transform transition-transform duration-300 hover:scale-105"
                 onClick={() => handleFilter(null)}
               >
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-500 text-white">
                   <FontAwesomeIcon icon={faList} size="lg" />
                 </div>
                 <div className="ml-4">
-                <p className="text-lg font-medium">ทั้งหมด</p>
-                <p className="text-gray-600">ข้อมูลทั้งหมด : {counts.approved + counts.canceled}</p>
+                  <p className="text-lg font-medium">ทั้งหมด</p>
+                  <p className="text-gray-600">
+                    ข้อมูลทั้งหมด : {counts.approved + counts.canceled}
+                  </p>
                 </div>
               </div>
               <div
-                className="flex items-center p-4 border-2 border-green-500 rounded-lg shadow-md bg-green-50 cursor-pointer"
+                className="flex items-center p-4 border-2 border-green-500 rounded-lg shadow-md bg-green-50 cursor-pointer transform transition-transform duration-300 hover:scale-105"
                 onClick={() => handleFilter("APPROVE")}
               >
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white">
@@ -266,11 +264,13 @@ export default function DataBooking() {
                 </div>
                 <div className="ml-4">
                   <p className="text-lg font-medium">อนุมัติ</p>
-                  <p className="text-gray-600">ข้อมูลอนุมัติทั้งหมด : {counts.approved}</p>
+                  <p className="text-gray-600">
+                    ข้อมูลอนุมัติทั้งหมด : {counts.approved}
+                  </p>
                 </div>
               </div>
               <div
-                className="flex items-center p-4 border-2 border-red-500 rounded-lg shadow-md bg-red-50 cursor-pointer"
+                className="flex items-center p-4 border-2 border-red-500 rounded-lg shadow-md bg-red-50 cursor-pointer transform transition-transform duration-300 hover:scale-105"
                 onClick={() => handleFilter("CANCEL")}
               >
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500 text-white">
@@ -278,8 +278,19 @@ export default function DataBooking() {
                 </div>
                 <div className="ml-4">
                   <p className="text-lg font-medium">ยกเลิก</p>
-                  <p className="text-gray-600">ข้อมูลยกเลิกทั้งหมด : {counts.canceled}</p>
+                  <p className="text-gray-600">
+                    ข้อมูลยกเลิกทั้งหมด : {counts.canceled}
+                  </p>
                 </div>
+              </div>
+              <div
+                className="flex items-center p-4 border-2 border-gray-500 rounded-lg shadow-md bg-gray-50 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                onClick={() => handleFilter("SUCCEED")}
+              >
+                <FontAwesomeIcon icon={faList} className="text-blue-500" />
+                <p className="ml-2 text-sm text-gray-600">
+                  สำเร็จ ({counts.succeeded})
+                </p>
               </div>
             </div>
 
@@ -358,6 +369,7 @@ export default function DataBooking() {
                     <th>วันที่/เวลาจอง</th>
                     <th>ชื่อโต๊ะ</th>
                     <th>ประเภทโต๊ะ</th>
+                    <th>จำนวนที่นั่ง</th>
                     <th>ราคาโต๊ะ</th>
                     <th>ชื่อลูกค้า</th>
                     <th>สถานะ</th>
@@ -367,17 +379,29 @@ export default function DataBooking() {
                 <tbody className="font-medium text-black text-center">
                   {currentItems
                     .filter((booking) => {
-                      if (filterStatus === "APPROVE") {
-                        return booking.status_booking === "APPROVE";
-                      } else if (filterStatus === "CANCEL") {
-                        return booking.status_booking === "CANCEL";
-                      } else { return booking.status_booking === "APPROVE" || booking.status_booking === "CANCEL";
-                      }
+                      const statusMatch =
+                        filterStatus === "SUCCEED"
+                          ? booking.status_booking === "SUCCEED"
+                          : filterStatus === "APPROVE"
+                          ? booking.status_booking === "APPROVE"
+                          : filterStatus === "CANCEL"
+                          ? booking.status_booking === "CANCEL"
+                          : booking.status_booking === "APPROVE" ||
+                            booking.status_booking === "CANCEL" ||
+                            booking.status_booking === "SUCCEED";
+
+                      const dateMatch = selectedDate
+                        ? new Date(booking.booking_datatime)
+                            .toISOString()
+                            .split("T")[0] === selectedDate
+                        : true;
+
+                      return statusMatch && dateMatch;
                     })
                     .map((booking, index) => (
                       <tr
                         key={booking.booking_id}
-                        className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-900"
+                        className="bg-gray-50 border border-gray-300 dark:bg-gray-800 dark:border-gray-900"
                       >
                         <td className="py-4 px-6">
                           {index + 1 + indexOfFirstItem}
@@ -392,6 +416,9 @@ export default function DataBooking() {
                           {booking.table.type_table.type_name}
                         </td>
                         <td className="py-4 px-6">
+                          {booking.table.table_seat}
+                        </td>
+                        <td className="py-4 px-6">
                           {booking.table.table_price}
                         </td>
                         <td className="py-4 px-6">{booking.user.firstname}</td>
@@ -404,27 +431,42 @@ export default function DataBooking() {
                             <span className="text-red-600 font-bold">
                               ยกเลิก
                             </span>
+                          ) : booking.status_booking === "SUCCEED" ? (
+                            <span className="text-blue-600 font-bold">
+                              สำเร็จ
+                            </span>
                           ) : null}
                         </td>
-                        <td className="px-6 py-4 flex space-x-2 justify-center">
-                          <button
-                            onClick={(e) =>
-                              handleStatusChange(
-                                e,
-                                booking.booking_id,
-                                booking.status_booking
-                              )
-                            }
-                            className={`bg-red-600 hover:bg-red-700 text-white py-3 px-2 rounded-2xl dark:text-red-500 dark:hover:text-red-700 text-xs ${
-                              booking.status_booking !== "APPROVE"
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                            }`}
-                            disabled={booking.status_booking !== "APPROVE"}
-                          >
-                            <FontAwesomeIcon icon={faTimes} className="mr-2" />
-                            ยกเลิกการจอง
-                          </button>
+                        <td className="justify-center px-2 py-2">
+                          {booking.status_booking === "APPROVE" && (
+                            <div className="flex space-x-2">
+                              <button
+                                className="bg-green-500 text-white rounded px-4 py-2 mr-2"
+                                onClick={(e) =>
+                                  handleStatusChange(
+                                    e,
+                                    booking.booking_id,
+                                    booking.status_booking
+                                  )
+                                }
+                              >
+                                <FontAwesomeIcon icon={faCheckCircle} />
+                                
+                              </button>
+                              <button
+                                className="bg-red-500 text-white rounded px-4 py-2 mr-2"
+                                onClick={(e) =>
+                                  handleStatusChange(
+                                    e,
+                                    booking.booking_id,
+                                    booking.status_booking
+                                  )
+                                }
+                              >
+                                <FontAwesomeIcon icon={faTimesCircle} />
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}

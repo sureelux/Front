@@ -201,7 +201,8 @@ export default function BookingTable() {
       }
     } catch (error) {
       console.error("Error:", error);
-      Swal.fire("เกิดข้อผิดพลาดในการจอง");
+      Swal.fire("ไม่สามารถจองโต๊ะได้ในขณะนี้", "ต้องรอดูแลระบบทำการยืนยันการจอง", "error");
+
     }
   };
 
