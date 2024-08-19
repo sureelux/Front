@@ -100,7 +100,7 @@ export default function DataTable() {
 <div class="space-y-4">
   <div class="flex items-center space-x-4">
     <label for="table_img" class="font-bold text-lg mb-2">รูปโต๊ะ</label>
-    <input id="table_img" type="text" class="text-lg w-80 rounded-lg border border-gray-400 p-2" value="${table.table_img}" placeholder="URL ของรูปโต๊ะ">
+    <input id="table_img" type="text" class="text-lg w-80 rounded-xl border border-gray-400 p-2" value="${table.table_img}" placeholder="URL ของรูปโต๊ะ">
   </div>
 
   <div class="flex items-center space-x-4">
@@ -110,10 +110,10 @@ export default function DataTable() {
 
 <div class="flex items-center space-x-4">
   <label for="table_status" class="font-bold text-lg mb-2">สถานะ</label>
-  <select id="table_status" class="text-lg w-80 rounded-lg border border-gray-400 p-2 bg-white" disabled>
-  <option value="FREE" ${table.table_status === "FREE" ? "selected" : ""} class="bg-green-100 text-green-800">ว่าง</option>
-  <option value="BUSY" ${table.table_status === "BUSY" ? "selected" : ""} class="bg-red-100 text-red-800">ไม่ว่าง</option>
-</select>
+  <select id="table_status" class="text-lg w-80 rounded-lg border border-gray-400 p-2 bg-gray-200 text-gray-500 cursor-not-allowed" disabled>
+    <option value="FREE" ${table.table_status === "FREE" ? "selected" : ""} class="bg-green-100 text-green-800">ว่าง</option>
+    <option value="BUSY" ${table.table_status === "BUSY" ? "selected" : ""} class="bg-red-100 text-red-800">ไม่ว่าง</option>
+  </select>
 </div>
 
 
