@@ -9,10 +9,10 @@ import {
   faCalendarCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns-tz";
-import useAuth from "../hooks/userAuth"; // Import useAuth hook
+import useAuth from "../hooks/userAuth"; 
 
 export default function Dashboard() {
-  const { user } = useAuth(); // Get the user object
+  const { user } = useAuth(); 
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalTableTypes, setTotalTableTypes] = useState(0);
   const [totalTables, setTotalTables] = useState(0);
@@ -49,11 +49,10 @@ export default function Dashboard() {
         setTotalTables(tablesResponse.data.tables.length);
         setTotalBookings(bookingsResponse.data.bookings.length);
 
-        // Filter bookings with status 'WAIT'
         const waitingBookings = bookingsResponse.data.bookings.filter(
           (booking) => booking.status_booking === "WAIT"
         );
-        setTotalWaitingBookings(waitingBookings.length); // Set the state with the count of waiting bookings
+        setTotalWaitingBookings(waitingBookings.length);
       } catch (error) {
         setError(error.message || "เกิดข้อผิดพลาดในการดึงข้อมูล");
         console.error("Error fetching data:", error);

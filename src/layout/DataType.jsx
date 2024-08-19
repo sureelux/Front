@@ -118,14 +118,14 @@ export default function DataType() {
     const { value: newName } = await Swal.fire({
       title: "แก้ไขข้อมูลประเภทโต๊ะ",
       html: `
-        <label for="tableTypeName" class="font-bold text-left block">ชื่อประเภท</label>
-        <input id="tableTypeName" type="text" class="swal2-input text-lg w-80 rounded-lg border border-gray-400" value="${currentName}" placeholder="กรุณากรอกชื่อประเภทโต๊ะใหม่">
+        <label for="tableTypeName" class="font-bold text-left block">ชื่อประเภท :</label>
+        <input id="tableTypeName" type="text" class="swal2-input text-lg w-96 rounded-lg border border-gray-400" value="${currentName}" placeholder="กรุณากรอกชื่อประเภทโต๊ะใหม่">
       `,
       confirmButtonText: "บันทึก",
-      cancelButtonText: "ยกเลิก",
-      showCancelButton: true,
+      showCloseButton: true,
+      closeButtonAriaLabel: "ปิด",
+      reverseButtons: true,
       confirmButtonColor: "#27ba48",
-      cancelButtonColor: "#eb3b4c",
       inputValidator: (value) => {
         if (!value) {
           return "กรุณากรอกชื่อประเภทโต๊ะ";

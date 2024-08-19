@@ -71,6 +71,7 @@ export default function BookingTable() {
     status_booking: "",
     user_id: +user.user_id,
     table_id: tableId,
+    note_booking: "",
   });
   const [startDate, setStartDate] = useState(null);
   const [time, setTime] = useState("");
@@ -201,7 +202,16 @@ export default function BookingTable() {
       }
     } catch (error) {
       console.error("Error:", error);
-      Swal.fire("ไม่สามารถจองโต๊ะได้ในขณะนี้", "ต้องรอดูแลระบบทำการยืนยันการจอง", "error");
+      Swal.fire({
+        title: 'ไม่สามารถจองโต๊ะได้ในขณะนี้',
+        icon: 'error',
+        showConfirmButton: false, 
+        timer: 3000, 
+        timerProgressBar: true, 
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      }); 
 
     }
   };
