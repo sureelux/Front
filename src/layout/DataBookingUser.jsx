@@ -120,6 +120,22 @@ export default function BookingUser() {
               </span>
             </p>
 
+            <p className="text-lg text-gray-800">
+              <span className="font-semibold text-gray-700">
+                จำนวนที่นั่ง :{" "}
+              </span>
+              <span className="font-normal text-gray-900">
+                {booking.table.table_seat}
+              </span>
+            </p>
+
+            <p className="text-lg text-gray-800">
+              <span className="font-semibold text-gray-700">ราคาโต๊ะ : </span>
+              <span className="font-normal text-gray-900">
+                {booking.table.table_price}
+              </span>
+            </p>
+
             <p className="text-lg">
               <span className="font-semibold text-gray-700">สถานะ : </span>
               <span
@@ -260,22 +276,33 @@ export default function BookingUser() {
           <table className="min-w-full bg-white border border-gray-200">
             <thead>
               <tr>
-                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center">
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center"></th>
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center"></th>
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
+                  รหัสการจอง
+                </th>
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
                   วันที่/เวลาจอง
                 </th>
-                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center">
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
                   ชื่อโต๊ะ
                 </th>
-                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center">
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
                   ประเภทโต๊ะ
                 </th>
-                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center">
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
+                  จำนวนที่นั่ง
+                </th>
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
+                  ราคาโต๊ะ
+                </th>
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
                   สถานะ
                 </th>
-                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center">
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
                   หมายเหตุ
                 </th>
-                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-lg font-semibold text-white uppercase tracking-wider text-center">
+                <th className="px-6 py-3 border-b border-blue-300 bg-blue-500 text-sm font-semibold text-white uppercase tracking-wider text-center">
                   ดูรายละเอียด
                 </th>
               </tr>
@@ -287,7 +314,7 @@ export default function BookingUser() {
                     <React.Fragment key={idx}>
                       <tr>
                         <td
-                          colSpan="6"
+                          colSpan="11"
                           className="px-5 py-1 border border-gray-200 text-lg font-bold bg-gray-100 mb-4"
                         >
                           {date}
@@ -304,6 +331,12 @@ export default function BookingUser() {
                             key={index}
                             className="hover:bg-gray-50 transition duration-300 ease-in-out"
                           >
+                            <td className="px-6 py-4 border-b border-gray-200 text-sm text-center"></td>
+                            <td className="px-6 py-4 border-b border-gray-200 text-sm text-center"></td>
+                            <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
+                              {booking.booking_id}
+                            </td>
+
                             <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
                               {moment(booking.booking_datatime).format(
                                 "DD/MM/YYYY HH:mm"
@@ -314,6 +347,12 @@ export default function BookingUser() {
                             </td>
                             <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
                               {booking.table.type_table.type_name}
+                            </td>
+                            <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
+                              {booking.table.table_seat}
+                            </td>
+                            <td className="px-6 py-4 border-b border-gray-200 text-sm text-center">
+                              {booking.table.table_price}
                             </td>
                             <td
                               className={`px-6 py-4 border-b border-gray-200 text-sm font-medium text-center ${
