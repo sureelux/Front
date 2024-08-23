@@ -195,6 +195,7 @@ export default function DataUser() {
                 <thead>
                   <tr className="text-sm text-black uppercase bg-gradient-to-r from-sky-400 to-cyan-300 text-center">
                     <th>ลำดับ</th>
+                    <th>ชื่อผู้ใช้</th>
                     <th>ชื่อ</th>
                     <th>นามสกุล</th>
                     <th>ที่อยู่</th>
@@ -211,6 +212,7 @@ export default function DataUser() {
                       className="bg-gray-50 border border-gray-300 dark:bg-gray-800 dark:border-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       <td>{index + 1 + indexOfFirstItem}</td>
+                      <td>{user.username}</td>
                       <td>{user.firstname}</td>
                       <td>{user.lastname}</td>
                       <td>{user.address}</td>
