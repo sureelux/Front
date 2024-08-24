@@ -115,14 +115,13 @@ export default function DataBooking_Approval() {
         throw new Error("Failed to update table status or booking status");
       }
     } catch (error) {
-      // Log error and show error message
       console.error("Error updating booking status:", error);
       Swal.fire({
         title: "เกิดข้อผิดพลาด",
         text: "ไม่สามารถอนุมัติการจองได้",
         icon: "error",
         showConfirmButton: false,
-        timer: 2000,
+        timer: 1000,
       });
     }
   };
@@ -254,11 +253,11 @@ export default function DataBooking_Approval() {
           text: "คุณได้ทำการยกเลิกการจองเรียบร้อยแล้ว",
           icon: "success",
           showConfirmButton: false,
-          timer: 2000,
+          timer: 1000,
         }).then(() => {
           setTimeout(() => {
             window.location.href = "/DataBooking";
-          }, 2000);
+          }, 1000);
         });
       }
     } catch (error) {

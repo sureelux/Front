@@ -29,7 +29,7 @@ export default function Profile() {
         </p>
       </div>
       {user ? (
-        <div className="max-w-full mx-auto shadow-lg rounded-lg mt-5 border-2 border-black bg-white">
+        <div className="w-3/6 shadow-lg rounded-lg mt-5 border-2 border-black bg-white">
           <div className="p-10">
             <div className="text-3xl font-bold mb-4 text-center">
               ข้อมูลส่วนตัว
