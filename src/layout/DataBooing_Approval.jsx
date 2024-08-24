@@ -49,24 +49,22 @@ export default function DataBooking_Approval() {
 
   const hdlModalAccept = async (tableId, bookingId) => {
     try {
-      // Fetch existing bookings
       const existingBookingsResponse = await axios.get(
         "http://localhost:8889/admin/bookings",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-  
+
       const existingBookings = existingBookingsResponse.data.bookings;
-  
-      // Check if the table is already approved by another booking
+
       const isTableAlreadyApproved = existingBookings.some(
         (booking) =>
           booking.table.table_id === tableId &&
           booking.status_booking === "APPROVE" &&
           booking.booking_id !== bookingId
       );
-  
+
       if (isTableAlreadyApproved) {
         Swal.fire({
           title: "ข้อผิดพลาด",
@@ -76,12 +74,10 @@ export default function DataBooking_Approval() {
         });
         return;
       }
-  
-      // Prepare data for updates
+
       const tableStatusUpdate = { table_status: "BUSY" };
       const bookingStatusUpdate = { status_booking: "APPROVE" };
-  
-      // Update table status and booking status concurrently
+
       const [updateTableStatusResponse, updateBookingStatusResponse] =
         await Promise.all([
           axios.patch(
@@ -99,8 +95,7 @@ export default function DataBooking_Approval() {
             }
           ),
         ]);
-  
-      // Check if both updates succeeded
+
       if (
         updateTableStatusResponse.status === 200 &&
         updateBookingStatusResponse.status === 200
@@ -131,8 +126,7 @@ export default function DataBooking_Approval() {
       });
     }
   };
-  
-  
+
   const handleApproveClick = (booking) => {
     Swal.fire({
       title: `
@@ -209,75 +203,75 @@ export default function DataBooking_Approval() {
 
   const hdlModalCancel = async (tableId, bookingId, noteBooking) => {
     try {
-        const existingBookingsResponse = await axios.get(
-            "http://localhost:8889/admin/bookings",
-            {
-                headers: { Authorization: `Bearer ${token}` },
-            }
-        );
-
-        const existingBookings = existingBookingsResponse.data.bookings;
-
-        const otherApprovedBookings = existingBookings.filter(
-            (booking) =>
-                booking.table.table_id === tableId &&
-                booking.status_booking === "APPROVE" &&
-                booking.booking_id !== bookingId
-        );
-
-        const tableStatusUpdate = {
-            table_status: otherApprovedBookings.length > 0 ? "BUSY" : "FREE",
-        };
-        const bookingStatusUpdate = {
-            status_booking: "CANCEL",
-            note_booking: noteBooking,
-        };
-
-        const [updateTableStatusResponse, updateBookingStatusResponse] =
-            await Promise.all([
-                axios.patch(
-                    `http://localhost:8889/admin/updateStatus/${tableId}`,
-                    tableStatusUpdate,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                ),
-                axios.patch(
-                    `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
-                    bookingStatusUpdate,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                ),
-            ]);
-
-        if (
-            updateTableStatusResponse.status === 200 &&
-            updateBookingStatusResponse.status === 200
-        ) {
-            Swal.fire({
-                title: "สำเร็จ",
-                text: "คุณได้ทำการยกเลิกการจองเรียบร้อยแล้ว",
-                icon: "success",
-                showConfirmButton: false,
-                timer: 2000,
-            }).then(() => {
-                setTimeout(() => {
-                    window.location.href = "/DataBooking";
-                }, 2000);
-            });
+      const existingBookingsResponse = await axios.get(
+        "http://localhost:8889/admin/bookings",
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-    } catch (error) {
-        console.error("Error updating booking status:", error);
+      );
+
+      const existingBookings = existingBookingsResponse.data.bookings;
+
+      const otherApprovedBookings = existingBookings.filter(
+        (booking) =>
+          booking.table.table_id === tableId &&
+          booking.status_booking === "APPROVE" &&
+          booking.booking_id !== bookingId
+      );
+
+      const tableStatusUpdate = {
+        table_status: otherApprovedBookings.length > 0 ? "BUSY" : "FREE",
+      };
+      const bookingStatusUpdate = {
+        status_booking: "CANCEL",
+        note_booking: noteBooking,
+      };
+
+      const [updateTableStatusResponse, updateBookingStatusResponse] =
+        await Promise.all([
+          axios.patch(
+            `http://localhost:8889/admin/updateStatus/${tableId}`,
+            tableStatusUpdate,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
+          axios.patch(
+            `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
+            bookingStatusUpdate,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
+        ]);
+
+      if (
+        updateTableStatusResponse.status === 200 &&
+        updateBookingStatusResponse.status === 200
+      ) {
         Swal.fire({
-            title: "เกิดข้อผิดพลาด",
-            text: "ไม่สามารถยกเลิกการจองได้",
-            icon: "error",
-            showConfirmButton: false,
-            timer: 2000,
+          title: "สำเร็จ",
+          text: "คุณได้ทำการยกเลิกการจองเรียบร้อยแล้ว",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 2000,
+        }).then(() => {
+          setTimeout(() => {
+            window.location.href = "/DataBooking";
+          }, 2000);
         });
+      }
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถยกเลิกการจองได้",
+        icon: "error",
+        showConfirmButton: false,
+        timer: 2000,
+      });
     }
-};
+  };
 
   function FormatDate(dateString) {
     const date = new Date(dateString);
