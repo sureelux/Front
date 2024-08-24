@@ -49,14 +49,17 @@ export default function DataBooking_Approval() {
 
   const hdlModalAccept = async (tableId, bookingId) => {
     try {
-      // ดึงข้อมูลการจองทั้งหมด
-      const existingBookingsResponse = await axios.get("http://localhost:8889/admin/bookings", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Fetch existing bookings
+      const existingBookingsResponse = await axios.get(
+        "http://localhost:8889/admin/bookings",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
   
       const existingBookings = existingBookingsResponse.data.bookings;
   
-      // เช็คว่ามีการอนุมัติซ้ำหรือไม่
+      // Check if the table is already approved by another booking
       const isTableAlreadyApproved = existingBookings.some(
         (booking) =>
           booking.table.table_id === tableId &&
@@ -74,20 +77,34 @@ export default function DataBooking_Approval() {
         return;
       }
   
-      // อัปเดตสถานะโต๊ะและการจอง
+      // Prepare data for updates
       const tableStatusUpdate = { table_status: "BUSY" };
       const bookingStatusUpdate = { status_booking: "APPROVE" };
   
-      const [updateTableStatusResponse, updateBookingStatusResponse] = await Promise.all([
-        axios.patch(`http://localhost:8889/admin/updateStatus/${tableId}`, tableStatusUpdate, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.patch(`http://localhost:8889/admin/updateStatusBooking/${bookingId}`, bookingStatusUpdate, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      ]);
+      // Update table status and booking status concurrently
+      const [updateTableStatusResponse, updateBookingStatusResponse] =
+        await Promise.all([
+          axios.patch(
+            `http://localhost:8889/admin/updateStatus/${tableId}`,
+            tableStatusUpdate,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
+          axios.patch(
+            `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
+            bookingStatusUpdate,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
+        ]);
   
-      if (updateTableStatusResponse.status === 200 && updateBookingStatusResponse.status === 200) {
+      // Check if both updates succeeded
+      if (
+        updateTableStatusResponse.status === 200 &&
+        updateBookingStatusResponse.status === 200
+      ) {
         Swal.fire({
           title: "สำเร็จ",
           text: "คุณได้ทำการอนุมัติการจองเรียบร้อยแล้ว",
@@ -99,8 +116,11 @@ export default function DataBooking_Approval() {
             window.location.href = "/DataBooking";
           }, 2000);
         });
+      } else {
+        throw new Error("Failed to update table status or booking status");
       }
     } catch (error) {
+      // Log error and show error message
       console.error("Error updating booking status:", error);
       Swal.fire({
         title: "เกิดข้อผิดพลาด",
@@ -112,7 +132,6 @@ export default function DataBooking_Approval() {
     }
   };
   
-
   
   const handleApproveClick = (booking) => {
     Swal.fire({
@@ -122,7 +141,8 @@ export default function DataBooking_Approval() {
         </div>
       `,
       icon: "warning",
-      confirmButtonText: '<span class="text-white py-1 px-4 rounded">อนุมัติ</span>',
+      confirmButtonText:
+        '<span class="text-white py-1 px-4 rounded">อนุมัติ</span>',
       confirmButtonColor: "#28a745",
       showCloseButton: true,
       closeButtonAriaLabel: "ปิด",
@@ -140,7 +160,7 @@ export default function DataBooking_Approval() {
       }
     });
   };
-  
+
   const handleCancelClick = (booking) => {
     Swal.fire({
       title: `
@@ -169,7 +189,7 @@ export default function DataBooking_Approval() {
         title: "text-xl text-left font-bold",
         confirmButton: "mr-2",
         cancelButton: "ml-5",
-        validationMessage: "text-red-600"
+        validationMessage: "text-red-600",
       },
       preConfirm: () => {
         const note = Swal.getPopup().querySelector("#cancel-note").value;
@@ -186,47 +206,78 @@ export default function DataBooking_Approval() {
       }
     });
   };
-  
-  
+
   const hdlModalCancel = async (tableId, bookingId, noteBooking) => {
     try {
-      const data = { table_status: "FREE" };
-      const data2 = { status_booking: "CANCEL", note_booking: noteBooking };
-  
-      const [updateTableStatusResponse, updateBookingStatusResponse] = await Promise.all([
-        axios.patch(`http://localhost:8889/admin/updateStatus/${tableId}`, data, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.patch(`http://localhost:8889/admin/updateStatusBooking/${bookingId}`, data2, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      ]);
-  
-      if (updateTableStatusResponse.status === 200 && updateBookingStatusResponse.status === 200) {
-        Swal.fire({
-          title: "สำเร็จ",
-          text: "คุณได้ทำการยกเลิกการจองเรียบร้อยแล้ว",
-          icon: "success",
-          showConfirmButton: false,
-          timer: 2000,
-        }).then(() => {
-          setTimeout(() => {
-            window.location.href = "/DataBooking";
-          }, 2000);
-        });
-      }
+        const existingBookingsResponse = await axios.get(
+            "http://localhost:8889/admin/bookings",
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+
+        const existingBookings = existingBookingsResponse.data.bookings;
+
+        const otherApprovedBookings = existingBookings.filter(
+            (booking) =>
+                booking.table.table_id === tableId &&
+                booking.status_booking === "APPROVE" &&
+                booking.booking_id !== bookingId
+        );
+
+        const tableStatusUpdate = {
+            table_status: otherApprovedBookings.length > 0 ? "BUSY" : "FREE",
+        };
+        const bookingStatusUpdate = {
+            status_booking: "CANCEL",
+            note_booking: noteBooking,
+        };
+
+        const [updateTableStatusResponse, updateBookingStatusResponse] =
+            await Promise.all([
+                axios.patch(
+                    `http://localhost:8889/admin/updateStatus/${tableId}`,
+                    tableStatusUpdate,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                ),
+                axios.patch(
+                    `http://localhost:8889/admin/updateStatusBooking/${bookingId}`,
+                    bookingStatusUpdate,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                ),
+            ]);
+
+        if (
+            updateTableStatusResponse.status === 200 &&
+            updateBookingStatusResponse.status === 200
+        ) {
+            Swal.fire({
+                title: "สำเร็จ",
+                text: "คุณได้ทำการยกเลิกการจองเรียบร้อยแล้ว",
+                icon: "success",
+                showConfirmButton: false,
+                timer: 2000,
+            }).then(() => {
+                setTimeout(() => {
+                    window.location.href = "/DataBooking";
+                }, 2000);
+            });
+        }
     } catch (error) {
-      console.error("Error updating booking status:", error);
-      Swal.fire({
-        title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถยกเลิกการจองได้",
-        icon: "error",
-        showConfirmButton: false,
-        timer: 2000,
-      });
+        console.error("Error updating booking status:", error);
+        Swal.fire({
+            title: "เกิดข้อผิดพลาด",
+            text: "ไม่สามารถยกเลิกการจองได้",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 2000,
+        });
     }
-  };
-  
+};
 
   function FormatDate(dateString) {
     const date = new Date(dateString);
@@ -530,9 +581,9 @@ export default function DataBooking_Approval() {
             </li>
             <li>
               <Link
-                to="/DataBooking_Approval"
+                to="/DataBooing_Approval"
                 className={`flex items-center p-2 rounded-lg ${
-                  isActive("/DataBooking_Approval")
+                  isActive("/DataBooing_Approval")
                     ? "bg-black text-white font-bold"
                     : "bg-opacity-55 text-black"
                 }`}
@@ -541,7 +592,6 @@ export default function DataBooking_Approval() {
                 ข้อมูลการจอง (รออนุมัติ)
               </Link>
             </li>
-
             <li>
               <Link
                 to="/DataBooking"

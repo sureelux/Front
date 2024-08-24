@@ -76,12 +76,12 @@ export default function Header() {
                 </li>
               </ul>
             </div>
-            <a className="btn btn-ghost text-xl text-white" onClick={() => navigate("/")}>
+            <a className="btn btn-ghost text-2xl text-white" onClick={() => navigate("/")}>
               ระบบจองโต๊ะอาหาร
             </a>
           </div>
           <div className="navbar-center hidden lg:flex text-white ">
-            <ul className="menu menu-horizontal px-1 bg-white-100">
+            <ul className="menu menu-horizontal px-1 bg-white-100 text-sm">
               {finalNav.map((item, index) => (
                 <li key={index}>
                   <a onClick={() => navigate(item.to)}>{item.text}</a>
@@ -132,7 +132,7 @@ export default function Header() {
         </div>
       ) : (
         <div>
-          <button className="text-white mr-5 text-sm" onClick={() => navigate("/login")}>
+          <button className="text-white mr-5 text-lg" onClick={() => navigate("/login")}>
             เข้าสู่ระบบ
           </button>
         </div>
