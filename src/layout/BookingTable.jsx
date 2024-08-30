@@ -161,7 +161,7 @@ export default function BookingTable() {
       });
       return;
     }
-    
+
     if (!startDate) {
       Swal.fire({
         icon: "warning",
@@ -203,16 +203,15 @@ export default function BookingTable() {
     } catch (error) {
       console.error("Error:", error);
       Swal.fire({
-        title: 'ไม่สามารถจองโต๊ะได้ในขณะนี้',
-        icon: 'error',
-        showConfirmButton: false, 
-        timer: 3000, 
-        timerProgressBar: true, 
+        title: "ไม่สามารถจองโต๊ะได้ในขณะนี้",
+        icon: "error",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
         didOpen: () => {
           Swal.showLoading();
-        }
-      }); 
-
+        },
+      });
     }
   };
 
@@ -234,21 +233,21 @@ export default function BookingTable() {
               className="card-body text-center grid grid-cols-2 gap-4"
             >
               <div>
-              <div className="w-full flex justify-center">
-                <figure className="w-full">
-                  <img
-                    src={bookingtable.table_img}
-                    alt={bookingtable.table_name}
-                  />
-                </figure>
-              </div>
-              <div className="mt-10 text-center">
+                <div className="w-full flex justify-center">
+                  <figure className="w-full">
+                    <img
+                      src={bookingtable.table_img}
+                      alt={bookingtable.table_name}
+                    />
+                  </figure>
+                </div>
+                <div className="mt-10 text-center">
                   <label className="text-4xl font-bold">
                     ชื่อโต๊ะ :{" "}
                     <a className="font-normal">{bookingtable.table_name}</a>
                   </label>
                 </div>
-                </div>
+              </div>
 
               <div className="w-full pl-16 space-y-1">
                 <div className="mb-4 text-left">
@@ -295,8 +294,27 @@ export default function BookingTable() {
                         date,
                         decreaseMonth,
                         increaseMonth,
-                      }) => <div>{formatDateToBuddhistEra(date)}</div>}
+                      }) => (
+                        <div className="flex items-center justify-between px-2">
+                          <button
+                            type="button"
+                            onClick={decreaseMonth}
+                            className="focus:outline-none"
+                          >
+                            {"<"}
+                          </button>
+                          <span>{formatDateToBuddhistEra(date)}</span>
+                          <button
+                            type="button"
+                            onClick={increaseMonth}
+                            className="focus:outline-none"
+                          >
+                            {">"}
+                          </button>
+                        </div>
+                      )}
                     />
+
                     <button
                       onClick={handleClearDate}
                       className="ml-4 text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-xs px-4 py-2 mb-1"
@@ -319,7 +337,7 @@ export default function BookingTable() {
                     </div>
                     <div className="text-left">
                       <span className="block label-text-alt font-bold text-sm mb-1">
-                      เลือกเวลา (08.30 AM - 04.30 PM)
+                        เลือกเวลา (08.30 AM - 04.30 PM)
                       </span>
                     </div>
 

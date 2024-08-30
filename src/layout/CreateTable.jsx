@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,9 +14,10 @@ import Swal from "sweetalert2";
 
 export default function CreateTable() {
   const navigate = useNavigate();
+  const fileInput = useRef(null);
+  const [selectFile, setSelectFile] = useState(null);
   const [typeTable, setTypeTable] = useState([]);
   const [tables, setTables] = useState({
-    table_img: "",
     table_name: "",
     table_status: "FREE",
     table_seat: "",
@@ -24,6 +25,7 @@ export default function CreateTable() {
     type_name: "1",
   });
   const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -78,13 +80,8 @@ export default function CreateTable() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (
-      !tables.table_img ||
-      !tables.table_name ||
-      !tables.table_seat ||
-      !tables.table_price
-    ) {
+    
+    if (!tables.table_name || !tables.table_seat || !tables.table_price) {
       Swal.fire({
         icon: "error",
         title: "กรุณากรอกข้อมูลให้ครบถ้วน",
@@ -92,13 +89,27 @@ export default function CreateTable() {
       });
       return;
     }
+    
+    const file = fileInput.current.files[0];
+    const formData = new FormData();
+
+    Object.entries(tables).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    if (file) {
+      formData.append("image", file);
+    }
 
     const isUnique = await checkTableNameUnique(tables.table_name);
     if (!isUnique) {
       Swal.fire({
         icon: "error",
-        title: "ชื่อโต๊ะนี้มีอยู่แล้ว กรุณาเลือกชื่ออื่น",
-        confirmButtonColor: "#3996fa",
+        title: "ข้อมูลซ้ำ",
+        text: "ชื่อโต๊ะนี้มีอยู่แล้ว กรุณาเลือกชื่ออื่น",
+        showCancelButton: false,
+        confirmButtonText: "ปิด",
+        confirmButtonColor: "#dc3545",
       });
       return;
     }
@@ -106,7 +117,7 @@ export default function CreateTable() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:8889/admin/tables", tables, {
+      await axios.post("http://localhost:8889/admin/tables", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       Swal.fire({
@@ -119,11 +130,24 @@ export default function CreateTable() {
       console.error("Error submitting table:", err);
       Swal.fire({
         icon: "error",
-        title: "เกิดข้อผิดพลาด: " + err.message,
+        title: "เกิดข้อผิดพลาด: " + err.response.data.error,
         confirmButtonColor: "#3996fa",
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const hdlChangeFile = () => {
+    const file = fileInput.current.files[0];
+    setSelectFile(file);
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -135,7 +159,7 @@ export default function CreateTable() {
         </Link>
       </div>
       <form
-        className="flex flex-col min-w-[550px] h-[620px] border border-gray-500 w-1/2 mx-auto p-12 gap-4 mt-16 rounded-xl shadow-2xl bg-white"
+        className="flex flex-col min-w-[750px] h-[620px] border border-gray-500 w-3/5 mx-auto p-12 gap-4 mt-16 rounded-xl shadow-2xl bg-white"
         onSubmit={handleSubmit}
       >
         <div className="text-3xl font-bold [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-500">
@@ -150,13 +174,20 @@ export default function CreateTable() {
               </span>
             </div>
             <input
-              type="text"
-              className="input input-bordered w-full h-11 pl-5 text-sm"
-              name="table_img"
-              value={tables.table_img}
-              onChange={handleChange}
+              type="file"
+              className="file-input file-input-bordered file-input-xs w-full h-6 max-w-xs flex col-auto mt-4"
+              ref={fileInput}
+              onChange={hdlChangeFile}
             />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="mt-4 w-36 h-auto border border-gray-300 rounded"
+              />
+            )}
           </label>
+          <div className="mt-full grid grid-cols-2 gap-4">
           <label className="form-control w-full">
             <div className="label">
               <span className="label-text font-bold">
@@ -166,7 +197,7 @@ export default function CreateTable() {
             </div>
             <input
               type="text"
-              className="input input-bordered w-full h-11 pl-5 text-sm"
+              className="input input-bordered w-96 h-11 pl-5 text-sm"
               name="table_name"
               value={tables.table_name}
               onChange={handleChange}
@@ -181,7 +212,7 @@ export default function CreateTable() {
             </div>
             <input
               type="text"
-              className="input input-bordered w-full h-11 pl-5 text-sm"
+              className="input input-bordered w-96 h-11 pl-5 text-sm"
               name="table_seat"
               value={tables.table_seat}
               onChange={handleChange}
@@ -198,7 +229,7 @@ export default function CreateTable() {
             </div>
             <input
               type="text"
-              className="input input-bordered w-full h-11 pl-5 text-sm"
+              className="input input-bordered w-96 h-11 pl-5 text-sm"
               name="table_price"
               value={tables.table_price}
               onChange={handleChange}
@@ -206,7 +237,7 @@ export default function CreateTable() {
               title="กรุณาใส่ตัวเลขเท่านั้น"
             />
           </label>
-          <label className="form-control w-full max-w-full">
+          <label className="form-control w-80 max-w-full">
             <div className="label">
               <span className="label-text font-bold">
                 <FontAwesomeIcon icon={faTag} className="mr-2" />
@@ -226,7 +257,7 @@ export default function CreateTable() {
               ))}
             </select>
           </label>
-
+          </div>
           <div className="justify-center mt-6">
             <button
               type="submit"

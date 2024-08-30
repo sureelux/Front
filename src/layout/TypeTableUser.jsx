@@ -170,31 +170,7 @@ export default function Tables() {
         </>
       )}
 
-      <div className="flex justify-center mt-1 mb-8">
-        <button
-          onClick={() =>
-            setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))
-          }
-          className={`px-4 py-2 bg-blue-500 text-white rounded-lg mr-2 ${
-            currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          disabled={currentPage === 1}
-        >
-          <FaArrowLeft />
-        </button>
-        <span className="flex items-center">{`Page ${currentPage} of ${totalPages}`}</span>
-        <button
-          onClick={() =>
-            setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages))
-          }
-          className={`px-4 py-2 bg-blue-500 text-white rounded-lg ml-2 ${
-            currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          disabled={currentPage === totalPages}
-        >
-          <FaArrowRight />
-        </button>
-      </div>
+     
     </div>
   );
 }

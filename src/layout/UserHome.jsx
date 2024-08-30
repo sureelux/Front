@@ -86,6 +86,9 @@ const UserHome = () => {
             <h2 className="text-5xl font-bold text-white [text-shadow:2px_2px_4px_var(--tw-shadow-color)] shadow-gray-800">
               ระบบจองโต๊ะอาหาร
             </h2>
+            <p className="mt-8 text-white text-3xl [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-600">
+              ร้านเดอะรอยัลเทเบิ้ล (The Royal Table)
+            </p>
             <p className="mt-8 text-white text-xl [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-600">
               ระบบการจองโต๊ะอาหารออนไลน์
               เพื่อจองที่นั่งล่วงหน้าไม่ต้องไปรอลุ้นหน้าร้านว่าจะมีโต๊ะไหม

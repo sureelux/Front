@@ -86,7 +86,7 @@ export default function HeaderAdmin() {
               className="btn btn-ghost text-xl text-white"
               onClick={hdlAdminHome}
             >
-              ระบบจองโต๊ะอาหาร
+              เดอะรอยัลเทเบิ้ล The Royal Table
             </a>
           </div>
           <div className="navbar-center hidden lg:flex text-white">

@@ -59,9 +59,9 @@ export default function CreateType() {
       const isDuplicate = await checkDuplicateType(type);
       if (isDuplicate) {
         Swal.fire({
-          icon: "warning",
+          icon: "error",
           title: "ข้อมูลซ้ำ",
-          text: "ชื่อประเภทนี้มีอยู่แล้ว",
+          text: "ชื่อประเภทนี้มีอยู่แล้ว กรุณาเลือกชื่ออื่น",
           showCancelButton: false, 
           confirmButtonText: "ปิด", 
           confirmButtonColor: "#dc3545",

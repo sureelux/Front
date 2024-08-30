@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,11 +14,17 @@ import {
 import Swal from "sweetalert2";
 
 export default function DataTable() {
+  const fileInput = useRef(null);
+  const [selectFile, setSelectFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [tables, setTables] = useState([]);
+  const [tableEdit, setTableEdit] = useState([]);
+  const [tableTypes, setTableTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(3);
   const [filterStatus, setFilterStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -34,6 +40,18 @@ export default function DataTable() {
       }
     };
     getTables();
+
+    const getTableType = async () => {
+      const { data: tableTypesResponse } = await axios.get(
+        "http://localhost:8889/admin/types",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setTableTypes(tableTypesResponse.types);
+    }
+
+    getTableType();
   }, [token]);
 
   const hdlDelete = async (e, table_id) => {
@@ -75,120 +93,55 @@ export default function DataTable() {
     }
   };
 
-  const handleEditClick = async (table) => {
+  const hdlChangeFile = () => {
+    const file = fileInput.current.files[0];
+    setSelectFile(file);
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
+  };
+
+  console.log(imagePreview)
+
+  const hdlSetData = (table) => {
+    setTableEdit(table);
+  }
+
+  const handleEditClick = async (id) => {
+    setLoading(true)
     try {
-      // Fetch table types
-      const { data: tableTypesResponse } = await axios.get("http://localhost:8889/admin/types", {
-        headers: { Authorization: `Bearer ${token}` },
+      const file = fileInput.current ? fileInput.current.files[0] : null;
+      const formData = new FormData();
+      Object.entries(tableEdit).forEach(([key, value]) => {
+        formData.append(key, value);
       });
-      const tableTypes = tableTypesResponse.types || [];
-  
-      // Create options for table types
-      const typeOptions = tableTypes
-        .map(
-          (type) =>
-            `<option value="${type.type_id}" ${
-              table.typeId === type.type_id ? "selected" : ""
-            }>${type.type_name}</option>`
-        )
-        .join("");
-  
-      // Show Swal.fire for editing table
-      const { value: formValues } = await Swal.fire({
-        title: "แก้ไขข้อมูลโต๊ะ",
-        html: `
-<div class="space-y-4">
-  <div class="flex items-center space-x-4">
-    <label for="table_img" class="font-bold text-lg mb-2">รูปโต๊ะ</label>
-    <input id="table_img" type="text" class="text-lg w-80 rounded-xl border border-gray-400 p-2" value="${table.table_img}" placeholder="URL ของรูปโต๊ะ">
-  </div>
+      if (file) {
+        formData.append("image", file);
+      }
 
-  <div class="flex items-center space-x-4">
-    <label for="table_name" class="font-bold text-lg mb-2">ชื่อโต๊ะ</label>
-    <input id="table_name" type="text" class="text-lg w-80 rounded-lg border border-gray-400 p-2" value="${table.table_name}" placeholder="ชื่อโต๊ะ">
-  </div>
+      if (formData) {
+        console.log("Form Values:", formData);
 
-<div class="flex items-center space-x-4">
-  <label for="table_status" class="font-bold text-lg mb-2">สถานะ</label>
-  <select id="table_status" class="text-lg w-80 rounded-lg border border-gray-400 p-2 bg-gray-200 text-gray-500 cursor-not-allowed" disabled>
-    <option value="FREE" ${table.table_status === "FREE" ? "selected" : ""} class="bg-green-100 text-green-800">ว่าง</option>
-    <option value="BUSY" ${table.table_status === "BUSY" ? "selected" : ""} class="bg-red-100 text-red-800">ไม่ว่าง</option>
-  </select>
-</div>
-
-
-<div class="flex items-center space-x-4">
-  <label for="table_seat" class="font-bold text-lg">จำนวนที่นั่ง</label>
-  <input id="table_seat" type="number" class="text-lg w-80 rounded-lg border border-gray-400 p-2" value="${table.table_seat}" placeholder="จำนวนที่นั่ง" min="1">
-</div>
-
-
-  <div class="flex items-center space-x-4">
-    <label for="table_price" class="font-bold text-lg mb-2">ราคา</label>
-    <input id="table_price" type="number" class="text-lg w-80 rounded-lg border border-gray-400 p-2" value="${table.table_price}" placeholder="ราคา" min="0" step="0.01">
-  </div>
-
-  <div class="flex items-center space-x-4">
-    <label for="type_id" class="font-bold text-lg mb-2">ประเภทโต๊ะ</label>
-    <select id="type_id" class="text-lg w-80 rounded-lg border border-gray-400 p-2">
-      ${typeOptions}
-    </select>
-  </div>
-</div>
-
-        `,
-        focusConfirm: false,
-        preConfirm: () => {
-          const table_img = document.getElementById("table_img").value.trim();
-          const table_name = document.getElementById("table_name").value.trim();
-          const table_status = document.getElementById("table_status").value;
-          const table_seat = parseInt(document.getElementById("table_seat").value, 10);
-          const table_price = parseFloat(document.getElementById("table_price").value);
-          const type_id = document.getElementById("type_id").value;
-  
-          // Validate inputs
-          if (
-            !table_img ||
-            !table_name ||
-            !table_status ||
-            isNaN(table_seat) || table_seat <= 0 ||
-            isNaN(table_price) || table_price < 0 ||
-            !type_id
-          ) {
-            Swal.showValidationMessage("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง");
-            return false;
-          }
-  
-          return {
-            table_img,
-            table_name,
-            table_status,
-            table_seat,
-            table_price,
-            type_id,
-          };
-        },
-        confirmButtonText: "บันทึก",
-        confirmButtonColor: "#27ba48",
-        showCloseButton: true,
-        closeButtonAriaLabel: "ปิด",
-        reverseButtons: true,
-      });
-  
-      if (formValues) {
-        console.log("Form Values:", formValues); // Log form values before sending the request
-  
-        // Send patch request
         const response = await axios.patch(
-          `http://localhost:8889/admin/updateTable/${table.table_id}`,
-          formValues,
+          `http://localhost:8889/admin/updateTable/${id}`,
+          formData,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-  
-        console.log("Server Response:", response.data); // Log server response
-  
+
+        console.log("Server Response:", response.data);
+        if(response.status === 200){
+          document.getElementById("my_modal_1").close();
+          setLoading(false)
+        }
         Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -196,23 +149,29 @@ export default function DataTable() {
           showConfirmButton: false,
           timer: 1500,
         });
-  
-        // Refresh table data
-        const { data: tablesResponse } = await axios.get("http://localhost:8889/user/tables", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+
+        const { data: tablesResponse } = await axios.get(
+          "http://localhost:8889/user/tables",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setTables(tablesResponse.tables);
       }
+      0;
     } catch (error) {
-      console.error("Error editing table:", error.response?.data || error.message);
+      document.getElementById("my_modal_1").close();
+      console.log(error)
+      console.log("Error editing table:", error.response?.data.message);
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
         text: error.response?.data?.message || "ไม่สามารถแก้ไขข้อมูลได้",
-      });
+      }).then(() => {
+        document.getElementById("my_modal_1").showModal();
+      })
     }
   };
-  
 
   const filteredTables = tables.filter((table) => {
     const searchTermLower = searchTerm.toLowerCase();
@@ -272,6 +231,12 @@ export default function DataTable() {
     setFilterStatus("BUSY");
   };
 
+  const hdlChangeEdit = (e) => {
+    setTableEdit( (prev) => ({
+      ...prev, [e.target.name]: e.target.value
+    }))
+  }
+
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -293,9 +258,9 @@ export default function DataTable() {
               onClick={handleShowAllTables}
             >
               จำนวนข้อมูลโต๊ะทั้งหมด :{" "}
-              <spen className="text-3xl text-sky-500">
+              <span className="text-3xl text-sky-500">
                 {filteredTables.length}{" "}
-              </spen>
+              </span>
             </p>
             <div className="flex flex-row space-x-2">
               <p
@@ -425,9 +390,14 @@ export default function DataTable() {
                             <button
                               className="btn btn-warning text-black text-xs font-normal rounded-xl shadow-xl"
                               style={{ marginRight: "20px" }}
-                              onClick={() => handleEditClick(tables)}
+                              onClick={() => {
+                                document
+                                  .getElementById("my_modal_1")
+                                  .showModal();
+                                  hdlSetData(tables);
+                              }}
                             >
-                              <FontAwesomeIcon icon={faEdit}></FontAwesomeIcon>
+                              <FontAwesomeIcon icon={faEdit} />
                             </button>
 
                             <button
@@ -464,7 +434,7 @@ export default function DataTable() {
               </div>
             )}
             {filteredTables.length > perPage && (
-              <div className="mt-2 flex items-center justify-center space-x-4">
+              <div className="mt-4 flex items-center justify-center space-x-4">
                 <button
                   className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-xs"
                   onClick={prevPage}
@@ -564,6 +534,144 @@ export default function DataTable() {
           </ul>
         </div>
       </div>
+      <dialog id="my_modal_1" className="modal">
+        <div className="relative space-y-6 bg-white rounded-xl shadow-md p-7">
+          <button
+            type="button"
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+            onClick={() => document.getElementById("my_modal_1").close()}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+          <div className="text-3xl font-bold text-center">แก้ไขข้อมูลโต๊ะ</div>
+          <div className="flex flex-col space-y-6">
+            <div className="flex items-center space-x-4">
+              <label htmlFor="table_img" className="font-bold text-lg w-32">
+                รูปโต๊ะ
+              </label>
+              <input
+                type="file"
+                className="file-input file-input-bordered file-input-xs w-full h-6 max-w-xs"
+                id="fileInput"
+                ref={fileInput}
+                onChange={(event) => hdlChangeFile(event)}
+              />
+            </div>
+            <div className="max-w-[200px] max-h-[200px] mx-auto my-2">
+              <img className="rounded-md" src={!imagePreview ? tableEdit.table_img : imagePreview} alt="" />
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <label htmlFor="table_name" className="font-bold text-lg w-32">
+                ชื่อโต๊ะ
+              </label>
+              <input
+                id="table_name"
+                name="table_name"
+                type="text"
+                onChange={hdlChangeEdit}
+                className="text-lg w-80 rounded-lg border border-gray-400 p-2"
+                value={tableEdit.table_name}
+                placeholder="ชื่อโต๊ะ"
+              />
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <label htmlFor="table_status" className="font-bold text-lg w-32">
+                สถานะ
+              </label>
+              <select
+                id="table_status"
+                name="table_status"
+                onChange={hdlChangeEdit}
+                className="text-lg w-80 rounded-lg border border-gray-400 p-2 bg-gray-200 text-gray-500 cursor-not-allowed"
+                value={tableEdit.table_status}
+
+                disabled
+              >
+                <option value="FREE" className="bg-green-100 text-green-800">
+                  ว่าง
+                </option>
+                <option value="BUSY" className="bg-red-100 text-red-800">
+                  ไม่ว่าง
+                </option>
+              </select>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <label htmlFor="table_seat" className="font-bold text-lg w-32">
+                จำนวนที่นั่ง
+              </label>
+              <input
+                id="table_seat"
+                type="number"
+                name="table_seat"
+                onChange={hdlChangeEdit}
+                className="text-lg w-80 rounded-lg border border-gray-400 p-2"
+                value={tableEdit.table_seat}
+                placeholder="จำนวนที่นั่ง"
+                min="1"
+              />
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <label htmlFor="table_price" className="font-bold text-lg w-32">
+                ราคา
+              </label>
+              <input
+                id="table_price"
+                type="number"
+                name="table_price"
+                onChange={hdlChangeEdit}
+                className="text-lg w-80 rounded-lg border border-gray-400 p-2"
+                value={tableEdit.table_price}
+                placeholder="ราคา"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <label htmlFor="type_id" className="font-bold text-lg w-32">
+                ประเภทโต๊ะ
+              </label>
+              <select
+                id="typeId"
+                name="typeId"
+                onChange={hdlChangeEdit}
+                className="text-lg w-80 rounded-lg border border-gray-400 p-2"
+              >
+                {tableTypes.map( (el, index) => 
+                  <option value={el.type_id}>{el.type_name}</option>
+                )}
+              </select>
+            </div>
+
+            <button
+              className="bg-green-500 hover:bg-green-600 text-white font-normal py-2 px-2 rounded-lg shadow-md transition duration-300 disabled:opacity-50"
+              onClick={() => {
+                handleEditClick(tableEdit.table_id)
+              }}
+              disabled={loading}
+            >
+              {loading ? <span className="loading loading-spinner loading-xs"></span> : ""} บันทึก
+            </button>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 }

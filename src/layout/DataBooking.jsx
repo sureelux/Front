@@ -11,7 +11,7 @@ import {
   faList,
   faCheckCircle,
   faTimesCircle,
-  faStamp
+  faStamp,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import "react-datepicker/dist/react-datepicker.css";
@@ -67,7 +67,7 @@ export default function DataBooking() {
     table_id
   ) => {
     e.stopPropagation();
-  
+
     const confirmTexts = {
       SUCCEED: {
         title:
@@ -82,7 +82,7 @@ export default function DataBooking() {
         confirmButtonColor: "#28a745",
       },
     };
-  
+
     const updateTableStatus = async (table_id) => {
       try {
         await axios.patch(
@@ -94,26 +94,33 @@ export default function DataBooking() {
         console.error("Error updating table status:", err);
       }
     };
-  
+
     if (confirmTexts[newStatus]) {
       Swal.fire({
         title: `${confirmTexts[newStatus].title}`,
         icon: "warning",
-        html: newStatus === "CANCEL" ? `<div style="text-align: left;">หมายเหตุ :</div>` : '',
+        html:
+          newStatus === "CANCEL"
+            ? `<div style="text-align: left;">หมายเหตุ :</div>`
+            : "",
         confirmButtonColor: "#28a745",
         confirmButtonText: confirmTexts[newStatus].confirmButtonText,
         showCloseButton: true,
         closeButtonAriaLabel: "ปิด",
         reverseButtons: true,
         customClass: {
-          validationMessage: "text-red-600"
+          validationMessage: "text-red-600",
         },
-        input: newStatus === "CANCEL" ? 'textarea' : null,
-        inputPlaceholder: newStatus === "CANCEL" ? 'กรอกข้อมูลการยกเลิก...' : null,
-        inputAttributes: newStatus === "CANCEL" ? { 'aria-label': 'กรอกข้อมูลการยกเลิก' } : null,
+        input: newStatus === "CANCEL" ? "textarea" : null,
+        inputPlaceholder:
+          newStatus === "CANCEL" ? "กรอกข้อมูลการยกเลิก..." : null,
+        inputAttributes:
+          newStatus === "CANCEL"
+            ? { "aria-label": "กรอกข้อมูลการยกเลิก" }
+            : null,
         preConfirm: () => {
           if (newStatus === "CANCEL") {
-            const note = Swal.getPopup().querySelector('textarea').value.trim();
+            const note = Swal.getPopup().querySelector("textarea").value.trim();
             if (!note) {
               Swal.showValidationMessage("กรุณากรอกข้อมูลยกเลิก");
               return false;
@@ -121,29 +128,31 @@ export default function DataBooking() {
             return note;
           }
           return null;
-        }
+        },
       }).then(async (result) => {
         if (result.isConfirmed) {
           const noteBooking = newStatus === "CANCEL" ? result.value : null;
-  
+
           try {
             const response = await axios.patch(
               `http://localhost:8889/admin/updateStatusBooking/${booking_id}`,
               { status_booking: newStatus, note_booking: noteBooking },
               { headers: { Authorization: `Bearer ${token}` } }
             );
-  
+
             if (response.status === 200) {
               if (newStatus === "SUCCEED" || newStatus === "CANCEL") {
                 await updateTableStatus(table_id);
               }
-  
+
               Swal.fire({
                 title: "สำเร็จ",
                 text: `คุณได้ทำรายการ ${
                   newStatus === "SUCCEED" ? "สำเร็จ" : "ยกเลิก"
                 } แล้ว`,
                 icon: "success",
+                confirmButtonText: "ตกลง",
+                confirmButtonColor: "#3996fa",
                 timer: 2000,
               }).then(() => {
                 setBookings(
@@ -181,8 +190,6 @@ export default function DataBooking() {
       });
     }
   };
-  
-  
 
   const FormatDate = (dateString) => {
     const date = new Date(dateString);
@@ -470,8 +477,7 @@ export default function DataBooking() {
                         <td className="py-4 px-6">
                           {booking.status_booking === "APPROVE" ? (
                             <span className="text-blue-500 font-bold flex items-center text-xs">
-                              <i className="fas fa-stamp mr-2"></i>{" "}
-                              อนุมัติ
+                              <i className="fas fa-stamp mr-2"></i> อนุมัติ
                             </span>
                           ) : booking.status_booking === "CANCEL" ? (
                             <span className="text-red-500 font-bold flex items-center text-xs">
@@ -480,7 +486,8 @@ export default function DataBooking() {
                             </span>
                           ) : booking.status_booking === "SUCCEED" ? (
                             <span className="text-green-500 font-bold flex items-center text-xs">
-                              <i className="fas fa-check-circle mr-2"></i> สำเร็จ
+                              <i className="fas fa-check-circle mr-2"></i>{" "}
+                              สำเร็จ
                             </span>
                           ) : null}
                         </td>
@@ -491,7 +498,7 @@ export default function DataBooking() {
                               {booking.note_booking}
                             </span>
                           ) : (
-                            "ไม่ระบุ"
+                            "-"
                           )}
                         </td>
 
@@ -559,7 +566,7 @@ export default function DataBooking() {
               </div>
             )}
             {filteredBookings.length > perPage && (
-              <div className="mt-2 flex items-center justify-center space-x-4">
+              <div className="mt-5 flex items-center justify-center space-x-4 ">
                 <button
                   className="bg-sky-500 text-white rounded-full px-4 py-2 hover:bg-sky-600 disabled:bg-sky-300 text-xs"
                   onClick={prevPage}

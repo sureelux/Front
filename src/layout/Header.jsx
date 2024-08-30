@@ -77,7 +77,7 @@ export default function Header() {
               </ul>
             </div>
             <a className="btn btn-ghost text-2xl text-white" onClick={() => navigate("/")}>
-              ระบบจองโต๊ะอาหาร
+            เดอะรอยัลเทเบิ้ล The Royal Table
             </a>
           </div>
           <div className="navbar-center hidden lg:flex text-white ">
