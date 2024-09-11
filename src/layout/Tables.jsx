@@ -269,7 +269,7 @@ export default function Tables() {
           <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
-                <h3 class="text-xl font-semibold mb-4">ชื่อร้าน</h3>
+                <h3 class="text-xl font-semibold mb-4">ร้านสุรีย์ เรสเตอรองต์</h3>
                 <p>จองโต๊ะอาหารออนไลน์ที่ง่ายและสะดวก</p>
               </div>
 

@@ -86,7 +86,11 @@ export default function HeaderAdmin() {
               className="btn btn-ghost text-xl text-white"
               onClick={hdlAdminHome}
             >
-              เดอะรอยัลเทเบิ้ล The Royal Table
+              <img
+                src="img/suree.png"
+                alt="Restaurant Logo"
+                className="mr-2 h-12 w-auto"
+              />
             </a>
           </div>
           <div className="navbar-center hidden lg:flex text-white">

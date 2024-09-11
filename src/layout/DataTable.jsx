@@ -115,7 +115,7 @@ export default function DataTable() {
   }
 
   const handleEditClick = async (id) => {
-    setLoading(true)
+    setLoading(true);
     try {
       const file = fileInput.current ? fileInput.current.files[0] : null;
       const formData = new FormData();
@@ -125,23 +125,39 @@ export default function DataTable() {
       if (file) {
         formData.append("image", file);
       }
-
-      if (formData) {
-        console.log("Form Values:", formData);
-
-        const response = await axios.patch(
-          `http://localhost:8889/admin/updateTable/${id}`,
-          formData,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        console.log("Server Response:", response.data);
-        if(response.status === 200){
-          document.getElementById("my_modal_1").close();
-          setLoading(false)
+  
+      const checkResponse = await axios.get(
+        `http://localhost:8889/admin/tables/check`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { table_name: tableEdit.table_name },
         }
+      );
+  
+      if (checkResponse.data.exists) {
+        setLoading(false);
+        document.getElementById("my_modal_1").close();
+        return Swal.fire({
+          icon: "error",
+          title: "ชื่อโต๊ะซ้ำ",
+          text: "กรุณาใช้ชื่อโต๊ะที่ไม่ซ้ำ",
+        });
+      }
+  
+  
+      const response = await axios.patch(
+        `http://localhost:8889/admin/updateTable/${id}`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      console.log("Server Response:", response.data);
+  
+      if (response.status === 200) {
+        document.getElementById("my_modal_1").close();
+        setLoading(false);
         Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -149,7 +165,7 @@ export default function DataTable() {
           showConfirmButton: false,
           timer: 1500,
         });
-
+  
         const { data: tablesResponse } = await axios.get(
           "http://localhost:8889/user/tables",
           {
@@ -158,20 +174,20 @@ export default function DataTable() {
         );
         setTables(tablesResponse.tables);
       }
-      0;
     } catch (error) {
       document.getElementById("my_modal_1").close();
-      console.log(error)
-      console.log("Error editing table:", error.response?.data.message);
+      console.log("Error editing table:", error.response?.data?.message);
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
         text: error.response?.data?.message || "ไม่สามารถแก้ไขข้อมูลได้",
       }).then(() => {
         document.getElementById("my_modal_1").showModal();
-      })
+      });
+      setLoading(false);
     }
   };
+  
 
   const filteredTables = tables.filter((table) => {
     const searchTermLower = searchTerm.toLowerCase();
@@ -557,7 +573,7 @@ export default function DataTable() {
             </svg>
           </button>
           <div className="text-3xl font-bold text-center">แก้ไขข้อมูลโต๊ะ</div>
-          <div className="flex flex-col space-y-6">
+          <div className="flex flex-col space-y-4">
             <div className="flex items-center space-x-4">
               <label htmlFor="table_img" className="font-bold text-lg w-32">
                 รูปโต๊ะ
@@ -659,9 +675,9 @@ export default function DataTable() {
                 )}
               </select>
             </div>
-
+              <div className="flex justify-center">
             <button
-              className="bg-green-500 hover:bg-green-600 text-white font-normal py-2 px-2 rounded-lg shadow-md transition duration-300 disabled:opacity-50"
+              className="bg-green-500 hover:bg-green-600 text-white font-normal py-2 w-36 rounded-lg shadow-md transition duration-300 disabled:opacity-50"
               onClick={() => {
                 handleEditClick(tableEdit.table_id)
               }}
@@ -669,6 +685,7 @@ export default function DataTable() {
             >
               {loading ? <span className="loading loading-spinner loading-xs"></span> : ""} บันทึก
             </button>
+            </div>
           </div>
         </div>
       </dialog>

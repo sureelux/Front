@@ -116,7 +116,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6 p-8">
         <Link
           to="/DataUser"
-          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-blue-50 transition"
+          className="p-6 border-2 border-gray-300 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-blue-50 transition"
         >
           <div className="p-6 bg-blue-100 rounded-lg shadow-lg flex items-center space-x-4 border border-sky-200">
             <FontAwesomeIcon icon={faUser} className="text-blue-500 text-4xl" />
@@ -131,7 +131,7 @@ export default function Dashboard() {
 
         <Link
           to="/DataType"
-          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-green-50 transition"
+          className="p-6 border-2 border-gray-300 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-green-50 transition"
         >
           <div className="p-6 bg-green-100 rounded-lg shadow-lg flex items-center space-x-4 border border-green-200">
             <FontAwesomeIcon
@@ -151,7 +151,7 @@ export default function Dashboard() {
 
         <Link
           to="/DataTable"
-          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-yellow-50 transition"
+          className="p-6 border-2 border-gray-300 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-yellow-50 transition"
         >
           <div className="p-6 bg-yellow-100 rounded-lg shadow-lg flex items-center space-x-4 border border-yellow-200">
             <FontAwesomeIcon
@@ -171,7 +171,7 @@ export default function Dashboard() {
 
         <Link
           to="/DataBooing_Approval"
-          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-purple-50 transition"
+          className="p-6 border-2 border-gray-300 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-purple-50 transition"
         >
           <div className="p-6 bg-purple-100 rounded-lg shadow-lg flex items-center space-x-4 border border-purple-200">
             <FontAwesomeIcon
@@ -191,7 +191,7 @@ export default function Dashboard() {
 
         <Link
           to="/DataBooking"
-          className="p-6 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-red-50 transition"
+          className="p-6 border-2 border-gray-300 bg-white rounded-lg shadow-lg flex justify-center items-center space-x-4 cursor-pointer hover:bg-red-50 transition"
         >
           <div className="p-6 bg-red-100 rounded-lg shadow-lg flex items-center space-x-4 border border-red-200">
             <FontAwesomeIcon

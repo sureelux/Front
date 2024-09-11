@@ -103,7 +103,9 @@ export default function RegisterForm() {
       if (!value && key !== "role") {
         Swal.fire({
           icon: "warning",
-          title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          title: 'ข้อมูลไม่ครบถ้วน',
+          text: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonText: 'ตกลง',
           confirmButtonColor: '#3996fa',
         });
         return;
@@ -162,13 +164,13 @@ export default function RegisterForm() {
           <div className="flex flex-col items-center mb-4">
             <img
               src="https://marketplace.1c-bitrix.ru/upload/update/a22/1421081294_add_user.png"
-              className="w-24 h-24"
+              className="w-20 h-20"
             />
-            <div className="text-5xl font-bold mt-4 text-blue-600">
+            <div className="text-4xl font-bold mt-4 text-blue-600">
               สมัครสมาชิก
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <label className="flex flex-col w-full">
               <div className="label mb-1">
                 <span className="label-text font-bold text-gray-700 text-lg">
@@ -309,14 +311,14 @@ export default function RegisterForm() {
           <div className="flex justify-end mt-8 gap-4 mr-20">
             <button
               type="submit"
-              className="bg-sky-400 hover:bg-sky-500 text-white py-4 px-4 rounded-full w-64"
+              className="bg-sky-400 hover:bg-sky-500 text-white py-3 px-4 rounded-full w-64"
             >
               สมัครสมาชิก
             </button>
             <button
               type="button"
               onClick={hdlReset}
-              className="bg-red-600 hover:bg-red-700 text-white py-4 px-2 rounded-full w-48"
+              className="bg-red-600 hover:bg-red-700 text-white py-3 px-2 rounded-full w-48"
             >
               ล้างข้อมูล
             </button>

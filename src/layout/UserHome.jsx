@@ -82,19 +82,20 @@ const UserHome = () => {
           </div>
         </div>
         <div className="p-6">
-          <div className="text-center mt-2 bg-gradient-to-tl bg-blue-600 via-sky-400 from-yellow-200 w-full p-10">
+          <div className="text-center mt-2 bg-gradient-to-tl bg-blue-600 via-sky-400 from-yellow-200 w-full p-10 shadow-2xl">
             <h2 className="text-5xl font-bold text-white [text-shadow:2px_2px_4px_var(--tw-shadow-color)] shadow-gray-800">
               ระบบจองโต๊ะอาหาร
             </h2>
-            <p className="mt-8 text-white text-3xl [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-600">
-              ร้านเดอะรอยัลเทเบิ้ล (The Royal Table)
+            <p className="mt-8 text-white font-bold text-3xl [text-shadow:1px_2px_3px_var(--tw-shadow-color)] shadow-gray-700">
+            ร้านสุรีย์ เรสเตอรองต์
             </p>
             <p className="mt-8 text-white text-xl [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-gray-600">
               ระบบการจองโต๊ะอาหารออนไลน์
               เพื่อจองที่นั่งล่วงหน้าไม่ต้องไปรอลุ้นหน้าร้านว่าจะมีโต๊ะไหม
             </p>
           </div>
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-1 gap-5 ">
+          <hr className="border-gray-400 my-10" />
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-1 gap-5 ">
             <div className="flex flex-col items-center p-8 bg-white border-2 border-gray-200 rounded-3xl shadow-md">
               <div className="max-w-[300rem]">
                 <Splide
@@ -131,12 +132,12 @@ const UserHome = () => {
                 </Splide>
               </div>
 
-              <div className="justify-end items-end p-4 text-lg">
+              <div className="justify-end items-end p-4 text-xl mt-4">
                 สามารถเลือกดูโต๊ะอาหาร ได้ที่นี้
                 <span className="mr-2"></span>
                 <Link
                   to="/Tables"
-                  className="text-red-600 font-bold hover:underline text-2xl animate-pulse"
+                  className="text-red-600 font-bold hover:underline text-3xl animate-pulse"
                 >
                   ดูโต๊ะอาหาร
                 </Link>

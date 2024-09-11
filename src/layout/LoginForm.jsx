@@ -17,9 +17,19 @@ export default function LoginForm() {
   };
 
   const hdlSubmit = async (e) => {
+    e.preventDefault(); 
+
     if (!input.username || !input.password) {
-      alert("โปรดใส่ข้อมูลให้ครบ");
+      Swal.fire({
+        icon: 'warning',
+        title: 'ข้อมูลไม่ครบถ้วน',
+        text: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: "#3996fa",
+      });
+      return; 
     }
+    
     try {
       e.preventDefault();
       const rs = await axios.post("http://localhost:8889/auth/login", input);

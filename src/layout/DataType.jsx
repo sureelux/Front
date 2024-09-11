@@ -140,22 +140,35 @@ export default function DataType() {
         cancelButton: "rounded-xl",
       },
     });
-
+  
     if (newName) {
       try {
+        const duplicate = types.find((type) => type.type_name.toLowerCase() === newName.toLowerCase() && type.type_id !== type_id);
+  
+        if (duplicate) {
+          Swal.fire({
+            icon: "error",
+            title: "ชื่อประเภทโต๊ะซ้ำ",
+            text: "ชื่อประเภทโต๊ะนี้มีอยู่แล้วในระบบ กรุณากรอกชื่อใหม่",
+            confirmButtonColor: "#3996fa",
+          });
+          return;
+        }
+  
         const token = localStorage.getItem("token");
         const response = await axios.patch(
           `http://localhost:8889/admin/updateType/${type_id}`,
           { type_name: newName },
           { headers: { Authorization: `Bearer ${token}` } }
         );
+  
         if (response.status === 200) {
           setTypes(
             types.map((type) =>
               type.type_id === type_id ? { ...type, type_name: newName } : type
             )
           );
-
+  
           Swal.fire({
             icon: "success",
             title: "สำเร็จ!",
@@ -177,6 +190,7 @@ export default function DataType() {
       }
     }
   };
+  
 
   const isActive = (path) => location.pathname === path;
 
